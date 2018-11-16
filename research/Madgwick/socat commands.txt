@@ -1,0 +1,2 @@
+server - sudo socat /dev/ttyAMA0,raw,echo=0,b115200 tcp-listen:54323,reuseaddr
+client - sudo socat PTY,raw,echo=0,link=/dev/ttyVUSB0 tcp:cuttysark:54323
