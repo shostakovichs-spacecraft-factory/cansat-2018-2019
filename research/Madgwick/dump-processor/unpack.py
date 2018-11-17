@@ -11,26 +11,73 @@ from pyqtgraph import Qt
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 
+from OpenGL.GL import *
+from pyqtgraph.opengl.GLGraphicsItem import GLGraphicsItem
+
+import pyquaternion
+
 MESH_PATH = './theplane.stl'
 
 
 class Record(QtCore.QObject):
-	record_size = (32 * 4)//8
+	record_size = (32 * 7)//8
 
 
 	def __init__(self, block):
 		super(Record, self).__init__()
 
-		if block != None: data = struct.unpack("<4f", block)
+		if block != None: data = struct.unpack("<7f", block)
 
-		else: data = [1, 0, 0, 0]
+		else: data = [0.7071, 0.7071, 0, 0, 0, -1, 0]
 
 
 		self.w = data[0]
 		self.x = data[1]
 		self.y = data[2]
 		self.z = data[3]
+		self.acc_x = data[4]
+		self.acc_y = data[5]
+		self.acc_z = data[6]
 
+
+class GLVectorItem(GLGraphicsItem):
+	def __init__(self, x = 1, y = 1, z = 1, color = [1, 0, 0], thickness = 5, antialias=True, glOptions='translucent'):
+		super(GLVectorItem, self).__init__()
+		self.setCords(x, y, z)
+		self.color = color
+		self.thickness = thickness
+		self.antialias = antialias
+		self.setGLOptions(glOptions)
+
+
+	def setCords(self, x, y, z):
+		self.__cords = [x, y, z]
+		self.update()
+
+
+	def getCords(self):
+		return self.__cords
+
+
+	def paint(self):
+		self.setupGLState()
+		
+		if self.antialias:
+			glEnable(GL_LINE_SMOOTH)
+			glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
+			
+		glLineWidth(self.thickness);
+
+		glBegin( GL_LINES )
+		
+		x,y,z = map(float, self.getCords())
+		glColor4f(self.color[0], self.color[1], self.color[2], .6)
+		glVertex3f(0, 0, 0)
+		glVertex3f(x, y, z)
+
+		glEnd()
+
+		glLineWidth(1)
 
 
 class PlaneWidget(gl.GLViewWidget):
@@ -44,8 +91,11 @@ class PlaneWidget(gl.GLViewWidget):
 		self.addItem(g)
 
 		self.plane_axis = gl.GLAxisItem()
-		self.plane_axis.setSize(x=1000, y=500, z=500)
+		self.plane_axis.setSize(x=300, y=300, z=300)
 		self.addItem(self.plane_axis)
+
+		self.acc = GLVectorItem(0, -1, 0)
+		self.addItem(self.acc)
 
 		verts = self._get_mesh_points(mesh_path)
 		faces = np.array([(i, i+1, i+2,) for i in range(0, len(verts), 3)])
@@ -53,6 +103,9 @@ class PlaneWidget(gl.GLViewWidget):
 		self.mesh = gl.GLMeshItem(vertexes=verts, faces=faces, faceColors=colors, smooth=False, shader='shaded')
 		self.addItem(self.mesh)
 		self._update_mesh(Record(None))
+
+		#self.plane_axis.hide()
+		#self.mesh.hide()
 
 
 	def on_new_records(self, records):
@@ -73,13 +126,13 @@ class PlaneWidget(gl.GLViewWidget):
 
 		return nd_points
 
-	def _update_mesh(self, quat):
-		print(quat.w)
-		print(quat.x)
-		print(quat.y)
-		print(quat.z)
+	def _update_mesh(self, record):
+		print(record.w)
+		print(record.x)
+		print(record.y)
+		print(record.z)
 
-		angle = acos(quat.w)
+		angle = acos(record.w)
 		angle *= 2
 
 		axis = []
@@ -87,25 +140,31 @@ class PlaneWidget(gl.GLViewWidget):
 		if angle != 0.0:
 			vector_coeff = sin(angle / 2)
 
-			axis.append( quat.x / vector_coeff )
-			axis.append( quat.y / vector_coeff )
-			axis.append( quat.z / vector_coeff )
+			axis.append( record.x / vector_coeff )
+			axis.append( record.y / vector_coeff )
+			axis.append( record.z / vector_coeff )
 
 		else: axis = [0.0, 0.0, 0.0]
 
 		angle *= 180 / np.pi
 
 
-		def do_things(target, move=True):
+		quat = pyquaternion.Quaternion(axis = axis, degrees = angle) #Поворачиваем ускорение не при отображении, а действительно меняя вектор
+		acc_vect = quat.rotate([record.acc_x, record.acc_y, record.acc_z])
+		self.acc.setCords(acc_vect[0], acc_vect[1], acc_vect[2])
+		print(acc_vect)
+
+
+		def do_things(target, move=True, rotate=True, scale=1/50):
 			target.resetTransform()
-			target.scale(1/50, 1/50, 1/50)
-			#target.rotate(90, 1, 0, 0)
-			#target.rotate(180, 0, 0, 1)
+			target.scale(scale, scale, scale)
 			if move: target.translate(0, 0, -3)
-			target.rotate(angle, axis[0], axis[1], axis[2])
+			if rotate: target.rotate(angle, axis[0], axis[1], axis[2])
 
 		do_things(self.mesh)
 		do_things(self.plane_axis, move=False)
+		do_things(self.acc, move=False, rotate=False, scale=10)#Не поворачиваем ускорение, т.к. уже повернули его
+
 
 
 
