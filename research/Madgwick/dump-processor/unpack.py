@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import struct
 from itertools import chain
 import serial
