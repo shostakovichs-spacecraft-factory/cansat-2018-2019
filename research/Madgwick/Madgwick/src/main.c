@@ -71,14 +71,14 @@ char string[100];
 uint32_t endofcaltime;
 
 inline void routine() {
-	HAL_StatusTypeDef lsm_read_err = lsm6ds3_acc_gyro_read_raw_all(&acc, data);
+	volatile HAL_StatusTypeDef lsm_read_err = lsm6ds3_acc_gyro_read_raw_all(&acc, data);
 
 	lsm6ds3_acc_recalc(&acc, data + 3, accel_data);
 	lsm6ds3_gyro_recalc(&acc, data, gyro_data);
 
 	lsm6ds3_gyro_remove_static_error(&acc, gyro_data);
 
-	HAL_StatusTypeDef lsm_read_mag_err = LSM303C_mag_getData(data, &lsm);
+	volatile HAL_StatusTypeDef lsm_read_mag_err = LSM303C_mag_getData(data, &lsm);
 	mag_data[0] = data[1] * -1.0 * 0.58 * 0.001;
 	mag_data[1] = data[0] * -1.0 * 0.58 * 0.001;
 	mag_data[2] = data[2] * 1.0 * 0.58 * 0.001;
@@ -180,29 +180,13 @@ void init_hardware(void) {
 
 	uart_init_err = HAL_UART_Init(&uart);
 
-	spi.Init.Mode = SPI_MODE_MASTER;
-	spi.Init.Direction = SPI_DIRECTION_1LINE;
-	spi.Init.DataSize = SPI_DATASIZE_8BIT;
-	spi.Init.CLKPolarity = SPI_POLARITY_LOW;
-	spi.Init.CLKPhase = SPI_PHASE_1EDGE;
-	spi.Init.NSS = SPI_NSS_SOFT;
-	spi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
-	spi.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-	spi.Init.TIMode = SPI_TIMODE_DISABLE;
-	spi.Init.FirstBit = SPI_FIRSTBIT_MSB;
-
-	spi.Instance = SPI1;
-	spi_init_err = HAL_SPI_Init(&spi);
 
 	LSM303C_config_t config;
 	config.temp_en = true;
 	config.data_rate = LSM303C_DATARATE_800Hz;
 	config.power_mode = LSM303C_POWERMODE_MEDIUM;
 
-	lsm.mag_cs_pin = GPIO_PIN_1;
-	lsm.acc_cs_pin = GPIO_PIN_2;
-	lsm.cs_port = GPIOA;
-	lsm.spi = &spi;
+	lsm.i2c = &i2c;
 
 	mag_init_err = LSM303C_mag_setup(&lsm, &config);
 }
@@ -239,33 +223,6 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart) {
 		HAL_GPIO_Init(GPIOA, &gpioa);
 	}
 
-	else abort();
-}
-
-void HAL_SPI_MspInit(SPI_HandleTypeDef* handle){
-	if(handle->Instance == SPI1) {
-		__SPI1_CLK_ENABLE();
-		__GPIOA_CLK_ENABLE();
-
-		GPIO_InitTypeDef gpioa;
-		gpioa.Alternate = GPIO_AF5_SPI1;
-		gpioa.Mode = GPIO_MODE_AF_PP;
-		gpioa.Pin = GPIO_PIN_5;
-		gpioa.Pull = GPIO_NOPULL;
-		gpioa.Speed = GPIO_SPEED_FREQ_HIGH;
-
-		HAL_GPIO_Init(GPIOA, &gpioa);
-
-		gpioa.Mode = GPIO_MODE_AF_OD;
-		gpioa.Pin = GPIO_PIN_7;
-
-		HAL_GPIO_Init(GPIOA, &gpioa);
-
-		gpioa.Mode = GPIO_MODE_OUTPUT_PP;
-		gpioa.Pin = GPIO_PIN_1;
-
-		HAL_GPIO_Init(GPIOA, &gpioa);
-	}
 	else abort();
 }
 

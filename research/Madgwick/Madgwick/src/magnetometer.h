@@ -10,6 +10,8 @@
 
 #include <stdbool.h>
 
+#include "stm32f4xx_hal_i2c.h"
+
 typedef enum {
 	LSM303C_DATARATE_POWERDOWN = 0,
 	LSM303C_DATARATE_10Hz,
@@ -46,10 +48,7 @@ typedef struct {
 } LSM303C_config_t;
 
 typedef struct {
-	SPI_HandleTypeDef * spi;
-	GPIO_TypeDef * cs_port;
-	uint16_t acc_cs_pin;
-	uint16_t mag_cs_pin;
+	I2C_HandleTypeDef * i2c;
 } LSM303C_t;
 
 HAL_StatusTypeDef LSM303C_mag_setup(LSM303C_t * self, LSM303C_config_t * config);
