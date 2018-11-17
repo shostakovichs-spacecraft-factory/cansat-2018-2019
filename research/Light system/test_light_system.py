@@ -4,16 +4,17 @@ import random
 import math
 
 #important!!!!
-#all functions return lists. Even if it's named ..._matrix
+#all functions return lists. Even if it's named get_..._matrix
 
 #values for rejecting sensors that not under sun light
-min_flow_abs = 0.21
-min_flow_rel = 0.25
+min_flow_abs = 0.05
+min_flow_rel = 0.05
 
-#simulate parametres
-random_rel = 0.2
-random_abs = 0.2
-sensor_dev_rel = 0.1
+#simulate_random parametres
+random_rel = 0.01
+random_abs = 0.01
+sensor_dev_rel = 0
+sensor_dev_abs = 0
 
 count_of_sensors = 8
 
@@ -21,111 +22,34 @@ count_of_sensors = 8
 count_of_rounds = 10000
 
 #maximum of light power
+min = 4
 max = 5
+#help functions
+def euler_to_dekart(psi, fi):
+    psi = math.radians(psi)
+    fi = math.radians(fi)
+    x = (math.cos(fi) * math.cos(psi))
+    y = (math.cos(fi) * math.sin(psi))
+    z = (math.sin(fi))
 
-#getting data from the file
-def get_sensor_matrix():
-    f = open("sensor_values","r")
-    b = (f.read().split('\n'))
-    d = []
-    for i in b:
-        d.append(i.split(' '))
-    f.close();
-    d.pop()
-    s = []
-    for l in d:
-        r = []
-        m = 0
-        for i in l:
-            r.append(float(i))
-        r1 = normate(r)
-        s.append(r1)
+    return [x,y,z]
 
-    return s
-
-
-#simulates sensor values
-def simulate(sensor_matrix, light):
-    r = []
-
-    M = light[0]/normate(light)[0]
-    for i in sensor_matrix:
-        s = 0
-        for j in [0,1,2]:
-            s += i[j] * light[j]
-        if s < 0:
-            s = 0
-        r1 = random.random() * random_rel
-        r2 = random.random() * random_abs
-
-        s = (1 + r1) * s + r2 + sensor_dev_rel * M
-        r.append(s)
-
-    return r
-
-#gives proper matrix for such sensor values
-def get_good_solve_matrix(matrixes, sensor_values):
-    l = sensor_values
-    a = 0
-    l.reverse()
-    s = 0
-    for i in l:
-        s += i
-    s /= len(l)
-    for i in l:
-        a = a << 1
-        if(i > s * min_flow_rel + min_flow_abs):
-            a += 1
-
-    return matrixes[a]
-
-
-def get_all_solve_matrixes(sensor_matrix):
-    #print("all solve matrixes!\n")
-    l = sensor_matrix
-    i = 1
-    r = []
-    r.append("0")
-    while i < 2**count_of_sensors:
-        s = []
-        j = i
-        for k in l:
-            if(j % 2 == 1):
-                s.append(k)
-            j = j >> 1
-        k = np.matrix(s)
-
-        j = i
-        if(lg.matrix_rank(k) == 3):
-            h = k.getI().getT().tolist()
-            d = []
-            ii = 0
-            for k in l:
-                if(j % 2 == 1):
-                    d.append(h[ii])
-                    ii += 1
-                else:
-                    d.append([0.0,0.0,0.0])
-                j = j >> 1
-            h = np.matrix(d).getT()
-            #print(h.getT())
-            r.append(h)
-        else:
-            r.append("kek")
-            #print("kek")
-            #print(k)
-
-        #print("{0:b}".format(i))
-        #print("\n")
-        i += 1
-    return r
-
-
-def normate(a):
+def norm(a):
     s = 0
     for i in a:
         s += i**2
-    s = s**0.5
+    return s**0.5
+
+def find_angle(a1,a2):
+    a1 = normate(a1)
+    a2 = normate(a2)
+    s = 0
+    for i in range(len(a1)):
+        s += a1[i] * a2[i]
+    return math.acos(s)
+
+def normate(a):
+    s = norm(a)
     if(s == 0):
         return a
 
@@ -134,13 +58,16 @@ def normate(a):
         res.append(i/s)
     return res
 
+def square_deviation(a1, a2):
+    s = []
+    for i in range(len(a1)):
+        s.append(a1[i] - a2[i])
+    return norm(s)/len(s)**0.5
+
 #returns deviation in degrees
 def test_system(min_height,max_height):
 
-    #print("testing!\n")
-    a = get_sensor_matrix()
-    #print(a)
-    all = get_all_solve_matrixes(a)
+    ls = Light_system()
 
     deviation = 0
 
@@ -153,55 +80,33 @@ def test_system(min_height,max_height):
         if pp > 1:
             continue
         y = (1 - pp)**0.5
-        m = random.uniform(1, max)
+        m = random.uniform(min, max)
         x *= m
         y *= m
         z *= m
 
-        b = simulate(a, [x, y, z])
+        b = ls.simulate_random([x, y, z])
 
-        a_ = get_good_solve_matrix(all, b)
-        if(isinstance(a_,str)):
+        res = ls.get_solution(b)
+        if(isinstance(res, str)):
             continue
 
-        #I have no idea why it's work, but it's work
-        b.reverse()
-        res = np.matmul(np.matrix(a_), np.matrix(b).getT() )
-
-        res = res.tolist()
-        res = [a[0] for a in res]
-
-        h1 = normate([x,y,z])
-        h2 = normate(res)
-
-        if(minZ > h2[2]):
-            minZ = h2[2]
-
-
-        dev = 0
-        j = 0
-        while(j < 3):
-            dev += h1[j]*h2[j]
-            j += 1
+        dev = math.cos(find_angle([x,y,z],res))
 
         dev = dev**2
         deviation += dev
         i += 1
 
     deviation = ((deviation / count_of_rounds)**0.5)
-    #print(minZ)
-    #print(360*math.asin(minZ)/(math.pi*2))
-    return 360*math.acos(deviation)/(math.pi*2)
+    return math.degrees(math.acos(deviation))
     #return deviation
 
 #just shows deviation for different vertical angles
-i = -30
+i = -90
 d = 10
 while i <= 90 - d:
-    print("{0:f}: {1:f}".format(i, test_system(math.sin(math.pi*2*i/360),math.sin(math.pi*2*(i + d)/360))))
+    #print("{0:f}: {1:f}".format(i, test_system(math.sin(math.pi*2*i/360),math.sin(math.pi*2*(i + d)/360))))
     i+=d
-
-
 
 #Don't look below. Will be probably used in next versions
 
@@ -243,3 +148,135 @@ def set_properties():
     #f.write("{0:b} ".format(choise))
     save_solve_matrix(f, get_solve_matrix(m))
     f.close();
+
+
+class Light_system:
+    __sensor_matrix = []
+    __all_solve_matrixes = []
+    def __get_sensor_matrix(self):
+        f = open("sensor_values","r")
+        b = (f.read().split('\n'))
+        d = []
+        for i in b:
+            d.append(i.split(' '))
+        f.close();
+        d.pop()
+        s = []
+        for l in d:
+            r = euler_to_dekart(float(l[0]), float(l[1]))
+            s.append(r)
+        return s
+
+
+    def __get_all_solve_matrixes(self, sensor_matrix):
+        l = sensor_matrix
+        r = []
+        r.append("0")
+        for i in range(2**count_of_sensors):
+            if(i == 0):
+                continue
+            s = []
+            j = i
+            for k in l:
+                if(j % 2 == 1):
+                    s.append(k)
+                j = j >> 1
+            k = np.matrix(s)
+
+            j = i
+            if(lg.matrix_rank(k) == 3):
+                h = k.getI().getT().tolist()
+                d = []
+                ii = 0
+                for k in l:
+                    if(j % 2 == 1):
+                        d.append(h[ii])
+                        ii += 1
+                    else:
+                        d.append([0.0,0.0,0.0])
+                    j = j >> 1
+                h = np.matrix(d).getT()
+                #print(h.getT())
+                r.append(h)
+            else:
+                r.append("kek")
+        return r
+
+    def __find_solution(self, solve_matrix, sensor_values):
+        sensor_values.reverse()
+        res = np.matmul(np.matrix(solve_matrix), np.matrix(sensor_values).T).tolist()
+        res = [a[0] for a in res]
+        return res
+
+    def __get_good_solve_matrix(self, sensor_values):
+        l = sensor_values
+        a = 0
+        l.reverse()
+        s = 0
+        for i in l:
+            s += i
+        s /= len(l)
+        for i in l:
+            a = a << 1
+            if(i > s * min_flow_rel + min_flow_abs):
+                a += 1
+
+        return self.__all_solve_matrixes[a]
+
+
+    def __init__(self):
+        self.__sensor_matrix = self.__get_sensor_matrix()
+        #print(self.__sensor_matrix)
+        self.__all_solve_matrixes = self.__get_all_solve_matrixes(self.__sensor_matrix)
+
+    def get_solution(self, sensor_values):
+        a = self.__get_good_solve_matrix(sensor_values)
+        if(isinstance(a,str)):
+            return "oops"
+
+        return self.__find_solution(a, sensor_values)
+
+    #simulates sensor values
+    def simulate_random(self, light):
+        r = []
+        #best way to find norm of light
+        M = norm(light)
+        #return simulate(sensor_matrix, light, random.random() * random_rel, random.random() * random_abs + sensor_dev_rel * M)
+
+        for i in self.__sensor_matrix:
+            s = 0
+            for j in [0,1,2]:
+                s += i[j] * light[j]
+            if s < 0:
+                s = 0
+
+            r1 = random.random() * random_rel
+            r2 = random.random() * random_abs
+
+            s = (1 + r1) * s + r2 + sensor_dev_rel * M + sensor_dev_abs
+            r.append(s)
+
+        return r
+
+
+    def simulate(self, light):
+
+        r = []
+        for b in self.__sensor_matrix:
+            s = 0
+
+            for i in range(len(light)):
+                s += light[i] * b[i]
+
+            if(s < 0):
+                s = 0
+            r.append(s)
+        return r
+
+    def get_sensor_matrix(self):
+        return self.__sensor_matrix
+
+hey = Light_system()
+b = hey.simulate([1,2,3])
+x = hey.get_solution(b)
+print(x)
