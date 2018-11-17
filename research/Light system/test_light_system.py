@@ -22,7 +22,7 @@ count_of_sensors = 8
 count_of_rounds = 10000
 
 #maximum of light power
-min = 4
+min = 1
 max = 5
 #help functions
 def euler_to_dekart(psi, fi):
@@ -34,11 +34,14 @@ def euler_to_dekart(psi, fi):
 
     return [x,y,z]
 
+
 def norm(a):
     s = 0
     for i in a:
         s += i**2
     return s**0.5
+
+
 
 def find_angle(a1,a2):
     a1 = normate(a1)
@@ -47,6 +50,20 @@ def find_angle(a1,a2):
     for i in range(len(a1)):
         s += a1[i] * a2[i]
     return math.acos(s)
+
+
+def dekart_to_euler(a):
+    x = a[0]
+    y = a[1]
+    z = a[2]
+    fi = find_angle(a, [0,0,1])
+    psi = find_angle([x, y, 0], [1, 0, 0])
+
+    if x > 0 and y < 0:
+        psi = -psi
+    elif x < 0 and y < 0:
+        psi = -psi
+    return [math.degrees(psi), 90 - math.degrees(fi)]
 
 def normate(a):
     s = norm(a)
@@ -101,14 +118,6 @@ def test_system(min_height,max_height):
     return math.degrees(math.acos(deviation))
     #return deviation
 
-#just shows deviation for different vertical angles
-i = -90
-d = 10
-while i <= 90 - d:
-    #print("{0:f}: {1:f}".format(i, test_system(math.sin(math.pi*2*i/360),math.sin(math.pi*2*(i + d)/360))))
-    i+=d
-
-#Don't look below. Will be probably used in next versions
 
 #will be deleted in next versions
 def get_solve_matrix(matrix):
@@ -151,6 +160,7 @@ def set_properties():
 
 
 class Light_system:
+    count_of_sensors = 0
     __sensor_matrix = []
     __all_solve_matrixes = []
     def __get_sensor_matrix(self):
@@ -167,11 +177,10 @@ class Light_system:
             s.append(r)
         return s
 
-
     def __get_all_solve_matrixes(self, sensor_matrix):
         l = sensor_matrix
         r = []
-        r.append("0")
+        r.append(None)
         for i in range(2**count_of_sensors):
             if(i == 0):
                 continue
@@ -199,7 +208,7 @@ class Light_system:
                 #print(h.getT())
                 r.append(h)
             else:
-                r.append("kek")
+                r.append(None)
         return r
 
     def __find_solution(self, solve_matrix, sensor_values):
@@ -226,13 +235,13 @@ class Light_system:
 
     def __init__(self):
         self.__sensor_matrix = self.__get_sensor_matrix()
-        #print(self.__sensor_matrix)
+        self.count_of_sensors = len(self.__sensor_matrix)
         self.__all_solve_matrixes = self.__get_all_solve_matrixes(self.__sensor_matrix)
 
     def get_solution(self, sensor_values):
         a = self.__get_good_solve_matrix(sensor_values)
-        if(isinstance(a,str)):
-            return "oops"
+        if a is None:
+            return None
 
         return self.__find_solution(a, sensor_values)
 
@@ -276,7 +285,8 @@ class Light_system:
     def get_sensor_matrix(self):
         return self.__sensor_matrix
 
-hey = Light_system()
-b = hey.simulate([1,2,3])
-x = hey.get_solution(b)
-print(x)
+if __name__ == "__main__":
+    i = -90
+    while i < 90:
+        print(dekart_to_euler(euler_to_dekart(0,i)))
+        i += 10
