@@ -37,7 +37,7 @@ class Record(QtCore.QObject):
 
 
 		self.quat = (data[0], data[1], data[2], data[3])
-		self.acc = data[4], data[5], data[6]
+		self.acc = (data[4], data[5], data[6])
 
 
 class SunRecord(QtCore.QObject):
@@ -45,16 +45,14 @@ class SunRecord(QtCore.QObject):
 
 
 	def __init__(self, block):
-		super(Record, self).__init__()
+		super(SunRecord, self).__init__()
 
 		if block != None: data = struct.unpack("<3f", block)
 
-		else: data = [0, 0, 0]
+		else: data = [0, 1, 0]
 
 
-		self.x = data[0]
-		self.y = data[1]
-		self.z = data[2]
+		self.data = data
 
 
 class GLVectorItem(GLGraphicsItem):
@@ -114,7 +112,7 @@ class PlaneWidget(gl.GLViewWidget):
 		self.acc = GLVectorItem(0, -1, 0)
 		self.addItem(self.acc)
 
-		self.sun = GLVectorItem(0, 1, 0)
+		self.sun = GLVectorItem(0, 1, 0, color=[1,1,0])
 		self.addItem(self.sun)
 
 		verts = self._get_mesh_points(mesh_path)
@@ -122,22 +120,18 @@ class PlaneWidget(gl.GLViewWidget):
 		colors = np.array([(0.0, 1.0, 0.0, 1.0,) for i in range(0, len(verts), 3)])
 		self.mesh = gl.GLMeshItem(vertexes=verts, faces=faces, faceColors=colors, smooth=False, shader='shaded')
 		self.addItem(self.mesh)
-		self._update_mesh(Record(None))
 
-		#self.plane_axis.hide()
-		#self.mesh.hide()
-
+		self._update_rotation(Record(None))
 
 	def on_new_records(self, records):
 		record = records[-1]
 
-		self._update_mesh(record)
+		self._update_rotation(record)
 
 	def on_new_sun_records(self, records):
 		record = records[-1]
 
-		self.rotation = pyquaternion.Quaternion(record.w, record.x, record.y, record.z)
-
+		self.sun.setCords(*self.rotation.rotate(record.data))
 
 	def _get_mesh_points(self, mesh_path):
 		your_mesh = mesh.Mesh.from_file(mesh_path)
@@ -155,36 +149,18 @@ class PlaneWidget(gl.GLViewWidget):
 			target.resetTransform()
 			target.scale(scale, scale, scale)
 			if move: target.translate(0, 0, -3)
-			if rotate: 
-				if type(target) == GLVectorItem: target.setCords(*self.rotation.rotate(target.getCords))
-				else: target.rotate(self.rotation.angle, self.rotation.axis[0], self.rotation.axis[1], self.rotation.axis[2])
+			if rotate:
+				target.rotate(degrees(self.rotation.angle), self.rotation.axis[0], self.rotation.axis[1], self.rotation.axis[2])
 
-	def _update_mesh(self, record):
-		angle = acos(record.w)
-		angle *= 2
+	def _update_rotation(self, record):
+		quat = pyquaternion.Quaternion(*record.quat) 
+		self.rotation = quat
 
-		axis = []
+		self.acc.setCords(* quat.rotate(record.acc) ) #Поворачиваем ускорение не при отображении, а действительно меняя вектор
 
-		if angle != 0.0:
-			vector_coeff = sin(angle / 2)
-
-			axis.append( record.x / vector_coeff )
-			axis.append( record.y / vector_coeff )
-			axis.append( record.z / vector_coeff )
-
-		else: axis = [0.0, 0.0, 0.0]
-
-		angle = degrees(angle)
-
-
-		quat = pyquaternion.Quaternion(axis = axis, degrees = angle) #Поворачиваем ускорение не при отображении, а действительно меняя вектор
-		acc_vect = quat.rotate([record.acc_x, record.acc_y, record.acc_z])
-		self.acc.setCords(acc_vect[0], acc_vect[1], acc_vect[2])
-		print(acc_vect)
-
-		_transform_object(self.mesh)
-		_transform_object(self.plane_axis, move=False)
-		_transform_object(self.acc, move=False, rotate=False, scale=10)#Не поворачиваем ускорение, т.к. уже повернули его
+		self._transform_object(self.mesh)
+		self._transform_object(self.plane_axis, move=False)
+		self._transform_object(self.acc, move=False, rotate=False, scale=10)#Не поворачиваем ускорение, т.к. уже повернули его
 
 	def _update_sun(self, record):
 		print(record.x)
@@ -247,7 +223,6 @@ class DataGenerator(QtCore.QThread):
 
 		records = []
 		while True:
-			print(port.name)
 			block = port.read(Record.record_size)
 			records.append(Record(block))
 			if len(records) > 0:
@@ -266,7 +241,7 @@ class SunDataGenerator(QtCore.QThread):
 	def run(self):
 		while True:
 			try:
-				sock = socket.sokcet(socket.AF_INET, socket.SOCK_STREAM)
+				sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 				sock.bind(('0.0.0.0', SUN_TCP_PORT))
 				sock.listen()
 				print("listening for sun data on %d tcp port" % SUN_TCP_PORT)
@@ -282,7 +257,7 @@ class SunDataGenerator(QtCore.QThread):
 
 			try:
 				while True:
-					block = sock.read(SunRecord.record_size)
+					block = conn.recv(SunRecord.record_size)
 					records.append(SunRecord(block))
 					if len(records) > 0:
 						self.new_record.emit(records)
@@ -304,5 +279,9 @@ win.show()
 data_generator = DataGenerator()
 data_generator.new_record.connect(win.on_new_record)
 data_generator.start()
+
+sun_data_generator = SunDataGenerator()
+sun_data_generator.new_record.connect(win.on_new_sun_record)
+sun_data_generator.start()
 
 exit(app.exec_())

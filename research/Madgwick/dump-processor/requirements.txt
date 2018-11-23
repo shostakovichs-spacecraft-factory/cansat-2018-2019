@@ -1,0 +1,6 @@
+serial=0.0.70
+numpy>=1.15.4
+numpy-stl>=2.7.0
+PyOpenGL>=3.1.0
+pyqtgraph>=0.10.0
+pyquaternion>=0.9.2
