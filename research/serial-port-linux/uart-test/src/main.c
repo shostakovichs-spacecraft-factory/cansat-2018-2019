@@ -2,72 +2,63 @@
  * main.c
  *
  *  Created on: 23 нояб. 2018 г.
- *      Author: snork
+ *      Author: SeresHotes
  */
 
 #include <unistd.h>
-#include <fcntl.h>
-#include <termios.h>
-
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <string.h>
 
-
-int configure_port(int fd)
-{
-	speed_t speed = B115200;
-	int parity = 0;
-
-	struct termios tty;
-	memset (&tty, 0, sizeof tty);
-	if (tcgetattr (fd, &tty) != 0)
-	{
-		perror("error from tcgetattr");
-		return -1;
-	}
-
-	cfsetospeed (&tty, speed);
-	cfsetispeed (&tty, speed);
-
-	tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars
-	// disable IGNBRK for mismatched speed tests; otherwise receive break
-	// as \000 chars
-	tty.c_iflag &= ~IGNBRK;         // disable break processing
-	tty.c_lflag = 0;                // no signaling chars, no echo,
-									// no canonical processing
-	tty.c_oflag = 0;                // no remapping, no delays
-	tty.c_cc[VMIN]  = 0;            // read doesn't block
-	tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
-
-	tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
-
-	tty.c_cflag |= (CLOCAL | CREAD);// ignore modem controls,
-									// enable reading
-	tty.c_cflag &= ~(PARENB | PARODD);      // shut off parity
-	tty.c_cflag |= parity;
-	tty.c_cflag &= ~CSTOPB;
-	tty.c_cflag &= ~CRTSCTS;
-
-	tty.c_cc[VMIN] = 0;
-	tty.c_cc[VTIME] = 5;
-
-	if (tcsetattr (fd, TCSANOW, &tty) != 0)
-	{
-		perror("error from tcsetattr");
-		return -1;
-	}
-
-
-	return 0;
-}
+#include "camera_interface.h"
 
 
 
 int main()
 {
+	setvbuf(stdout, NULL, _IONBF, 0);
+	//printf("Hey\n");
+	CAMERA *cam = camera_init();
+	if(cam == NULL)
+		printf("\ncan't init\n");
+
+
+	if(camera_reset(cam))
+	{
+		perror("can't reset");
+	}
+	printf("camera is reseted\n");
+
+	sleep(1);
+
+	camera_resume(cam);
+	printf("camera is resumed\n");
+
+	sleep(1);
+	if(camera_stop(cam))
+	{
+		perror("can't stop");
+	}
+
+	printf("camera is stopped\n");
+	sleep(1);
+
+	FILE * file = fopen("image.jpeg", "wb");
+	if(camera_get_and_save_picture(cam, file))
+	{
+		perror("can't save");
+	}
+
+	printf("image is saved\n");
+	camera_resume(cam);
+
+	camera_deinit(cam);
+	fclose(file);
+
+	printf("\n");
+
+	/*
 	const char port_name[] = "/dev/ttyUSB0";
 
 	int fd = open(port_name, O_RDWR | O_NOCTTY | O_SYNC);
@@ -103,7 +94,7 @@ int main()
 		buffer[readed] = 0x00;
 		printf("readed %zu bytes: %s\n", readed, buffer);
 	}
-
+	*/
 
 	return EXIT_SUCCESS;
 }
