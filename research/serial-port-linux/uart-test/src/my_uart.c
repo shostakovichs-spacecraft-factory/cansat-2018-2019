@@ -24,10 +24,13 @@ int configure_port(int fd)
 	tty.c_lflag = 0;                // no signaling chars, no echo,
 									// no canonical processing
 	tty.c_oflag = 0;                // no remapping, no delays
+	tty.c_oflag &= ~OCRNL;
+
 	tty.c_cc[VMIN]  = 0;            // read doesn't block
 	tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
 
 	tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
+	tty.c_iflag &= ~ICRNL;
 
 	tty.c_cflag |= (CLOCAL | CREAD);// ignore modem controls,
 									// enable reading
@@ -52,7 +55,7 @@ int configure_port(int fd)
 MY_UART *my_uart_init(const char port_name[], int flags)
 {
 	MY_UART *descr = (MY_UART*)malloc(sizeof(MY_UART));
-	descr->port_name = (char*)malloc(sizeof(char)*strlen(port_name));
+	descr->port_name = (char*)malloc(sizeof(char) * (strlen(port_name) + 1));
 	strcpy(descr->port_name, port_name);
 
 	//printf("%s hey!", port_name);

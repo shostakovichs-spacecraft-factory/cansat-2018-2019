@@ -69,6 +69,15 @@ void debug(uint8_t *buffer, size_t size)
 {}
 #endif
 
+uint64_t get_time_ms()
+{
+	struct timeval a;
+	gettimeofday(&a, NULL);
+
+	uint64_t res = a.tv_usec/1000.0 + a.tv_sec*1000.0;
+
+	return res;
+}
 
 ssize_t cam_send_buf(CAMERA *cam, uint8_t *buffer, size_t size)
 {
@@ -125,10 +134,10 @@ ssize_t skip_response(CAMERA *cam, size_t size, int timeout_ms)
 	if(size == 0)
 		return 0;
 
-	struct timeval t0, t1;
+	uint64_t t0, t1;
 	size_t readed = 0;
 
-	gettimeofday(&t0, NULL);
+	t0 = t1 = get_time_ms();
 
 	uint8_t temp;
 
@@ -142,21 +151,23 @@ ssize_t skip_response(CAMERA *cam, size_t size, int timeout_ms)
 		}
 
 		readed += len;
-		gettimeofday(&t1,NULL);
-	}while(size > readed && timeout_ms > (t1.tv_usec - t0.tv_usec)/1000.0 + (t1.tv_sec - t0.tv_sec)*1000.0);
+		t1 = get_time_ms();
+	}while(size > readed && timeout_ms > t1 - t0);
 
 	return readed;
 }
+
+//uint8_t wait_response()
 
 ssize_t read_response(CAMERA *cam, uint8_t *buffer, size_t size, int timeout_ms)
 {
 	if(size == 0)
 		return 0;
 
-	struct timeval t0, t1;
+	uint64_t t0, t1;
 	size_t readed = 0;
 
-	gettimeofday(&t0, NULL);
+	t0 = get_time_ms();
 
 
 	do
@@ -170,11 +181,11 @@ ssize_t read_response(CAMERA *cam, uint8_t *buffer, size_t size, int timeout_ms)
 		}
 
 		readed += len;
-		gettimeofday(&t1,NULL);
+		t1 = get_time_ms();
 
-	}while(size > readed && timeout_ms > (t1.tv_usec - t0.tv_usec)/1000.0 + (t1.tv_sec - t0.tv_sec)*1000.0);
+	}while(size > readed && timeout_ms > t1 - t0);
 
-	if(timeout_ms <= (t1.tv_usec - t0.tv_usec)/1000.0 + (t1.tv_sec - t0.tv_sec)*1000.0)
+	if(timeout_ms <= t1 - t0)
 	{
 		printf("Error: read response timeout\n");
 	}
@@ -293,22 +304,22 @@ ssize_t camera_get_image_buffer_size(CAMERA *cam)
 ssize_t camera_read_picture(CAMERA *cam, uint8_t *buffer, camera_type size)
 {
 
-	uint8_t args[] = {0x0C, 0x0, 0x0A,
+	uint8_t args[] = {0x0, 0x0F,
 	                  0, 0, cam->frame_ptr >> 8, cam->frame_ptr & 0xFF,
 	                  0, 0, size >> 8, size & 0xFF,
-	                  0, 0x0A
+	                  0, 0x0F
 					};
 
-	if(run_command(cam, VC0706_READ_FBUF, args, sizeof(args), 5, 1))
+	if(run_command(cam, VC0706_READ_FBUF, args, sizeof(args), 5, 0))
 		perror("can't run command: read buffer");
 
-	ssize_t len = read_response(cam, buffer, size, 1000);
+	ssize_t len = read_response(cam, buffer, size, 100);
 	len += skip_response(cam, 5, CAMERADELAY) - 5;
 
 	if(len != size)
 		perror("bad response: read buffer");
 
-	cam->frame_ptr += size;
+	cam->frame_ptr += len;
 
 	return len;
 }
@@ -332,7 +343,7 @@ void camera_deinit(CAMERA *cam)
 	free(cam);
 }
 
-int camera_get_and_save_picture(CAMERA *cam, FILE *file)
+int camera_load_and_save_picture(CAMERA *cam, FILE *file)
 {
 	camera_reset_image(cam);
 	const size_t buf_size = 100;
@@ -346,15 +357,21 @@ int camera_get_and_save_picture(CAMERA *cam, FILE *file)
 
 	unsigned long long length = (buffer[1] << 24) + (buffer[2] << 16) + (buffer[3] << 8) + buffer[4];
 
-	camera_type remaining = length;
+	int remaining = length;
 
 	while(remaining > 0)
 	{
-		int buf_size_litte = buf_size - 10;
+		int buf_size_litte = buf_size - 20;
+
+		if(remaining < buf_size_litte)
+			buf_size_litte = remaining;
+
 		ssize_t len = camera_read_picture(cam, buffer, buf_size_litte);
 
-		fwrite(pointer, sizeof(uint8_t), buf_size_litte, file);
+		fwrite(pointer, sizeof(uint8_t), len, file);
 		remaining -= len;
+		printf("%d\n", remaining);
+		usleep(10000);
 	}
 
 	return 0;

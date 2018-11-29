@@ -30,7 +30,7 @@ int main()
 	}
 	printf("camera is reseted\n");
 
-	sleep(1);
+	usleep(500);
 
 	camera_resume(cam);
 	printf("camera is resumed\n");
@@ -42,10 +42,18 @@ int main()
 	}
 
 	printf("camera is stopped\n");
-	sleep(1);
+	usleep(500);
+
+
+	//print_buffer(buffer , len);
 
 	FILE * file = fopen("image.jpeg", "wb");
-	if(camera_get_and_save_picture(cam, file))
+	if(file == NULL)
+	{
+		printf("can't open file\n");
+		return -1;
+	}
+	if(camera_load_and_save_picture(cam, file))
 	{
 		perror("can't save");
 	}

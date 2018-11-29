@@ -36,7 +36,7 @@ int camera_resume(CAMERA *cam);
 
 int camera_reset(CAMERA *cam);
 
-int camera_get_and_save_picture(CAMERA *cam, FILE *file);
+int camera_load_and_save_picture(CAMERA *cam, FILE *file);
 
 ssize_t read_response(CAMERA *cam, uint8_t *buffer, size_t size, int timeout_ms);
 
