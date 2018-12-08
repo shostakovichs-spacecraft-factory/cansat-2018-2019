@@ -204,16 +204,7 @@ int is_response_ok(CAMERA *cam, uint8_t *buffer, size_t size, uint8_t command)
 	}
 	return 0;
 }
-/*
-int run_command(CAMERA *cam, uint8_t command, uint8_t *args, uint8_t argn)
-{
-	ssize_t sent = send_command(cam, command, args, argn);
 
-	if(sent != argn + 4)
-		return -1;
-	return 0;
-}
-*/
 int run_command(CAMERA *cam, uint8_t command, uint8_t *args, uint8_t argn, size_t reply_size, int flush_flag)
 {
 	if(flush_flag)
@@ -274,6 +265,7 @@ int camera_frame_buff_ctrl(CAMERA *cam, uint8_t command) {
 void camera_reset_image(CAMERA *cam)
 {
    cam->frame_ptr = 0;
+   cam->image_size = 0;
 }
 
 int camera_reset(CAMERA *cam)
@@ -304,6 +296,10 @@ ssize_t camera_get_image_buffer_size(CAMERA *cam)
 ssize_t camera_read_picture(CAMERA *cam, uint8_t *buffer, camera_type size)
 {
 
+	if(size > cam->image_size - cam->frame_ptr)
+	{
+		size = cam->image_size - cam->frame_ptr;
+	}
 	uint8_t args[] = {0x0, 0x0F,
 	                  0, 0, cam->frame_ptr >> 8, cam->frame_ptr & 0xFF,
 	                  0, 0, size >> 8, size & 0xFF,
@@ -331,6 +327,7 @@ CAMERA *camera_init()
 	cam->frame_ptr = 0;
 	cam->serial_num = 0;
 	cam->uart_des = my_uart_init("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_SYNC);
+	cam->image_size = 0;
 
 	skip_response(cam, 100, 100);
 
@@ -343,34 +340,62 @@ void camera_deinit(CAMERA *cam)
 	free(cam);
 }
 
-int camera_load_and_save_picture(CAMERA *cam, FILE *file)
+camera_type camera_get_image_size(CAMERA *cam)
+{
+	if(cam->image_size <= 0)
+	{
+		uint8_t buffer[5];
+
+		camera_get_image_buffer_size(cam);
+		read_response(cam, buffer, 5, CAMERADELAY);
+
+		cam->image_size = (buffer[1] << 24) + (buffer[2] << 16) + (buffer[3] << 8) + buffer[4];
+	}
+	return cam->image_size;
+}
+
+int camera_take_picture(CAMERA *cam)
+{
+	if(camera_stop(cam))
+	{
+		printf("error: can't stop cam\n");
+		return 1;
+	}
+
+	camera_get_image_size(cam);
+
+	return 0;
+}
+
+int camera_is_all_image_loaded(CAMERA* cam)
+{
+	return cam->frame_ptr == cam->image_size;
+}
+
+int camera_restore_picture(CAMERA *cam)
 {
 	camera_reset_image(cam);
+
+	if(camera_resume(cam))
+	{
+		printf("error: can't resume cam\n");
+		return 1;
+	}
+	return 0;
+}
+
+int camera_load_and_save_picture(CAMERA *cam, FILE *file)
+{
 	const size_t buf_size = 100;
 	uint8_t buffer[buf_size];
 	uint8_t *pointer = buffer;
 
-	printf("skipping: %d \n", skip_response(cam, 100, 100));
-	camera_get_image_buffer_size(cam);
-
-	read_response(cam, buffer, 5, CAMERADELAY);
-
-	unsigned long long length = (buffer[1] << 24) + (buffer[2] << 16) + (buffer[3] << 8) + buffer[4];
-
-	int remaining = length;
-
-	while(remaining > 0)
+	usleep(100000);
+	while(!camera_is_all_image_loaded(cam))
 	{
-		int buf_size_litte = buf_size - 20;
-
-		if(remaining < buf_size_litte)
-			buf_size_litte = remaining;
-
-		ssize_t len = camera_read_picture(cam, buffer, buf_size_litte);
+		ssize_t len = camera_read_picture(cam, buffer, 80);
 
 		fwrite(pointer, sizeof(uint8_t), len, file);
-		remaining -= len;
-		printf("%d\n", remaining);
 		usleep(10000);
 	}
 

@@ -22,28 +22,7 @@ int main()
 	CAMERA *cam = camera_init();
 	if(cam == NULL)
 		printf("\ncan't init\n");
-
-
-	if(camera_reset(cam))
-	{
-		perror("can't reset");
-	}
-	printf("camera is reseted\n");
-
-	usleep(500);
-
-	camera_resume(cam);
-	printf("camera is resumed\n");
-
-	sleep(1);
-	if(camera_stop(cam))
-	{
-		perror("can't stop");
-	}
-
-	printf("camera is stopped\n");
-	usleep(500);
-
+	camera_restore_picture(cam);
 
 	//print_buffer(buffer , len);
 
@@ -53,13 +32,15 @@ int main()
 		printf("can't open file\n");
 		return -1;
 	}
+	camera_take_picture(cam);
 	if(camera_load_and_save_picture(cam, file))
 	{
 		perror("can't save");
 	}
 
 	printf("image is saved\n");
-	camera_resume(cam);
+
+	camera_restore_picture(cam);
 
 	camera_deinit(cam);
 	fclose(file);
