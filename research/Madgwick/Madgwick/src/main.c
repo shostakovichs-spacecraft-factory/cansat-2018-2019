@@ -79,6 +79,7 @@ inline void routine() {
 	lsm6ds3_gyro_remove_static_error(&acc, gyro_data);
 
 	volatile HAL_StatusTypeDef lsm_read_mag_err = LSM303C_mag_getData(data, &lsm);
+
 	mag_data[0] = data[1] * -1.0 * 0.58 * 0.001;
 	mag_data[1] = data[0] * -1.0 * 0.58 * 0.001;
 	mag_data[2] = data[2] * 1.0 * 0.58 * 0.001;
@@ -103,6 +104,17 @@ inline void routine() {
 		HAL_UART_Transmit(&uart, (uint8_t *) accel_data, sizeof(float), 10);
 		HAL_UART_Transmit(&uart, (uint8_t *) (accel_data + 1), sizeof(float), 10);
 		HAL_UART_Transmit(&uart, (uint8_t *) (accel_data + 2), sizeof(float), 10);
+		HAL_UART_Transmit(&uart, (uint8_t *) mag_data, sizeof(float), 10);
+		HAL_UART_Transmit(&uart, (uint8_t *) (mag_data + 1), sizeof(float), 10);
+		HAL_UART_Transmit(&uart, (uint8_t *) (mag_data + 2), sizeof(float), 10);
+
+		if(lsm_read_err != HAL_OK) 	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_5, GPIO_PIN_SET);
+		else 	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_5, GPIO_PIN_RESET);
+
+		if(lsm_read_mag_err != HAL_OK) 	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_6, GPIO_PIN_SET);
+		else 	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_6, GPIO_PIN_RESET);
+
+		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 	}
 
 	if(beta != 0.066 && HAL_GetTick() > endofcaltime) {
@@ -135,6 +147,23 @@ int main(int argc, char* argv[])
 }
 
 void init_hardware(void) {
+
+	__HAL_RCC_GPIOE_CLK_ENABLE();
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+	GPIO_InitTypeDef gpio_init;
+	gpio_init.Pin = GPIO_PIN_5 | GPIO_PIN_6;
+	gpio_init.Pull = GPIO_NOPULL;
+	gpio_init.Mode = GPIO_MODE_OUTPUT_OD;
+	gpio_init.Speed = GPIO_SPEED_FAST;
+	HAL_GPIO_Init(GPIOE, &gpio_init);
+
+	gpio_init.Pin = GPIO_PIN_13;
+	HAL_GPIO_Init(GPIOC, &gpio_init);
+
+	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_5, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_6, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+
 	i2c.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
 	i2c.Init.ClockSpeed = 100000;
 	i2c.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;

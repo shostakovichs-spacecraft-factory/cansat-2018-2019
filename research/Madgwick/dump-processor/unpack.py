@@ -23,21 +23,29 @@ MESH_PATH = './theplane.stl'
 
 SUN_TCP_PORT = 43521
 
+MAG_LOG = './mag_log'
+
+mag_log = open(MAG_LOG, 'w')
 
 class Record(QtCore.QObject):
-	record_size = (32 * 7)//8
+	record_size = (32 * 10)//8
 
 
 	def __init__(self, block):
 		super(Record, self).__init__()
 
-		if block != None: data = struct.unpack("<7f", block)
+		if block != None: data = struct.unpack("<10f", block)
 
-		else: data = [0.7071, 0.7071, 0, 0, 0, -1, 0]
+		else: data = [0.7071, 0.7071, 0, 0, 0, -1, 0, 0, 0, 1]
 
 
 		self.quat = (data[0], data[1], data[2], data[3])
 		self.acc = (data[4], data[5], data[6])
+		self.mag = (data[7], data[8], data[9])
+
+		if block != None:
+			print(*self.mag, file=mag_log)
+			mag_log.flush()
 
 
 class SunRecord(QtCore.QObject):
@@ -112,6 +120,9 @@ class PlaneWidget(gl.GLViewWidget):
 		self.acc = GLVectorItem(0, -1, 0)
 		self.addItem(self.acc)
 
+		self.mag = GLVectorItem(0, 0, 1, color=[0,0,1])
+		self.addItem(self.mag)
+
 		self.sun = GLVectorItem(0, 1, 0, color=[1,1,0])
 		self.addItem(self.sun)
 
@@ -157,6 +168,8 @@ class PlaneWidget(gl.GLViewWidget):
 		self.rotation = quat
 
 		self.acc.setCords(* quat.rotate(record.acc) ) #Поворачиваем ускорение не при отображении, а действительно меняя вектор
+		record.mag = [axis * 40 for axis in record.mag]
+		self.mag.setCords(* quat.rotate(record.mag) )
 
 		self._transform_object(self.mesh)
 		self._transform_object(self.plane_axis, move=False)
