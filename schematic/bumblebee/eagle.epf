@@ -264,6 +264,7 @@ UsedLibraryUrn="urn:adsk.eagle:library:196"
 UsedLibraryUrn="urn:adsk.eagle:library:197"
 UsedLibraryUrn="urn:adsk.eagle:library:198"
 UsedLibraryUrn="urn:adsk.eagle:library:199"
+UsedLibrary="/home/kirs/EAGLE/libraries/MCP2551.lbr"
 UsedLibrary="/home/kirs/EAGLE/libraries/bluepill.lbr"
 UsedLibrary="libraries/bluepill.lbr"
 
