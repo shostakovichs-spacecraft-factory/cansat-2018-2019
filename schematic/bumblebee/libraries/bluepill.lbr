@@ -7,7 +7,7 @@
 <setting keepoldvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<grid distance="50" unitdist="mil" unit="mil" style="lines" multiple="1" display="yes" altdistance="5" altunitdist="mil" altunit="mil"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
@@ -164,7 +164,7 @@
 <text x="-16.51" y="-15.24" size="1.27" layer="27">&gt;VALUE</text>
 <dimension x1="-18" y1="-12.75" x2="18" y2="-12.75" x3="0" y3="-19.2" textsize="1.27" layer="21"/>
 </package>
-<package name="LSM">
+<package name="LSM6DS3">
 <description>lsm</description>
 <rectangle x1="-6.5" y1="-9" x2="6.5" y2="9" layer="21"/>
 <hole x="2.5" y="7" drill="3"/>
@@ -186,7 +186,7 @@
 <dimension x1="3.122521875" y1="-5.635278125" x2="1.877478125" y2="-8.364721875" x3="17.77999375" y3="-13.9700125" textsize="1.27" layer="21" dtype="diameter"/>
 <dimension x1="-6.5" y1="-9" x2="6.5" y2="-9" x3="0" y3="-16.51" textsize="1.27" layer="21"/>
 </package>
-<package name="LSMGY">
+<package name="LSM303C">
 <description>lsm</description>
 <rectangle x1="-6.5" y1="-10" x2="5" y2="10" layer="21"/>
 <hole x="2.5" y="8" drill="3"/>
@@ -511,7 +511,7 @@
 <text x="-7.62" y="12.7" size="1.27" layer="95">&gt;NAME</text>
 <text x="-7.62" y="-12.7" size="1.27" layer="96">&gt;VALUE</text>
 </symbol>
-<symbol name="LSM">
+<symbol name="LSM6DS3">
 <description>lSM</description>
 <pin name="OCS" x="15.24" y="10.16" length="middle" rot="R180"/>
 <pin name="INT2" x="15.24" y="5.08" length="middle" rot="R180"/>
@@ -532,7 +532,7 @@
 <text x="-7.62" y="20.32" size="1.27" layer="95">&gt;NAME</text>
 <text x="-7.62" y="-22.86" size="1.27" layer="96">&gt;VALUE</text>
 </symbol>
-<symbol name="LSMGY">
+<symbol name="LSM303C">
 <pin name="SDA" x="-15.24" y="0" length="middle"/>
 <pin name="SCL" x="-15.24" y="5.08" length="middle"/>
 <pin name="GND" x="-15.24" y="10.16" length="middle"/>
@@ -876,13 +876,13 @@
 </device>
 </devices>
 </deviceset>
-<deviceset name="LSM">
+<deviceset name="LSM6DS3">
 <description>lsm</description>
 <gates>
-<gate name="G$1" symbol="LSM" x="0" y="0"/>
+<gate name="G$1" symbol="LSM6DS3" x="0" y="0"/>
 </gates>
 <devices>
-<device name="" package="LSM">
+<device name="" package="LSM6DS3">
 <connects>
 <connect gate="G$1" pin="3V3" pad="3V3"/>
 <connect gate="G$1" pin="CS" pad="CS"/>
@@ -903,12 +903,12 @@
 </device>
 </devices>
 </deviceset>
-<deviceset name="LSMGY">
+<deviceset name="LSM303C">
 <gates>
-<gate name="G$1" symbol="LSMGY" x="0" y="0"/>
+<gate name="G$1" symbol="LSM303C" x="0" y="0"/>
 </gates>
 <devices>
-<device name="" package="LSMGY">
+<device name="" package="LSM303C">
 <connects>
 <connect gate="G$1" pin="CS" pad="CS"/>
 <connect gate="G$1" pin="DRDY" pad="DRDY"/>
@@ -1022,7 +1022,22 @@
 <connect gate="G$1" pin="GND_2" pad="GND_2"/>
 <connect gate="G$1" pin="GND_3" pad="GND_3"/>
 <connect gate="G$1" pin="NRST" pad="NRST"/>
-<connect gate="G$1" pin="P$62" pad="P$20"/>
+<connect gate="G$1" pin="P$1" pad="P$8"/>
+<connect gate="G$1" pin="P$2" pad="P$9"/>
+<connect gate="G$1" pin="P$3" pad="P$10"/>
+<connect gate="G$1" pin="P$4" pad="P$11"/>
+<connect gate="G$1" pin="P$5" pad="P$12"/>
+<connect gate="G$1" pin="P$55" pad="P$14"/>
+<connect gate="G$1" pin="P$56" pad="P$15"/>
+<connect gate="G$1" pin="P$58" pad="P$3"/>
+<connect gate="G$1" pin="P$59" pad="P$4"/>
+<connect gate="G$1" pin="P$6" pad="P$1"/>
+<connect gate="G$1" pin="P$60" pad="P$5"/>
+<connect gate="G$1" pin="P$61" pad="P$6"/>
+<connect gate="G$1" pin="P$62" pad="P$7"/>
+<connect gate="G$1" pin="P$7" pad="P$17"/>
+<connect gate="G$1" pin="P$8" pad="P$18"/>
+<connect gate="G$1" pin="P$9" pad="P$20"/>
 <connect gate="G$1" pin="PA0" pad="PA0"/>
 <connect gate="G$1" pin="PA1" pad="PA1"/>
 <connect gate="G$1" pin="PA10" pad="PA10"/>
