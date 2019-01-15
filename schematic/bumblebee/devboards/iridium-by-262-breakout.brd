@@ -127,8 +127,10 @@
 <variantdefs>
 </variantdefs>
 <classes>
-<class number="0" name="RF" width="0.4" drill="0">
-<clearance class="0" value="0.0645125"/>
+<class number="0" name="defaul" width="0" drill="0">
+</class>
+<class number="2" name="RF" width="0.5" drill="0.5">
+<clearance class="2" value="0.0645125"/>
 </class>
 </classes>
 <designrules name="rezonit">
@@ -326,7 +328,7 @@ design rules under a new name.</description>
 <element name="U$1" library="iridium-antenna" package="BY-IRIDIUM-254" value="BY-IRIDIUM-254" x="11" y="15" smashed="yes" rot="R90"/>
 </elements>
 <signals>
-<signal name="N$1">
+<signal name="N$1" class="2">
 <contactref element="J1" pad="3"/>
 <contactref element="U$1" pad="P$1"/>
 <wire x1="11" y1="15" x2="31.45" y2="15" width="0.5" layer="1"/>

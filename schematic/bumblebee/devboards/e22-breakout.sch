@@ -356,9 +356,11 @@ Datasheet and info: http://www.ebyte.com/en/product-view-news.aspx?id=436</descr
 <variantdefs>
 </variantdefs>
 <classes>
-<class number="0" name="default" width="0.125" drill="0">
+<class number="0" name="default" width="0.2" drill="0.5">
+<clearance class="0" value="0.2"/>
 </class>
-<class number="1" name="power" width="0.2" drill="0">
+<class number="1" name="power" width="0.2" drill="0.5">
+<clearance class="1" value="0.2"/>
 </class>
 </classes>
 <parts>

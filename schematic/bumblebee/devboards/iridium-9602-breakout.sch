@@ -1106,10 +1106,10 @@
 <class number="0" name="default" width="0.2" drill="0">
 <clearance class="0" value="0.2"/>
 </class>
-<class number="1" name="POWER" width="0.5" drill="0">
+<class number="1" name="power" width="0.5" drill="0">
 <clearance class="1" value="0.2"/>
 </class>
-<class number="2" name="RF" width="0.5" drill="0">
+<class number="2" name="rf" width="0.5" drill="0">
 <clearance class="2" value="0.0645125"/>
 </class>
 </classes>

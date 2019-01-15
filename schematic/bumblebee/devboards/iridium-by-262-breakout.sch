@@ -203,8 +203,10 @@
 <variantdefs>
 </variantdefs>
 <classes>
-<class number="0" name="RF" width="0.4" drill="0">
-<clearance class="0" value="0.0645125"/>
+<class number="0" name="defaul" width="0" drill="0">
+</class>
+<class number="2" name="RF" width="0.5" drill="0.5">
+<clearance class="2" value="0.0645125"/>
 </class>
 </classes>
 <parts>
@@ -227,7 +229,7 @@
 <busses>
 </busses>
 <nets>
-<net name="N$1" class="0">
+<net name="N$1" class="2">
 <segment>
 <pinref part="J1" gate="G$1" pin="SIG"/>
 <pinref part="U$1" gate="G$1" pin="P$1"/>
