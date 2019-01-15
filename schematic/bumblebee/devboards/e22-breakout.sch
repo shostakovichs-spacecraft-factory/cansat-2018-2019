@@ -67,17 +67,17 @@
 Datasheet and info: http://www.ebyte.com/en/product-view-news.aspx?id=436</description>
 <wire x1="-10" y1="7" x2="-10" y2="-7" width="0.127" layer="21"/>
 <wire x1="10" y1="7" x2="10" y2="-7" width="0.127" layer="21"/>
-<smd name="P$1" x="-9" y="-6.97" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$2" x="-7.73" y="-6.97" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$3" x="-6.46" y="-6.97" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$4" x="-0.89" y="-6.97" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$5" x="0.38" y="-6.97" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$6" x="1.65" y="-6.97" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$7" x="2.92" y="-6.97" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$8" x="4.19" y="-6.97" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$9" x="5.46" y="-6.97" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$10" x="6.73" y="-6.97" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$11" x="8" y="-6.97" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
+<smd name="P$1" x="-9" y="-6.97" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$2" x="-7.73" y="-6.97" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$3" x="-6.46" y="-6.97" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$4" x="-0.89" y="-6.97" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$5" x="0.38" y="-6.97" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$6" x="1.65" y="-6.97" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$7" x="2.92" y="-6.97" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$8" x="4.19" y="-6.97" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$9" x="5.46" y="-6.97" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$10" x="6.73" y="-6.97" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$11" x="8" y="-6.97" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
 <circle x="-7.62" y="3.81" radius="1.27" width="0.127" layer="51"/>
 <circle x="-7.62" y="3.81" radius="0.2" width="0.127" layer="51"/>
 <wire x1="8.89" y1="5.08" x2="-5.08" y2="5.08" width="0.127" layer="51"/>
@@ -88,17 +88,17 @@ Datasheet and info: http://www.ebyte.com/en/product-view-news.aspx?id=436</descr
 <wire x1="8.89" y1="-5.08" x2="8.89" y2="5.08" width="0.127" layer="51"/>
 <text x="-7.62" y="-1.27" size="1.27" layer="25">&gt;Name</text>
 <text x="-7.62" y="-3.81" size="1.27" layer="27">&gt;Value</text>
-<smd name="P$12" x="8" y="7" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$13" x="6.73" y="7" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$14" x="5.46" y="7" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$15" x="4.19" y="7" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$16" x="2.92" y="7" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$17" x="1.65" y="7" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$18" x="0.38" y="7" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$19" x="-0.89" y="7" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$20" x="-6.46" y="7" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$21" x="-7.73" y="7" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
-<smd name="P$22" x="-9" y="7" dx="1.9304" dy="0.9652" layer="1" rot="R90"/>
+<smd name="P$12" x="8" y="7" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$13" x="6.73" y="7" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$14" x="5.46" y="7" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$15" x="4.19" y="7" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$16" x="2.92" y="7" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$17" x="1.65" y="7" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$18" x="0.38" y="7" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$19" x="-0.89" y="7" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$20" x="-6.46" y="7" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$21" x="-7.73" y="7" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
+<smd name="P$22" x="-9" y="7" dx="1.6764" dy="0.8128" layer="1" rot="R90"/>
 <wire x1="-5" y1="7" x2="-2" y2="7" width="0.127" layer="21"/>
 <wire x1="-5" y1="-7" x2="-2" y2="-7" width="0.127" layer="21"/>
 <wire x1="10" y1="7" x2="9" y2="7" width="0.127" layer="21"/>
@@ -510,6 +510,10 @@ Datasheet and info: http://www.ebyte.com/en/product-view-news.aspx?id=436</descr
 </nets>
 </sheet>
 </sheets>
+<errors>
+<approved hash="113,1,71.3571,58.6461,JP1,,,,,"/>
+<approved hash="113,1,-7.85707,55.6539,JP2,,,,,"/>
+</errors>
 </schematic>
 </drawing>
 <compatibility>
