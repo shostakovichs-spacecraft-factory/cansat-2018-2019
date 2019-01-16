@@ -359,6 +359,8 @@ design rules under a new name.</description>
 <via x="32" y="4" extent="1-16" drill="0.5"/>
 <via x="33" y="23" extent="1-16" drill="0.5"/>
 <via x="7" y="2" extent="1-16" drill="0.5"/>
+<contactref element="J1" pad="1"/>
+<contactref element="J1" pad="2"/>
 </signal>
 </signals>
 <mfgpreviewcolors>
