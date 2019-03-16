@@ -10,7 +10,7 @@
 
 typedef struct
 {
-	float **arr;
+	float arr[8][8];
 	int height;
 	int width;
 
@@ -20,7 +20,7 @@ void matrix_for_each(Matrixf *matrix, void (*fun)(Matrixf*, int, int));
 
 void matrix_print(Matrixf *matrix);
 
-Matrixf *matrix_create(int height, int width);
+Matrixf matrix_create(int height, int width);
 
 void matrix_delete(Matrixf *source);
 

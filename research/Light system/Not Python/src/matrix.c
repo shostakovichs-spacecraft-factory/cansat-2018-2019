@@ -32,15 +32,11 @@ void matrix_print(Matrixf *matrix)
 }
 
 //Don't worry! Dynamic arrays just for testing. One day will be optimized
-Matrixf *matrix_create(int height, int width)
+Matrixf matrix_create(int height, int width)
 {
-	Matrixf *res = malloc(sizeof(res[0]));
-	res->arr = calloc(sizeof(res->arr[0]), height);
-	for (int i = 0; i < height; i++) {
-		res->arr[i] = calloc(sizeof(res->arr[0][0]), width);
-	}
-	res->height = height;
-	res->width = width;
+	Matrixf res;
+	res.height = height;
+	res.width = width;
 	return res;
 }
 
@@ -58,11 +54,8 @@ void matrix_make_identity(Matrixf *matrix)
 
 void matrix_delete(Matrixf *matrix)
 {
-	for (int i = 0; i < matrix->height; i++)
-	{
-		free(matrix->arr[i]);
-	}
-	free(matrix->arr);
+	matrix->height = -1;
+	matrix->width = -1;
 }
 
 void matrix_multiplicate(Matrixf *left, Matrixf *right, Matrixf* result)
@@ -95,9 +88,12 @@ void matrix_swap_rows(Matrixf *matrix, int i1, int i2)
 		printf("bad swap\n");
 		return;
 	}
-	float *t = matrix->arr[i1];
-	matrix->arr[i1] = matrix->arr[i2];
-	matrix->arr[i2] = t;
+	for(int i = 0; i < matrix->width; i++)
+	{
+		float t = matrix->arr[i1][i];
+		matrix->arr[i1][i] = matrix->arr[i2][i];
+		matrix->arr[i2][i] = t;
+	}
 }
 void matrix_mul_row_num(Matrixf *matrix, int index, float b)
 {
@@ -139,50 +135,51 @@ void matrix_get_inverse(Matrixf *matrix, Matrixf *result)
 		printf("bad inverse\n");
 		return;
 	}
-	Matrixf *temp = matrix_create(matrix->height, matrix->width);
-	matrix_equate(matrix, temp);
-	matrix_make_identity(result);
-	matrix_print(temp);
+	Matrixf temp = matrix_create(matrix->height, matrix->width);
 
-	for (int x = 0; x < temp->width - 1; x++)
+	matrix_equate(matrix, &temp);
+	matrix_make_identity(result);
+	//matrix_print(&temp);
+
+	for (int x = 0; x < temp.width - 1; x++)
 	{
 		int i1 = -1;
-		for (int i = x; i < temp->height; i++)
+		for (int i = x; i < temp.height; i++)
 		{
-			if (temp->arr[i][x] > EPS || temp->arr[i][x] < -EPS)
+			if (temp.arr[i][x] > EPS || temp.arr[i][x] < -EPS)
 			{
 				i1 = i;
 				break;
 			}
 		}
-		matrix_swap_rows(temp, x, i1);
+		matrix_swap_rows(&temp, x, i1);
 		matrix_swap_rows(result, x, i1);
 
-		float k = -1 / temp->arr[x][x];
+		float k = -1 / temp.arr[x][x];
 
-		for (int i = x + 1; i < temp->height; i++)
+		for (int i = x + 1; i < temp.height; i++)
 		{
-			float t = k * temp->arr[i][x];
+			float t = k * temp.arr[i][x];
 			//printf("%f",t);
-			matrix_add_row(temp, x, i, t);
+			matrix_add_row(&temp, x, i, t);
 			matrix_add_row(result, x, i, t);
-			//matrix_print(temp);
+			//matrix_print(&temp);
 		}
 	}
-	for (int i = temp->width - 1; i >= 0; i--)
+	for (int i = temp.width - 1; i >= 0; i--)
 	{
-		matrix_mul_row_num(result, i, 1 / temp->arr[i][i]);
-		temp->arr[i][i] = 1;
+		matrix_mul_row_num(result, i, 1 / temp.arr[i][i]);
+		temp.arr[i][i] = 1;
 
 		for (int j = i - 1; j >= 0; j--)
 		{
-			float t = -temp->arr[j][i];
-			matrix_add_row(temp, i, j, t);
+			float t = -temp.arr[j][i];
+			matrix_add_row(&temp, i, j, t);
 			matrix_add_row(result, i, j, t);
 		}
 	}
-	//matrix_print(temp);
-	matrix_delete(temp);
+	//matrix_print(&temp);
+	matrix_delete(&temp);
 }
 
 void matrix_equate(Matrixf *source, Matrixf *destination)
