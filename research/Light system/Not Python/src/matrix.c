@@ -28,7 +28,7 @@ float *matrix_at(Matrixf *matrix, int row, int column)
 	return &matrix->arr[row * matrix->width + column];
 }
 
-void matrix_for_each(Matrixf *matrix, void (*fun)(Matrixf*, int, int))
+void matrix_foreach(Matrixf *matrix, void (*fun)(Matrixf*, int, int))
 {
 	for (int i = 0; i < matrix->height; i++)
 		for (int j = 0; j < matrix->width; j++)
@@ -44,7 +44,7 @@ static void _matrix_print(Matrixf *x, int a, int b)
 }
 void matrix_print(Matrixf *matrix)
 {
-	matrix_for_each(matrix, _matrix_print);
+	matrix_foreach(matrix, _matrix_print);
 	printf("\n");
 }
 
@@ -84,7 +84,7 @@ void matrix_multiplicate(Matrixf *left, Matrixf *right, Matrixf* result)
 		}
 	}
 }
-void matrix_swap_rows(Matrixf *matrix, int i1, int i2)
+void matrix_swapRows(Matrixf *matrix, int i1, int i2)
 {
 	if (i1 >= matrix->height || i2 >= matrix->height)
 	{
@@ -99,7 +99,7 @@ void matrix_swap_rows(Matrixf *matrix, int i1, int i2)
 		*matrix_at(matrix, i2, i) = t;
 	}
 }
-void matrix_mul_row_num(Matrixf *matrix, int index, float b)
+void matrix_mulRowNum(Matrixf *matrix, int index, float b)
 {
 	if (index >= matrix->height)
 	{
@@ -112,7 +112,7 @@ void matrix_mul_row_num(Matrixf *matrix, int index, float b)
 	}
 }
 
-void matrix_add_row(Matrixf *matrix, int source, int destination, float koef)
+void matrix_addRow(Matrixf *matrix, int source, int destination, float koef)
 {
 	if (source >= matrix->height || destination >= matrix->height)
 	{
@@ -167,8 +167,8 @@ void matrix_inverse(Matrixf *matrix)
 				break;
 			}
 		}
-		matrix_swap_rows(&result, x, i1);
-		matrix_swap_rows(matrix, x, i1);
+		matrix_swapRows(&result, x, i1);
+		matrix_swapRows(matrix, x, i1);
 
 		float k = -1 / *matrix_at(matrix, x, x);
 
@@ -176,21 +176,21 @@ void matrix_inverse(Matrixf *matrix)
 		{
 			float t = k * *matrix_at(matrix, i, x);
 			//printf("%f",t);
-			matrix_add_row(matrix, x, i, t);
-			matrix_add_row(&result, x, i, t);
+			matrix_addRow(matrix, x, i, t);
+			matrix_addRow(&result, x, i, t);
 			//matrix_print(matrix);
 		}
 	}
 	for (int i = matrix->width - 1; i >= 0; i--)
 	{
-		matrix_mul_row_num(&result, i, 1 / *matrix_at(matrix, i, i));
+		matrix_mulRowNum(&result, i, 1 / *matrix_at(matrix, i, i));
 		*matrix_at(matrix, i, i) = 1;
 
 		for (int j = i - 1; j >= 0; j--)
 		{
 			float t = -*matrix_at(matrix, j, i);
-			matrix_add_row(matrix, i, j, t);
-			matrix_add_row(&result, i, j, t);
+			matrix_addRow(matrix, i, j, t);
+			matrix_addRow(&result, i, j, t);
 		}
 	}
 	matrix_copy(&result, matrix, 0);

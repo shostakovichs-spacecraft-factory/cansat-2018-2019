@@ -18,17 +18,17 @@ typedef struct
 
 float *matrix_at(Matrixf *matrix, int row, int column);
 
-void matrix_for_each(Matrixf *matrix, void (*fun)(Matrixf*, int, int));
+void matrix_foreach(Matrixf *matrix, void (*fun)(Matrixf*, int, int));
 
 void matrix_print(Matrixf *matrix);
 
 void matrix_setSize(Matrixf *matrix, int height, int width);
 
-void matrix_swap_rows(Matrixf *matrix, int i1, int i2);
+void matrix_swapRows(Matrixf *matrix, int i1, int i2);
 
-void matrix_mul_row_num(Matrixf *matrix, int index, float b);
+void matrix_mulRowNum(Matrixf *matrix, int index, float b);
 
-void matrix_add_row(Matrixf *matrix, int source, int destination, float koef);
+void matrix_addRow(Matrixf *matrix, int source, int destination, float koef);
 
 void matrix_copy(Matrixf *source, Matrixf *destination, int isForced);
 
