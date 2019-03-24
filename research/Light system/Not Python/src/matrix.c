@@ -8,8 +8,25 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "matrix.h"
+#include <errno.h>
+
 
 #define EPS 1 / (1 << 20)
+
+int matrix_isInRange(Matrixf *matrix, int row, int column)
+{
+	return !(row >= matrix->height || column >= matrix->width);
+}
+
+float *matrix_at(Matrixf *matrix, int row, int column)
+{
+	if(!matrix_isInRange(matrix, row, column))
+	{
+		fprintf(stderr, "Out of range!\n");
+		return NULL;
+	}
+	return &matrix->arr[row * matrix->width + column];
+}
 
 void matrix_for_each(Matrixf *matrix, void (*fun)(Matrixf*, int, int))
 {
@@ -18,27 +35,20 @@ void matrix_for_each(Matrixf *matrix, void (*fun)(Matrixf*, int, int))
 			fun(matrix, i, j);
 }
 
-void print(Matrixf *x, int a, int b)
+static void _matrix_print(Matrixf *x, int a, int b)
 {
-	printf("%f ", x->arr[a][b]);
+	printf("%f ", *matrix_at(x, a, b));
 	if (b == x->width - 1)
 		printf("\n");
 
 }
 void matrix_print(Matrixf *matrix)
 {
-	matrix_for_each(matrix, print);
+	matrix_for_each(matrix, _matrix_print);
 	printf("\n");
 }
 
-//Don't worry! Dynamic arrays just for testing. One day will be optimized
-Matrixf matrix_create(int height, int width)
-{
-	Matrixf res;
-	res.height = height;
-	res.width = width;
-	return res;
-}
+
 
 void matrix_make_identity(Matrixf *matrix)
 {
@@ -46,17 +56,12 @@ void matrix_make_identity(Matrixf *matrix)
 		for (int j = 0; j < matrix->width; j++)
 		{
 			if (i != j)
-				matrix->arr[i][j] = 0;
+				*matrix_at(matrix, i, j) = 0;
 			else
-				matrix->arr[i][j] = 1;
+				*matrix_at(matrix, i, j) = 1;
 		}
 }
 
-void matrix_delete(Matrixf *matrix)
-{
-	matrix->height = -1;
-	matrix->width = -1;
-}
 
 void matrix_multiplicate(Matrixf *left, Matrixf *right, Matrixf* result)
 {
@@ -71,15 +76,14 @@ void matrix_multiplicate(Matrixf *left, Matrixf *right, Matrixf* result)
 	{
 		for (int j = 0; j < right->width; j++)
 		{
-			result->arr[i][j] = 0;
-			for (int k = 0; k < left->height; k++)
+			*matrix_at(result, i, j) = 0;
+			for (int k = 0; k < left->width; k++)
 			{
-				result->arr[i][j] += left->arr[i][k] * right->arr[k][j];
+				*matrix_at(result, i, j) += *matrix_at(left, i, k) * *matrix_at(right, k, j);
 			}
 		}
 	}
 }
-
 void matrix_swap_rows(Matrixf *matrix, int i1, int i2)
 {
 	if (i1 >= matrix->height || i2 >= matrix->height)
@@ -90,9 +94,9 @@ void matrix_swap_rows(Matrixf *matrix, int i1, int i2)
 	}
 	for(int i = 0; i < matrix->width; i++)
 	{
-		float t = matrix->arr[i1][i];
-		matrix->arr[i1][i] = matrix->arr[i2][i];
-		matrix->arr[i2][i] = t;
+		float t = *matrix_at(matrix, i1, i);
+		*matrix_at(matrix, i1, i) = *matrix_at(matrix, i2, i);
+		*matrix_at(matrix, i2, i) = t;
 	}
 }
 void matrix_mul_row_num(Matrixf *matrix, int index, float b)
@@ -104,7 +108,7 @@ void matrix_mul_row_num(Matrixf *matrix, int index, float b)
 	}
 	for (int i = 0; i < matrix->width; i++)
 	{
-		matrix->arr[index][i] *= b;
+		*matrix_at(matrix, index, i) *= b;
 	}
 }
 
@@ -118,16 +122,19 @@ void matrix_add_row(Matrixf *matrix, int source, int destination, float koef)
 	}
 	for (int i = 0; i < matrix->width; i++)
 	{
-		matrix->arr[destination][i] += koef * matrix->arr[source][i];
+		*matrix_at(matrix, destination, i) += koef * *matrix_at(matrix, source, i);
 	}
 }
 
+#warning "Надо исправить это"
 void matrix_get_transpose(Matrixf *matrix, Matrixf *result) //do we need error processing
 {
 	for (int i = 0; i < matrix->height; i++)
 		for (int j = 0; j < matrix->width; j++)
-			result->arr[j][i] = matrix->arr[i][j];
+			*matrix_at(result, j, i) = *matrix_at(matrix, i, j);
 }
+
+//Метод Гаусса
 void matrix_get_inverse(Matrixf *matrix, Matrixf *result)
 {
 	if (matrix->height != matrix->width)
@@ -135,9 +142,12 @@ void matrix_get_inverse(Matrixf *matrix, Matrixf *result)
 		printf("bad inverse\n");
 		return;
 	}
-	Matrixf temp = matrix_create(matrix->height, matrix->width);
 
-	matrix_equate(matrix, &temp);
+	float _arr[matrix->height * matrix->width];
+	Matrixf temp;
+	temp.arr = _arr;
+	matrix_copy(matrix, &temp, 1);
+
 	matrix_make_identity(result);
 	//matrix_print(&temp);
 
@@ -146,20 +156,20 @@ void matrix_get_inverse(Matrixf *matrix, Matrixf *result)
 		int i1 = -1;
 		for (int i = x; i < temp.height; i++)
 		{
-			if (temp.arr[i][x] > EPS || temp.arr[i][x] < -EPS)
+			if (*matrix_at(&temp, i, x) > EPS || *matrix_at(&temp, i, x) < -EPS)
 			{
 				i1 = i;
 				break;
 			}
 		}
-		matrix_swap_rows(&temp, x, i1);
 		matrix_swap_rows(result, x, i1);
+		matrix_swap_rows(&temp, x, i1);
 
-		float k = -1 / temp.arr[x][x];
+		float k = -1 / *matrix_at(&temp, x, x);
 
 		for (int i = x + 1; i < temp.height; i++)
 		{
-			float t = k * temp.arr[i][x];
+			float t = k * *matrix_at(&temp, i, x);
 			//printf("%f",t);
 			matrix_add_row(&temp, x, i, t);
 			matrix_add_row(result, x, i, t);
@@ -168,27 +178,46 @@ void matrix_get_inverse(Matrixf *matrix, Matrixf *result)
 	}
 	for (int i = temp.width - 1; i >= 0; i--)
 	{
-		matrix_mul_row_num(result, i, 1 / temp.arr[i][i]);
-		temp.arr[i][i] = 1;
+		matrix_mul_row_num(result, i, 1 / *matrix_at(&temp, i, i));
+		*matrix_at(&temp, i, i) = 1;
 
 		for (int j = i - 1; j >= 0; j--)
 		{
-			float t = -temp.arr[j][i];
+			float t = -*matrix_at(&temp, j, i);
 			matrix_add_row(&temp, i, j, t);
 			matrix_add_row(result, i, j, t);
 		}
 	}
 	//matrix_print(&temp);
-	matrix_delete(&temp);
 }
 
-void matrix_equate(Matrixf *source, Matrixf *destination)
+//isForced != 0 => copy size too
+void matrix_copy(Matrixf *source, Matrixf *destination, int isForced)
 {
-
+	if(isForced)
+	{
+		destination->height = source->height;
+		destination->width = source->width;
+	}
+	else if(destination->height != source->height || destination->width != source->width)
+	{
+		fprintf(stderr, "Sizes do not appropriate\n");
+		return;
+	}
 	for (int i = 0; i < destination->height; i++)
 		for (int j = 0; j < source->width; j++)
-			destination->arr[i][j] = source->arr[i][j];
+			*matrix_at(destination, i, j) = *matrix_at(source, i, j);
 }
+
+
+void matrix_setSize(Matrixf *matrix, int height, int width)
+{
+	matrix->height = height;
+	matrix->width = width;
+}
+
+
+
 
 /*
  float matrix_det1(Matrixf a)

@@ -10,8 +10,8 @@
 
 #include "matrix.h"
 
-void LDR_find_solution(Matrixf *A, Matrixf *b, Matrixf *x);
+void LDR_findSolution(Matrixf *A, Matrixf *b, Matrixf *x);
 
-
+void LDR_init();
 
 #endif /* LIGHT_DIRECTION_DETERMINANT_H_ */
