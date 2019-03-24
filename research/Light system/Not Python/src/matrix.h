@@ -32,9 +32,9 @@ void matrix_add_row(Matrixf *matrix, int source, int destination, float koef);
 
 void matrix_copy(Matrixf *source, Matrixf *destination, int isForced);
 
-void matrix_get_transpose(Matrixf *source, Matrixf *result);
+void matrix_transpose(Matrixf* matrix);
 
-void matrix_get_inverse(Matrixf *source, Matrixf *result);
+void matrix_inverse(Matrixf *matrix);
 
 void matrix_multiplicate(Matrixf *left, Matrixf *right, Matrixf* result);
 

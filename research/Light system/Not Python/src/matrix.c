@@ -126,16 +126,21 @@ void matrix_add_row(Matrixf *matrix, int source, int destination, float koef)
 	}
 }
 
-#warning "Надо исправить это"
-void matrix_get_transpose(Matrixf *matrix, Matrixf *result) //do we need error processing
+void matrix_transpose(Matrixf *matrix) //do we need error processing
 {
+	Matrixf result;
+	matrix_setSize(&result, matrix->width, matrix->height);
+	float arr[matrix->height * matrix->width];
+	result.arr = arr;
+
 	for (int i = 0; i < matrix->height; i++)
 		for (int j = 0; j < matrix->width; j++)
-			*matrix_at(result, j, i) = *matrix_at(matrix, i, j);
+			*matrix_at(&result, j, i) = *matrix_at(matrix, i, j);
+	matrix_copy(&result, matrix, 1);
 }
 
 //Метод Гаусса
-void matrix_get_inverse(Matrixf *matrix, Matrixf *result)
+void matrix_inverse(Matrixf *matrix)
 {
 	if (matrix->height != matrix->width)
 	{
@@ -143,52 +148,53 @@ void matrix_get_inverse(Matrixf *matrix, Matrixf *result)
 		return;
 	}
 
+	Matrixf result;
+	matrix_setSize(&result, matrix->width, matrix->height);
 	float _arr[matrix->height * matrix->width];
-	Matrixf temp;
-	temp.arr = _arr;
-	matrix_copy(matrix, &temp, 1);
+	result.arr = _arr;
 
-	matrix_make_identity(result);
-	//matrix_print(&temp);
+	matrix_make_identity(&result);
+	//matrix_print(matrix);
 
-	for (int x = 0; x < temp.width - 1; x++)
+	for (int x = 0; x < matrix->width - 1; x++)
 	{
 		int i1 = -1;
-		for (int i = x; i < temp.height; i++)
+		for (int i = x; i < matrix->height; i++)
 		{
-			if (*matrix_at(&temp, i, x) > EPS || *matrix_at(&temp, i, x) < -EPS)
+			if (*matrix_at(matrix, i, x) > EPS || *matrix_at(matrix, i, x) < -EPS)
 			{
 				i1 = i;
 				break;
 			}
 		}
-		matrix_swap_rows(result, x, i1);
-		matrix_swap_rows(&temp, x, i1);
+		matrix_swap_rows(&result, x, i1);
+		matrix_swap_rows(matrix, x, i1);
 
-		float k = -1 / *matrix_at(&temp, x, x);
+		float k = -1 / *matrix_at(matrix, x, x);
 
-		for (int i = x + 1; i < temp.height; i++)
+		for (int i = x + 1; i < matrix->height; i++)
 		{
-			float t = k * *matrix_at(&temp, i, x);
+			float t = k * *matrix_at(matrix, i, x);
 			//printf("%f",t);
-			matrix_add_row(&temp, x, i, t);
-			matrix_add_row(result, x, i, t);
-			//matrix_print(&temp);
+			matrix_add_row(matrix, x, i, t);
+			matrix_add_row(&result, x, i, t);
+			//matrix_print(matrix);
 		}
 	}
-	for (int i = temp.width - 1; i >= 0; i--)
+	for (int i = matrix->width - 1; i >= 0; i--)
 	{
-		matrix_mul_row_num(result, i, 1 / *matrix_at(&temp, i, i));
-		*matrix_at(&temp, i, i) = 1;
+		matrix_mul_row_num(&result, i, 1 / *matrix_at(matrix, i, i));
+		*matrix_at(matrix, i, i) = 1;
 
 		for (int j = i - 1; j >= 0; j--)
 		{
-			float t = -*matrix_at(&temp, j, i);
-			matrix_add_row(&temp, i, j, t);
-			matrix_add_row(result, i, j, t);
+			float t = -*matrix_at(matrix, j, i);
+			matrix_add_row(matrix, i, j, t);
+			matrix_add_row(&result, i, j, t);
 		}
 	}
-	//matrix_print(&temp);
+	matrix_copy(&result, matrix, 0);
+	//matrix_print(matrix);
 }
 
 //isForced != 0 => copy size too
