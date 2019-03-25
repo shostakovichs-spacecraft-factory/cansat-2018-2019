@@ -2,7 +2,7 @@
 # Каталог с входными файлами
 MSGDEFS_DIR = message_definitions/v1.0
 # Список имен входных файлов
-MSGDEFS_NAMES = granum.xml
+MSGDEFS_NAMES = zikush.xml
 # Список путей до входных файлов
 MSGDEFS = $(addprefix $(MSGDEFS_DIR)/, $(MSGDEFS_NAMES))
 
