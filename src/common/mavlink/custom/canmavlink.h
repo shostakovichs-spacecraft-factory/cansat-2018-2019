@@ -11,6 +11,8 @@
 #endif
 #define MIN(a, b) (a < b ? a : b)
 
+#define DIVIDE_ROUND_UP(DIVIDEE, DIVIDER)	(DIVIDEE / DIVIDER + ( (DIVIDEE % DIVIDER) != 0) )
+
 #define CAN2_MAX_DLC	8
 
 #define FIRSTFRAME_FLAG	1
@@ -35,13 +37,15 @@
  *
  * @return A number of CAN frames used to encode a message
  */
-MAVLINK_HELPER uint16_t canmavlink_msg_to_frames(CanTxMsg * frames, const mavlink_message_t *msg)
+MAVLINK_HELPER uint8_t canmavlink_msg_to_frames(CanTxMsg * frames, const mavlink_message_t *msg)
 {
 	uint8_t length = msg->len;
 	CanTxMsg * firstframe = frames;
 
 	if (msg->magic == MAVLINK_STX_MAVLINK1) {
 		firstframe->IDE = CAN_ID_STD;
+		firstframe->RTR = CAN_RTR_DATA;
+		firstframe->DLC = 4;
 		firstframe->StdId = CAN_STDID_PACK(msg->compid, FIRSTFRAME_FLAG, msg->msgid);
 		firstframe->Data[0] = length;
 		firstframe->Data[1] = msg->seq;
@@ -51,19 +55,27 @@ MAVLINK_HELPER uint16_t canmavlink_msg_to_frames(CanTxMsg * frames, const mavlin
 		for(uint8_t i = 0; true;)
 		{
 			CanTxMsg * currframe = frames +  i / CAN2_MAX_DLC + 1;
+
 			uint8_t copylen = MIN(length - i, CAN2_MAX_DLC);
 			memcpy(currframe->Data, _MAV_PAYLOAD(msg) + i, copylen);
+			i += copylen;
+
+			currframe->IDE = CAN_ID_STD;
+			currframe->RTR = CAN_RTR_DATA;
+			currframe->DLC = copylen;
+			currframe->StdId = CAN_STDID_PACK(msg->compid, !FIRSTFRAME_FLAG, msg->msgid);
 
 			if(copylen < 7) //We should append CRC
 			{
 				currframe->Data[copylen] = (uint8_t)(msg->checksum & 0xFF);
 				currframe->Data[copylen + 1] = (uint8_t)(msg->checksum >> 8);
+				currframe->DLC += 2;
 
 				break;
 			}
 		}
 
-		return (length + 2) / CAN2_MAX_DLC + 1; //Length counted with CRC, added one for FF
+		return DIVIDE_ROUND_UP( (length + 2), CAN2_MAX_DLC) + 1; //Length counted with CRC, added one for FF
 
 	} else {
 		//TODO MAVLINK 2 support not implemented yet
@@ -83,7 +95,7 @@ MAVLINK_HELPER uint16_t canmavlink_msg_to_frames(CanTxMsg * frames, const mavlin
  */
 MAVLINK_HELPER uint8_t canmavlink_parse_frame(CanRxMsg * frame, mavlink_message_t* r_message, mavlink_status_t* r_mavlink_status)
 {
-	if(frame->ExtId) return MAVLINK_FRAMING_INCOMPLETE;
+	if(frame->IDE != CAN_ID_STD) return MAVLINK_FRAMING_INCOMPLETE;
 
 	uint8_t chan = CAN_STDID_COMPID(frame); // Implicit logic channel separation
 
@@ -124,10 +136,10 @@ MAVLINK_HELPER uint8_t canmavlink_parse_frame(CanRxMsg * frame, mavlink_message_
 	for(int i = 0; i < copylen; i++) //Handle CRC for header and data
 	{
 		mavlink_update_checksum(msgbuf, frame->Data[i]);
-
-		if( ISFIRSTFRAME(frame) )
-			mavlink_update_checksum(msgbuf, msgbuf->msgid & 0xFF);
 	}
+
+	if( ISFIRSTFRAME(frame) )
+				mavlink_update_checksum(msgbuf, msgbuf->msgid & 0xFF);
 
 	if(frame->DLC - copylen == 2) //We've got CRC
 	{
