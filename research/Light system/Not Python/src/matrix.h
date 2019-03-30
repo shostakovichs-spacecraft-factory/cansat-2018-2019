@@ -14,7 +14,17 @@ typedef struct
 	int width;
 	float *arr;
 
+	int reserved;
+
 } Matrixf;
+
+Matrixf matrix_create(int height, int width);
+
+void matrix_delete(Matrixf *matrix);
+
+void matrix_resize(Matrixf *matrix, int height, int width);
+
+int matrix_add(Matrixf *left, Matrixf *right);
 
 float *matrix_at(Matrixf *matrix, int row, int column);
 
