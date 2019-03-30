@@ -21,10 +21,10 @@
 Matrixf matrix_create(int height, int width)
 {
 	Matrixf result;
-	result->height = height;
-	result->width = width;
-	result->reserved = height * width;
-	result->arr = malloc(result->reserved * sizeof(result->arr[0]));
+	result.height = height;
+	result.width = width;
+	result.reserved = height * width;
+	result.arr = malloc(result.reserved * sizeof(result.arr[0]));
 	return result;
 }
 
@@ -40,7 +40,7 @@ void matrix_resize(Matrixf *matrix, int height, int width)
 	if(matrix->reserved < r)
 	{
 		matrix->reserved = RESERVE_KOEF * r;
-		matrix->arr = realloc(matrix->reserved * sizeof(matrix->arr[0]));
+		matrix->arr = realloc(matrix->arr, matrix->reserved * sizeof(matrix->arr[0]));
 	}
 	matrix->height = height;
 	matrix->width = width;
@@ -93,7 +93,7 @@ int matrix_add(Matrixf *left, Matrixf *right)
 	{
 		for(int j = 0; j < left->width; j++)
 		{
-			*matrix_at(left, i, j) += right(right, i, j);
+			*matrix_at(left, i, j) += *matrix_at(right, i, j);
 		}
 	}
 	return 0;
@@ -109,6 +109,13 @@ void matrix_make_identity(Matrixf *matrix)
 			else
 				*matrix_at(matrix, i, j) = 1;
 		}
+}
+
+void matrix_make_zero(Matrixf *matrix)
+{
+	for (int i = 0; i < matrix->height; i++)
+		for (int j = 0; j < matrix->width; j++)
+			*matrix_at(matrix, i, j) = 0;
 }
 
 
@@ -279,6 +286,17 @@ void matrix_setSize(Matrixf *matrix, int height, int width)
 	matrix->width = width;
 }
 
+float matrix_norm(Matrixf *matrix)
+{
+	float result = 0;
+	for (int i = 0; i < matrix->height; i++)
+		for (int j = 0; j < matrix->width; j++)
+		{
+			float t = *matrix_at(matrix, i, j);
+			result += t * t;
+		}
+	return result;
+}
 
 
 
