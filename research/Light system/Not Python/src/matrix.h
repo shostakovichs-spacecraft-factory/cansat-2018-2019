@@ -44,9 +44,13 @@ void matrix_make_identity(Matrixf *matrix);
 void matrix_transpose(Matrixf* matrix);
 
 int matrix_inverse(Matrixf *matrix);
+
+float matrix_norm(Matrixf *matrix);
 ///////
 
 ///////Operations
+int matrix_normalize(Matrixf *matrix);
+
 int matrix_swapRows(Matrixf *matrix, int i1, int i2);
 
 int matrix_mulRowNum(Matrixf *matrix, int index, float b);
@@ -56,6 +60,10 @@ int matrix_addRow(Matrixf *matrix, int source, int destination, float koef);
 int matrix_multiplicate(Matrixf *left, Matrixf *right, Matrixf* result);
 
 int matrix_add(Matrixf *left, Matrixf *right);
+
+int matrix_sub(Matrixf *left, Matrixf *right);
+
+void matrix_mulNumber(Matrixf *matrix, float koef);
 ///////
 
 

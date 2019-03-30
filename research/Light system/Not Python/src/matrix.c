@@ -10,11 +10,11 @@
 #include "matrix.h"
 #include <errno.h>
 
-
 #define EPS 1 / (1 << 20)
 #define BAD_SIZES 0x10
 #define BAD_INDEX 0x11
 #define DET_IS_ZERO 0x12
+#define NORM_IS_ZERO 0x13
 
 #define RESERVE_KOEF 1.5
 
@@ -94,6 +94,23 @@ int matrix_add(Matrixf *left, Matrixf *right)
 		for(int j = 0; j < left->width; j++)
 		{
 			*matrix_at(left, i, j) += *matrix_at(right, i, j);
+		}
+	}
+	return 0;
+}
+
+int matrix_sub(Matrixf *left, Matrixf *right)
+{
+	if(left->height != right->height || left->width != right->width)
+	{
+		fprintf(stderr, "Matrix sizes do not appropriate\n");
+		return BAD_SIZES;
+	}
+	for(int i = 0; i < left->height; i++)
+	{
+		for(int j = 0; j < left->width; j++)
+		{
+			*matrix_at(left, i, j) -= *matrix_at(right, i, j);
 		}
 	}
 	return 0;
@@ -295,10 +312,30 @@ float matrix_norm(Matrixf *matrix)
 			float t = *matrix_at(matrix, i, j);
 			result += t * t;
 		}
+	result = sqrtf(result);
 	return result;
 }
 
+int matrix_normalize(Matrixf *matrix)
+{
+	float norm = matrix_norm(matrix);
+	if(norm == 0)
+	{
+		fprintf(stderr, "Can't normalize zero matrix\n");
+		return NORM_IS_ZERO;
+	}
+	for (int i = 0; i < matrix->height; i++)
+		for (int j = 0; j < matrix->width; j++)
+			*matrix_at(matrix, i, j) /= norm;
+	return 0;
+}
 
+void matrix_mulNumber(Matrixf *matrix, float koef)
+{
+	for (int i = 0; i < matrix->height; i++)
+		for (int j = 0; j < matrix->width; j++)
+			*matrix_at(matrix, i, j) *= koef;
+}
 
 /*
  float matrix_det1(Matrixf a)
