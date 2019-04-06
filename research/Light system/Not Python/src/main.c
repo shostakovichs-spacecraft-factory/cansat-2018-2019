@@ -3,7 +3,6 @@
 #include "matrix.h"
 
 #include "Light_direction_determinant.h"
-#include "madgwick.h"
 void test()
 {
 	LDR_init();

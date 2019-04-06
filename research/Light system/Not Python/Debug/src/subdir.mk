@@ -5,19 +5,16 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../src/Light_direction_determinant.c \
-../src/ahrs.c \
 ../src/main.c \
 ../src/matrix.c 
 
 OBJS += \
 ./src/Light_direction_determinant.o \
-./src/ahrs.o \
 ./src/main.o \
 ./src/matrix.o 
 
 C_DEPS += \
 ./src/Light_direction_determinant.d \
-./src/ahrs.d \
 ./src/main.d \
 ./src/matrix.d 
 
