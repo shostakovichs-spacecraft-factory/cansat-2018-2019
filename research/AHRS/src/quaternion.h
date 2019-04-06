@@ -37,5 +37,11 @@ int quatToMatrix(Matrixf *result, quaternion_t *quat);
 quaternion_t vecToQuat(vector_t *vec);
 int matrixToQuat(quaternion_t *result, Matrixf *m);
 
+quaternion_t quat_zero();
+quaternion_t quat_init(double w, double x, double y, double z);
+
+
+vector_t vec_init(double x, double y, double z);
+vector_t vec_zero();
 
 #endif /* MADGWICK_QUATERNION_H_ */

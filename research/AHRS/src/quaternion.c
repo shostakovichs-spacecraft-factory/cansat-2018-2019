@@ -166,3 +166,25 @@ int matrixToQuat(quaternion_t *result, Matrixf *m)
 	result->z = *matrix_at(m, 3, 0);
 	return 0;
 }
+
+quaternion_t quat_init(double w, double x, double y, double z)
+{
+	quaternion_t res = {w,x,y,z};
+	return res;
+}
+
+quaternion_t quat_zero()
+{
+	return quat_init(0,0,0,0);
+}
+
+vector_t vec_init(double x, double y, double z)
+{
+	vector_t res = {x,y,z};
+	return res;
+}
+
+vector_t vec_zero()
+{
+	return vec_init(0,0,0);
+}

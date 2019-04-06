@@ -10,41 +10,10 @@
 #include "matrix.h"
 #include "quaternion.h"
 
-static Matrixf ori_previous;
-static Matrixf ori_present;
 
-#define madgwick_VECTORS_COUNT 3
+static int madgwick_aproachVector(Matrixf* result, vector_t *real, vector_t *measured, quaternion_t *expected);
+static int madgwick_jacobianAproachVector(Matrixf*result, vector_t *real, quaternion_t *expected);
 
-struct madgwick_parametres_struct{
-	float koef_M;
-	float koef_B;
-
-	int is_LDR_used;
-	int is_MAG_used;
-	int is_ACCEL_used;
-
-	float gyro_data[3];
-	float accel_data[3];
-	float mag_data[3];
-	float ldr_data[3];
-} madgwick_parametres;
-
-int madgwick_aproachVector(Matrixf* result, vector_t *real, vector_t *measured, quaternion_t *expected);
-int madgwick_jacobianAproachVector(Matrixf*result, vector_t *real, quaternion_t *expected);
-
-void madgwick_init()
-{
-	ori_previous = matrix_create(4, 1);
-	ori_present = matrix_create(4, 1);
-}
-
-void madgwick_deinit()
-{
-	matrix_delete(&ori_previous);
-	matrix_delete(&ori_present);
-}
-
-typedef int (*_fun_template_)(Matrixf*, Matrixf*);
 /*
 int madgwick_getErrorOri(Matrixf *result, Matrixf *ori_expected, _fun_template_ *functions,
 		_fun_template_ *jacobians, float *portions, int size)
@@ -108,7 +77,7 @@ void madgwick_quatToMatrix4_4(Matrixf *matrix)
 	*matrix_at(matrix, 3, 2) = b;
 	*matrix_at(matrix, 3, 3) = a;
 }*/
-int madgwick_getGyroDerOri(quaternion_t *result, quaternion_t *previous, vector_t *gyro_data, float dt)
+int madgwick_getGyroDerOri(quaternion_t *result, vector_t *gyro_data, float dt, quaternion_t *previous)
 {
 	quaternion_t S = vecToQuat(gyro_data);
 
@@ -170,12 +139,12 @@ int madgwick_aproachVector(Matrixf *result, Matrixf *ori_expected, Matrixf *vec_
 	*matrix_at(result, 2, 0) = 2*dx*(q1*q3 + q2*q4) + 2*dy*(q3*q4 - q1*q2) + 2*dx*(0.5 - q2*q2 - q3*q3) - sz;
 	return 0;
 }*/
-int madgwick_calcGrad(Matrixf* result, Matrixf *func, Matrixf *jack)
+static int madgwick_calcGrad(Matrixf* result, Matrixf *func, Matrixf *jack)
 {
 	return matrix_multiplicate(jack, func, result);
 }
 
-int madgwick_getErrorOri(quaternion_t *result, vector_t real[], vector_t measured[], float portions[], int count, quaternion_t *previous)
+int madgwick_getErrorOri(quaternion_t *result, vector_t *real[], vector_t *measured[], float portions[], int count, quaternion_t *previous)
 {
 	Matrixf _result = matrix_create(4, 1);
 	matrix_make_zero(&_result);
@@ -186,8 +155,8 @@ int madgwick_getErrorOri(quaternion_t *result, vector_t real[], vector_t measure
 
 	for(int i = 0; i < count; i++)
 	{
-		madgwick_aproachVector(&F, &real[i],&measured[i],previous);
-		madgwick_jacobianAproachVector(&J, &real[i], previous);
+		madgwick_aproachVector(&F, real[i],measured[i],previous);
+		madgwick_jacobianAproachVector(&J, real[i], previous);
 
 		matrix_multiplicate(&J, &F, &temp);
 		matrix_mulNumber(&temp, portions[i]);
@@ -207,7 +176,7 @@ int madgwick_getErrorOri(quaternion_t *result, vector_t real[], vector_t measure
 	matrix_delete(&J);
 	return 0;
 }
-int madgwick_aproachVector(Matrixf* result, vector_t *real, vector_t *measured, quaternion_t *expected)
+static int madgwick_aproachVector(Matrixf* result, vector_t *real, vector_t *measured, quaternion_t *expected)
 {
 	float q1 = expected->w;
 	float q2 = expected->x;
@@ -227,7 +196,7 @@ int madgwick_aproachVector(Matrixf* result, vector_t *real, vector_t *measured, 
 	*matrix_at(result, 2, 0) = 2*dx*(q1*q3 + q2*q4) + 2*dy*(q3*q4 - q1*q2) + 2*dx*(0.5 - q2*q2 - q3*q3) - sz;
 	return 0;
 }
-int madgwick_jacobianAproachVector(Matrixf*result, vector_t *real, quaternion_t *expected)
+static int madgwick_jacobianAproachVector(Matrixf*result, vector_t *real, quaternion_t *expected)
 {
 	float q1 = expected->w;
 	float q2 = expected->x;
@@ -257,7 +226,7 @@ int madgwick_jacobianAproachVector(Matrixf*result, vector_t *real, quaternion_t 
 	return 0;
 }
 
-int madgwick_getEstimatedOri(quaternion_t *result, quaternion_t *gyroDerOri, quaternion_t *error, quaternion_t *previous, float dt, float koef_B)
+int madgwick_getEstimatedOri(quaternion_t *result, quaternion_t *gyroDerOri, quaternion_t *error, float dt, float koef_B, quaternion_t *previous)
 {
 	*result = quat_mulByNum(error, koef_B);
 	quat_add(result, gyroDerOri);
