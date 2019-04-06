@@ -32,6 +32,8 @@ void matrix_print(Matrixf *matrix);
 void matrix_setSize(Matrixf *matrix, int height, int width);
 
 int matrix_copy(Matrixf *source, Matrixf *destination, int isForced);
+
+int matrix_isThatSize(Matrixf *matrix, int height, int width);
 ///////
 
 ///////Unique matrices

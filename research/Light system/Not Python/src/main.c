@@ -3,7 +3,7 @@
 #include "matrix.h"
 
 #include "Light_direction_determinant.h"
-
+#include "madgwick.h"
 void test()
 {
 	LDR_init();
@@ -50,8 +50,16 @@ void swapi(int *a,int *b)
 
 int main()
 {
+	Matrixf a = matrix_create(4, 1);
+	*matrix_at(&a, 0, 0) = 1;
+	*matrix_at(&a, 1, 0) = 2;
+	*matrix_at(&a, 2, 0) = 3;
+	*matrix_at(&a, 3, 0) = 4;
 
-	test();
+	matrix_print(&a);
+	//AHRS_quatToMatrix4_4(&a);
+	matrix_print(&a);
 
+	matrix_delete(&a);
 	return 0;
 }

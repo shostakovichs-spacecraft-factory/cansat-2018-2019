@@ -337,6 +337,10 @@ void matrix_mulNumber(Matrixf *matrix, float koef)
 			*matrix_at(matrix, i, j) *= koef;
 }
 
+int matrix_isThatSize(Matrixf *matrix, int height, int width)
+{
+	return matrix->height == height && matrix->width == width;
+}
 /*
  float matrix_det1(Matrixf a)
  {
