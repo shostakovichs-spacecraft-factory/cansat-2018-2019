@@ -47,12 +47,14 @@ void quat_sub(quaternion_t *left, quaternion_t *right)
 }
 
 double quat_getNorm(quaternion_t * a) {
-	return sqrt( a->w * a->w + a->x * a->x + a->y * a->y + a->z * a->z);
+	double t = a->w * a->w + a->x * a->x + a->y * a->y + a->z * a->z;
+	t = sqrt(t);
+	return t;
 }
 
-quaternion_t quat_normalize(quaternion_t * a) {
+void quat_normalize(quaternion_t * a) {
 
-	return quat_mulByNum(a, 1 / quat_getNorm(a) );
+	*a = quat_mulByNum(a, 1 / quat_getNorm(a) );
 }
 
 quaternion_t quat_getConj(quaternion_t *a)
@@ -97,7 +99,7 @@ quaternion_t quat_mulByVec(quaternion_t * a, vector_t * b) {
 	return quat_mulByQuat(a, &vectQuat);
 }
 
-vector_t vect_rotate(vector_t * vect, quaternion_t * rotation) {
+vector_t vec_rotate(vector_t * vect, quaternion_t * rotation) {
 	quaternion_t rot_normal = *rotation;//quat_normalize(rotation);
 
 	quaternion_t tmp = quat_mulByVec(&rot_normal, vect);
@@ -188,3 +190,9 @@ vector_t vec_zero()
 {
 	return vec_init(0,0,0);
 }
+
+void quat_print(quaternion_t *a)
+{
+	printf("%2.3lf %2.3lf %2.3lf %2.3lf\n", a->w, a->x, a->y, a->z);
+}
+

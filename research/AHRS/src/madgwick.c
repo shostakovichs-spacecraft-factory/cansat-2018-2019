@@ -139,10 +139,11 @@ int madgwick_aproachVector(Matrixf *result, Matrixf *ori_expected, Matrixf *vec_
 	*matrix_at(result, 2, 0) = 2*dx*(q1*q3 + q2*q4) + 2*dy*(q3*q4 - q1*q2) + 2*dx*(0.5 - q2*q2 - q3*q3) - sz;
 	return 0;
 }*/
+/*
 static int madgwick_calcGrad(Matrixf* result, Matrixf *func, Matrixf *jack)
 {
 	return matrix_multiplicate(jack, func, result);
-}
+}*/
 
 int madgwick_getErrorOri(quaternion_t *result, vector_t *real[], vector_t *measured[], float portions[], int count, quaternion_t *previous)
 {
@@ -162,13 +163,13 @@ int madgwick_getErrorOri(quaternion_t *result, vector_t *real[], vector_t *measu
 		matrix_mulNumber(&temp, portions[i]);
 
 		matrix_add(&_result, &temp);
+		//matrix_print(&F);
+		//matrix_print(&J);
 	}
-	matrix_normalize(&_result);
+	float n = matrix_norm(&_result);
+	if(n != 0)
+		matrix_mulNumber(&_result, 1 / n);
 
-	for(int i = 0; i < _result.height; i++)
-	{
-		*matrix_at(&_result, i, 0) = -*matrix_at(&_result, i, 0);
-	}
 	matrixToQuat(result, &_result);
 
 	matrix_delete(&temp);
@@ -181,7 +182,7 @@ static int madgwick_aproachVector(Matrixf* result, vector_t *real, vector_t *mea
 	float q1 = expected->w;
 	float q2 = expected->x;
 	float q3 = expected->y;
-	float q4 = expected->w;
+	float q4 = expected->z;
 
 	float dx = real->x;
 	float dy = real->y;
@@ -193,7 +194,7 @@ static int madgwick_aproachVector(Matrixf* result, vector_t *real, vector_t *mea
 
 	*matrix_at(result, 0, 0) = 2*dx*(0.5 - q3*q3 - q4*q4) + 2*dy*(q1*q4 + q2*q3) + 2*dz*(q2*q4 - q1*q3) - sx;
 	*matrix_at(result, 1, 0) = 2*dx*(q2*q3 - q1*q4) + 2*dy*(0.5 - q2*q2 - q4*q4) + 2*dz*(q1*q2 + q3*q4) - sy;
-	*matrix_at(result, 2, 0) = 2*dx*(q1*q3 + q2*q4) + 2*dy*(q3*q4 - q1*q2) + 2*dx*(0.5 - q2*q2 - q3*q3) - sz;
+	*matrix_at(result, 2, 0) = 2*dx*(q1*q3 + q2*q4) + 2*dy*(q3*q4 - q1*q2) + 2*dz*(0.5 - q2*q2 - q3*q3) - sz;
 	return 0;
 }
 static int madgwick_jacobianAproachVector(Matrixf*result, vector_t *real, quaternion_t *expected)
@@ -201,7 +202,7 @@ static int madgwick_jacobianAproachVector(Matrixf*result, vector_t *real, quater
 	float q1 = expected->w;
 	float q2 = expected->x;
 	float q3 = expected->y;
-	float q4 = expected->w;
+	float q4 = expected->z;
 
 	float dx = real->x;
 	float dy = real->y;
@@ -216,21 +217,21 @@ static int madgwick_jacobianAproachVector(Matrixf*result, vector_t *real, quater
 	*matrix_at(result, 1, 1) = 2 * (dx * q3 - 2 * dy * q2 + dz * q1);
 	*matrix_at(result, 1, 2) = 2 * (dx * q4 - 2 * dz * q2 - dy * q1);
 
-	*matrix_at(result, 2, 0) = 2 * (dy * q2 - 2 * dx * q3 + dz * q1);
-	*matrix_at(result, 2, 1) = 2 * (dy * q3 + dz * q4);
-	*matrix_at(result, 2, 2) = 2 * (dx * q4 - 2 * dz * q2 - dy * q1);
+	*matrix_at(result, 2, 0) = 2 * (dy * q2 - 2 * dx * q3 - dz * q1);
+	*matrix_at(result, 2, 1) = 2 * (dx * q2 + dz * q4);
+	*matrix_at(result, 2, 2) = 2 * (dx * q1 - 2 * dz * q3 - dy * q4);
 
-	*matrix_at(result, 3, 0) = 2 * (dx * q3 - 2 * dy * q2 + dz * q1);
-	*matrix_at(result, 3, 1) = 2 * (dx * q4 - 2 * dz * q2 - dy * q1);
-	*matrix_at(result, 3, 2) = 2 * (dy * q3 + dz * q4);
+	*matrix_at(result, 3, 0) = 2 * (dy * q1 - 2 * dx * q4 + dz * q2);
+	*matrix_at(result, 3, 1) = 2 * (dz * q3 - 2 * dy * q4 - dx * q1);
+	*matrix_at(result, 3, 2) = 2 * (dx * q2 + dy * q3);
 	return 0;
 }
 
 int madgwick_getEstimatedOri(quaternion_t *result, quaternion_t *gyroDerOri, quaternion_t *error, float dt, float koef_B, quaternion_t *previous)
 {
-	*result = quat_mulByNum(error, koef_B);
+	*result = quat_mulByNum(error, -koef_B);
 	quat_add(result, gyroDerOri);
-	quat_mulByNum(result, dt);
+	*result = quat_mulByNum(result, dt);
 	quat_add(result, previous);
 	return 0;
 }

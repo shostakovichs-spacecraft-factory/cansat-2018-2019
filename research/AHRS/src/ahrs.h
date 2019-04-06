@@ -24,8 +24,9 @@ void ahrs_vectorActivate(enum Vector_type vec, int isUsed);
 void ahrs_updateVecMeasured(enum Vector_type vec, vector_t vector);
 void ahrs_updateVecReal(enum Vector_type vec, vector_t vector);
 void ahrs_updateVecPortion(enum Vector_type vec, float portion);
+void ahrs_updateGyroData(vector_t gyro_data);
 
-quaternion_t getOrientation();
+quaternion_t ahrs_getOrientation();
 
 int ahrs_calculateOrientation(float dt);
 
