@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.2.2">
+<eagle version="9.3.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -1950,6 +1950,9 @@ USE AT YOUR OWN RISK!&lt;p&gt;
 <wire x1="-27.94" y1="-96.52" x2="-5.08" y2="-96.52" width="0.1524" layer="91"/>
 <pinref part="GND14" gate="1" pin="GND"/>
 <wire x1="-5.08" y1="-96.52" x2="-5.08" y2="-104.14" width="0.1524" layer="91"/>
+<pinref part="P2" gate="G$1" pin="5"/>
+<wire x1="20.32" y1="-96.52" x2="-5.08" y2="-96.52" width="0.1524" layer="91"/>
+<junction x="-5.08" y="-96.52"/>
 </segment>
 </net>
 <net name="KEY_PLUS" class="0">

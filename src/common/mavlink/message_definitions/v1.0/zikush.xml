@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<mavlink>
+        <include>common.xml</include>
+        <!-- NOTE: If the included file already contains a version tag, remove the version tag here, else uncomment to enable. -->
+    <!--<version>3</version>-->
+    <enums>
+    	<enum name="ZIKUSH_CONTROLLER">
+			<description>Enumeration of onboard controllers (used for compid)</description>
+			<entry value="0" name="ZIKUSH_ICU">
+				<description>Interface control unit</description>
+			</entry>
+			<entry value="1" name="ZIKUSH_PCU">
+	        	<description>Power control unit</description>
+			</entry>
+			<entry value="2" name="ZIKUSH_SCU">
+				<description>Sensors control unit</description>
+			</entry>
+			<entry value="3" name="ZIKUSH_CCU">
+	        	<description>Camera control unit</description>
+			</entry>
+    	</enum>
+
+    	<enum name="ZIKUSH_STATUSFLAGS">
+			<description>Enumeration on status and error flags. Should be used as bitfield number.</description>
+			<entry value="0" name="ZIKUSH_STATUSFLAGS_INIT_OK">
+				<description></description>
+			</entry>
+			<entry value="1" name="ZIKUSH_STATUSFLAGS_LIFTOFF">
+				<description></description>
+			</entry>
+			<entry value="2" name="ZIKUSH_STATUSFLAGS_EXECUTING_MISSION">
+				<description></description>
+			</entry>
+			<entry value="3" name="ZIKUSH_STATUSFLAGS_FALLING">
+				<description></description>
+			</entry>
+			<entry value="4" name="ZIKUSH_STATUSFLAGS_LANDED">
+				<description></description>
+			</entry>
+			<!--and so on-->
+    	</enum>
+	</enums>
+
+    <messages>
+		<message id="150" name="ZIKUSH_CMD_POWER">
+			<description>Set the state of the power bus</description>
+			<field type="uint8_t" name="bus">Index of CU assotiated with bus</field>
+			<field type="int8_t" name="state">Should the power be provided</field>
+		</message>
+
+		<message id="151" name="ZIKUSH_POWER_STATE">
+			<description>Current state of the power buses</description>
+			<field type="int8_t" name="buses_state">Indicates power buses state (bitfield)</field>
+			<field type="float" name="icu_current">Measured current on ICU bus</field>
+			<field type="float" name="scu_current">Measured current on SCU bus</field>
+			<field type="float" name="ccu_current">Measured current on CCU bus</field>
+			<field type="float" name="bat_drained">Amount of current drained from battery after reset</field>
+		</message>
+
+		<message id="152" name="ZIKUSH_SUNSENSOR">
+			<description></description>
+			<field type="uint32_t" name="time_boot_ms">Timestamp (time since system boot)</field>
+			<field type="int16_t" name="x">X component of the unit vector</field>
+			<field type="int16_t" name="y">X component of the unit vector</field>
+			<field type="int16_t" name="z">X component of the unit vector</field>
+		</message>
+    </messages>
+</mavlink>

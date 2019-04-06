@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<mavlink>
+        <include>common.xml</include>
+        <!-- NOTE: If the included file already contains a version tag, remove the version tag here, else uncomment to enable. -->
+    <!--<version>3</version>-->
+    <enums>
+    </enums>
+    <messages>
+        <message id="150" name="TEST_MESSAGE">
+            <description>This is a test custom message</description>
+            <field type="uint16_t" name="field1">Custom test field 1</field>
+            <field type="uint8_t" name="field2">Custom test field 2</field>
+            <field type="uint8_t" name="field3">Custom test field 3</field>
+            <field type="uint32_t" name="field4">Custom test field 4</field>
+        </message>
+
+        <message id="151" name="SONAR">
+            <description>Data from GY-US42 sensor</description>
+            <field type="uint64_t" name="time_boot_ms" units="ms">Timestamp (milliseconds since system boot)</field>
+            <field type="uint16_t" name="distance" units="hz">Measured distance (hz)</field>
+        </message>
+        
+        <message id="152" name="PICTURE_HEADER">
+            <description>Picture of spectrum</description>
+            <field type="uint64_t" name="time_boot_ms" units="ms">Timestamp (milliseconds since system boot)</field>
+            <field type="uint16_t" name="servo">Servo position in degrees</field>
+            <field type="uint16_t" name="y_upleft_crop">Y-coordinate from which we crop the picture for transfer</field>
+            <field type="uint32_t" name="size" units="bytes">total data size in bytes (set on ACK only)</field>
+            <field type="uint16_t" name="packets">number of packets beeing sent (set on ACK only)</field>
+            <field type="uint8_t" name="payload" units="bytes">payload size per packet (normally 253 byte, see DATA field size in message ENCAPSULATED_DATA) (set on ACK only)</field>
+        </message>
+        
+        <message id="153" name="INTENSITY_HEADER">
+            <description>Array of spectrum intensity</description>
+            <field type="uint64_t" name="time_boot_ms" units="ms">Timestamp (milliseconds since system boot)</field>
+            <field type="uint16_t" name="servo">Servo position in degrees</field>
+            <field type="uint16_t" name="y_upleft_crop">Y-coordinate from which we crop the picture for transfer</field> 
+            <field type="uint32_t" name="size" units="bytes">total data size in bytes (set on ACK only)</field>
+            <field type="uint16_t" name="packets">number of packets beeing sent (set on ACK only)</field>
+            <field type="uint8_t" name="payload" units="bytes">payload size per packet (normally 253 byte, see DATA field size in message ENCAPSULATED_DATA) (set on ACK only)</field>
+        </message>
+        
+        <message id="154" name="INTENSITY_ENCAPSULATED_DATA">
+            <description>DUMMY DESCR FOR PROPER GEN</description>
+            <field type="uint16_t" name="seqnr">sequence number (starting with 0 on every transmission)</field>
+            <field type="uint16_t[126]" name="data">intensities</field>
+        </message>
+        
+        <message id="155" name="AM2320">
+            <description>DUMMY DESCR FOR PROPER GEN</description>
+            <field type="uint64_t" name="time_boot_ms" units="ms">Timestamp (milliseconds since system boot)</field>
+            <field type="int16_t" name="temperature" units="C">Measured temperature</field>
+            <field type="uint16_t" name="humidity" units="%">Measured humidity</field>
+        </message>
+
+        <message id="156" name="LUMINOSITY">
+            <description>DUMMY DESCR FOR PROPER GEN</description>
+            <field type="uint64_t" name="time_boot_ms" units="ms">Timestamp (milliseconds since system boot)</field>
+            <field type="uint16_t" name="luminosity" units="lux">Measured luminosity</field>
+        </message>
+
+        <message id="157" name="GRANUM_MESSAGE">
+            <description>DUMMY DESCR FOR PROPER GEN</description>
+            <field type="uint64_t" name="time_boot_ms" units="ms">Timestamp (milliseconds since system boot)</field>
+            <field type="int8_t[251]" name="message">Message text </field>
+        </message>
+
+        <message id="158" name="GRANUM_STATUS">
+            <description>DUMMY DESCR FOR PROPER GEN</description>
+            <field type="uint64_t" name="time_boot_ms" units="ms">Timestamp (milliseconds since system boot)</field>
+            <field type="uint8_t" name="state">Current state</field>
+        </message>
+        
+    </messages>
+</mavlink>

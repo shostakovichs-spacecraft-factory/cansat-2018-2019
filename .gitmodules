@@ -1,0 +1,3 @@
+[submodule "src/common/mavlink/pymavlink"]
+	path = src/common/mavlink/pymavlink
+	url = https://github.com/cansat-rsce/pymavlink.git
