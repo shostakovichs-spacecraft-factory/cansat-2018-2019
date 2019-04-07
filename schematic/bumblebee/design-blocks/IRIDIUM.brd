@@ -732,110 +732,42 @@ design rules under a new name.</description>
 <via x="37.43" y="48.78" extent="1-16" drill="0.5"/>
 <via x="37.43" y="55.78" extent="1-16" drill="0.5"/>
 </signal>
-<signal name="NETWORK_AVAILABLE">
-<contactref element="USER_PORT" pad="19"/>
-<wire x1="34.043" y1="34.065" x2="29.758" y2="29.78" width="0.2" layer="1"/>
-<wire x1="29.758" y1="29.78" x2="27.43" y2="29.78" width="0.2" layer="1"/>
-</signal>
-<signal name="SUPPLY_OUT">
-<contactref element="USER_PORT" pad="20"/>
-<wire x1="30.817" y1="34.065" x2="27.962" y2="31.21" width="0.254" layer="1"/>
-<wire x1="27.962" y1="31.21" x2="25.43" y2="31.21" width="0.254" layer="1"/>
-</signal>
 <signal name="RESERVED_1">
 <contactref element="USER_PORT" pad="16"/>
-</signal>
-<signal name="DF_DTR">
-<contactref element="USER_PORT" pad="14"/>
-<wire x1="30.817" y1="37.875" x2="29.525" y2="37.875" width="0.254" layer="1"/>
-<wire x1="29.525" y1="37.875" x2="25.4" y2="33.75" width="0.254" layer="1"/>
-</signal>
-<signal name="DF_RI">
-<contactref element="USER_PORT" pad="12"/>
-<wire x1="30.817" y1="39.145" x2="28.255" y2="39.145" width="0.254" layer="1"/>
-<wire x1="28.255" y1="39.145" x2="25.4" y2="36.29" width="0.254" layer="1"/>
-</signal>
-<signal name="DF_DSR">
-<contactref element="USER_PORT" pad="10"/>
-<wire x1="30.817" y1="40.415" x2="26.985" y2="40.415" width="0.254" layer="1"/>
-</signal>
-<signal name="DF_S_TX">
-<contactref element="USER_PORT" pad="6"/>
-<wire x1="30.817" y1="42.955" x2="26.985" y2="42.955" width="0.254" layer="1"/>
 </signal>
 <signal name="RESERVED_2\">
 <contactref element="USER_PORT" pad="17"/>
 </signal>
-<signal name="DF_RTS">
+<signal name="S$5">
 <contactref element="USER_PORT" pad="13"/>
-<wire x1="34.43415625" y1="37.852" x2="35.155" y2="37.13115625" width="0.254" layer="1"/>
 <wire x1="34.043" y1="37.875" x2="34.066" y2="37.852" width="0.254" layer="1"/>
 <wire x1="34.066" y1="37.852" x2="34.43415625" y2="37.852" width="0.254" layer="1"/>
-<wire x1="35.155" y1="37.13115625" x2="35.155" y2="33.23884375" width="0.254" layer="1"/>
-<wire x1="35.155" y1="33.23884375" x2="34.463078125" y2="32.546921875" width="0.254" layer="1"/>
-<wire x1="34.463078125" y1="32.546921875" x2="33.532921875" y2="32.546921875" width="0.254" layer="1"/>
-<wire x1="33.532921875" y1="32.546921875" x2="28.013" y2="27.027" width="0.254" layer="1"/>
-<wire x1="22.89220625" y1="27.027" x2="28.013" y2="27.027" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="DF_CTS">
+<signal name="S$4">
 <contactref element="USER_PORT" pad="11"/>
-<wire x1="28.22176875" y1="26.523" x2="22.6834375" y2="26.523" width="0.254" layer="1"/>
-<wire x1="35.659" y1="33.030075" x2="34.6194625" y2="31.9905375" width="0.254" layer="1"/>
 <wire x1="34.043" y1="39.145" x2="34.066" y2="39.122" width="0.254" layer="1"/>
 <wire x1="34.066" y1="39.122" x2="34.43415625" y2="39.122" width="0.254" layer="1"/>
-<wire x1="34.43415625" y1="39.122" x2="35.659" y2="37.89715625" width="0.254" layer="1"/>
-<wire x1="35.659" y1="37.89715625" x2="35.659" y2="33.030075" width="0.254" layer="1"/>
-<wire x1="34.6194625" y1="31.9905375" x2="33.68930625" y2="31.9905375" width="0.254" layer="1"/>
-<wire x1="33.68930625" y1="31.9905375" x2="28.22176875" y2="26.523" width="0.254" layer="1"/>
 </signal>
-<signal name="DF_DCD">
+<signal name="S$3">
 <contactref element="USER_PORT" pad="9"/>
-<wire x1="36.163" y1="32.72130625" x2="34.925846875" y2="31.484153125" width="0.254" layer="1"/>
-<wire x1="34.166" y1="40.492" x2="34.089" y2="40.415" width="0.254" layer="1"/>
 <wire x1="34.043" y1="40.415" x2="34.089" y2="40.415" width="0.254" layer="1"/>
+<wire x1="34.166" y1="40.492" x2="34.089" y2="40.415" width="0.254" layer="1"/>
 <wire x1="34.166" y1="40.492" x2="34.33415625" y2="40.492" width="0.254" layer="1"/>
-<wire x1="34.33415625" y1="40.492" x2="36.163" y2="38.66315625" width="0.254" layer="1"/>
-<wire x1="36.163" y1="38.66315625" x2="36.163" y2="32.72130625" width="0.254" layer="1"/>
-<wire x1="34.925846875" y1="31.484153125" x2="33.895690625" y2="31.484153125" width="0.254" layer="1"/>
-<wire x1="33.895690625" y1="31.484153125" x2="28.4305375" y2="26.019" width="0.254" layer="1"/>
-<wire x1="28.4305375" y1="26.019" x2="22.47466875" y2="26.019" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="DF_S_RX">
+<signal name="S$1">
 <contactref element="USER_PORT" pad="7"/>
-<wire x1="33.5110375" y1="21.853" x2="29.4489625" y2="21.853" width="0.254" layer="1"/>
 <wire x1="34.043" y1="41.685" x2="34.066" y2="41.662" width="0.254" layer="1"/>
 <wire x1="34.066" y1="41.662" x2="34.43415625" y2="41.662" width="0.254" layer="1"/>
-<wire x1="34.43415625" y1="41.662" x2="36.667" y2="39.42915625" width="0.254" layer="1"/>
-<wire x1="36.667" y1="39.42915625" x2="36.667" y2="25.0089625" width="0.254" layer="1"/>
-<wire x1="36.667" y1="25.0089625" x2="33.5110375" y2="21.853" width="0.254" layer="1"/>
-<wire x1="22.2659" y1="25.515" x2="29.4489625" y2="21.853" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="ON_OFF">
+<signal name="S$2">
 <contactref element="USER_PORT" pad="5"/>
-<wire x1="37.171" y1="24.70019375" x2="33.81980625" y2="21.349" width="0.254" layer="1"/>
-<wire x1="33.81980625" y1="21.349" x2="29.24019375" y2="21.349" width="0.254" layer="1"/>
-<wire x1="29.24019375" y1="21.349" x2="25.57819375" y2="25.011" width="0.254" layer="1"/>
-<wire x1="34.33415625" y1="43.032" x2="34.12" y2="43.032" width="0.254" layer="1"/>
 <wire x1="34.043" y1="42.955" x2="34.12" y2="43.032" width="0.254" layer="1"/>
-<wire x1="34.33415625" y1="43.032" x2="37.171" y2="40.19515625" width="0.254" layer="1"/>
-<wire x1="37.171" y1="40.19515625" x2="37.171" y2="24.70019375" width="0.254" layer="1"/>
-</signal>
-<signal name="N$21" class="2">
-<contactref element="ANT" pad="1"/>
-<wire x1="32.43" y1="54.78" x2="30.43" y2="54.78" width="0.5" layer="1"/>
-<wire x1="30.43" y1="54.78" x2="23.43" y2="61.78" width="0.5" layer="1" curve="-90"/>
-</signal>
-<signal name="N$22" class="2">
-<contactref element="GPS" pad="1"/>
-<wire x1="16.43" y1="61.78" x2="28.43" y2="49.78" width="0.5" layer="1" curve="90"/>
-<wire x1="28.43" y1="49.78" x2="32.43" y2="49.78" width="0.5" layer="1"/>
+<wire x1="34.33415625" y1="43.032" x2="34.12" y2="43.032" width="0.254" layer="1"/>
 </signal>
 <signal name="VCC5" class="1">
 <contactref element="USER_PORT" pad="2"/>
 <contactref element="USER_PORT" pad="1"/>
 <wire x1="34.043" y1="45.495" x2="30.817" y2="45.495" width="0.5" layer="1"/>
-<wire x1="25.4" y1="46.45" x2="30.817" y2="46.45" width="0.5" layer="1"/>
-<wire x1="30.817" y1="46.45" x2="30.817" y2="45.495" width="0.5" layer="1"/>
 </signal>
 </signals>
 <mfgpreviewcolors>
