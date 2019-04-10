@@ -15,9 +15,16 @@
 
 typedef struct
 {
+	uint8_t * mem;
+	int length, head, tail;
+} sx1268_fifo_t;
+
+typedef struct
+{
 	SPI_HandleTypeDef * bus;
 	GPIO_TypeDef * cs_port;
 	uint16_t cs_pin;
+	sx1268_fifo_t fifo_rx, fifo_tx;
 } sx1268_t;
 
 typedef enum

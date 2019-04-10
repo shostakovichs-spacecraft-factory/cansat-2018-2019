@@ -221,12 +221,132 @@ static inline sx1268_status_t _cmd_SetDIO3AsTCXOCtrl(sx1268_t * self, uint8_t tx
 	return _cmd(self, 0x97, buff, 4);
 }
 
+#define RFFREQ_CALC(FREQ)	(FREQ * 32000000 / 2 ^ 25)
+
 static inline sx1268_status_t _cmd_SetRfFrequency(sx1268_t * self, uint32_t RfFreq)
 {
 	uint8_t buff[4];
-	buff[0] = (timeout >> 16) & 0xFF;
-	buff[1] = (timeout >> 16) & 0xFF;
-	buff[2] = (timeout >> 8) & 0xFF;
-	buff[3] = timeout & 0xFF;
+	buff[0] = (RfFreq >> 24) & 0xFF;
+	buff[1] = (RfFreq >> 16) & 0xFF;
+	buff[2] = (RfFreq >> 8) & 0xFF;
+	buff[3] = RfFreq & 0xFF;
 	return _cmd(self, 0x97, buff, 4);
+}
+
+static inline sx1268_status_t _cmd_SetPacketType(sx1268_t * self, bool LoRa)
+{
+	return _cmd(self, 0x8A, &LoRa, 1);
+}
+
+static inline sx1268_status_t _cmd_GetPacketType(sx1268_t * self, bool * LoRa)
+{
+	uint8_t buff[2];
+	return _cmd(self, 0x11, buff, 2);
+	LoRa = buff[1];
+}
+
+#define RAMPTIME_10U 	0x00
+#define RAMPTIME_20U 	0x01
+#define RAMPTIME_40U 	0x02
+#define RAMPTIME_80U 	0x03
+#define RAMPTIME_200U 	0x04
+#define RAMPTIME_800U 	0x05
+#define RAMPTIME_1700U 	0x06
+#define RAMPTIME_3400U 	0x07
+
+#define POWER_LOW_LOWEST	0xEF
+#define POWER_LOW_HIGHEST	0x0E
+#define POWER_HIGH_LOWEST	0xF7
+#define POWER_HIGH_HIGHEST	0x16
+
+static inline sx1268_status_t _cmd_SetTxParams(sx1268_t * self, uint8_t power, uint8_t RampTime)
+{
+	uint8_t buff[2];
+	buff[0] = power;
+	buff[1] = RampTime;
+	return _cmd(self, 0x8E, buff, 2);
+}
+
+// Mod_Params - array of 8 uint8_t representing modulation params (see 13.4.5 section of datasheet)
+static inline sx1268_status_t _cmd_SetModulationParams(sx1268_t * self, uint8_t * Mod_Params)
+{
+
+	return _cmd(self, 0x8B, Mod_Params, 8);
+}
+
+// Mod_Params - array of 8 uint8_t representing packet handling params (see 13.4.6 section of datasheet)
+static inline sx1268_status_t _cmd_SetPacketParams(sx1268_t * self, uint8_t * Packet_Params)
+{
+
+	return _cmd(self, 0x8C, Packet_Params, 9);
+}
+
+static inline sx1268_status_t _cmd_SetBufferBaseAddress(sx1268_t * self, uint8_t rxbuff, uint8_t txbuff)
+{
+	uint8_t buff[2] = {rxbuff, txbuff};
+	return _cmd(self, 0x8F, buff, 2);
+}
+
+#define STATUS_CHIPMODE(STATUS)	(STATUS>>4)&0x07
+#define STATUS_COMMAND(STATUS)	(STATUS>>1)&0x07
+
+#define STATUS_CHIPMODE_STBY_RC		0x02
+#define STATUS_CHIPMODE_STBY_XOSC	0x03
+#define STATUS_CHIPMODE_FS			0x04
+#define STATUS_CHIPMODE_RX			0x05
+#define STATUS_CHIPMODE_TX			0x06
+
+#define STATUS_COMMAND_AVAIL		0x02
+#define STATUS_COMMAND_TIMEOUT		0x03
+#define STATUS_COMMAND_ERROR		0x04
+#define STATUS_COMMAND_FAIL			0x05
+#define STATUS_COMMAND_DONE			0x06
+
+static inline sx1268_status_t _cmd_GetStatus(sx1268_t * self, uint8_t * status)
+{
+	return _cmd(self, 0xC0, status, 1);
+}
+
+void sx1268_struct_init(sx1268_t * self, uint8_t * rxbuff, int rxbufflen, uint8_t * txbuff, int txbufflen){
+	self->fifo_rx.mem = rxbuff;
+	self->fifo_rx.length = rxbufflen;
+	self->fifo_rx.head = 0;
+	self->fifo_rx.tail = 0;
+
+	self->fifo_tx.mem = txbuff;
+	self->fifo_tx.length = txbufflen;
+	self->fifo_tx.head = 0;
+	self->fifo_tx.tail = 0;
+}
+
+sx1268_status_t sx1268_init(sx1268_t * self)
+{
+	uint8_t status;
+	_cmd_GetStatus(self, &status);
+
+	if(STATUS_CHIPMODE(status) != STATUS_CHIPMODE_STBY_RC)
+		_cmd_SetStandby(self, false);
+
+	_cmd_SetPacketType(self, true);
+	_cmd_SetRfFrequency(self, RFFREQ_CALC(432000000));
+	_cmd_SetTxParams(self, POWER_LOW_HIGHEST, RAMPTIME_200U);
+	_cmd_SetBufferBaseAddress(self, 0, 0);
+	//_cmd_SetModulationParams(self, ///) TODO
+
+	/*configure irq, maybe through calling msp function, which should be defined by user*/
+}
+
+sx1268_status_t sx1268_send(sx1268_t * self, uint8_t * data, int len)
+{
+	//TODO
+}
+
+sx1268_status_t sx1268_receive(sx1268_t * self, uint8_t * data, int len)
+{
+	//TODO
+}
+
+sx1268_status_t sx1268_event(sx1268_t * self)
+{
+	//TODO
 }
