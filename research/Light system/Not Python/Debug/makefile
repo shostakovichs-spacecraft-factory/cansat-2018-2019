@@ -23,19 +23,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: Light\ direction\ determiner\ test
+all: Light\ direction\ determinant
 
 # Tool invocations
-Light\ direction\ determiner\ test: $(OBJS) $(USER_OBJS)
+Light\ direction\ determinant: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc  -o "Light direction determiner test" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc  -o "Light direction determinant" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) "Light direction determiner test"
+	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) "Light direction determinant"
 	-@echo ' '
 
 .PHONY: all clean dependents
