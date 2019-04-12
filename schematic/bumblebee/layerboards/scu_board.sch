@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.2.2">
+<eagle version="9.3.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -192,6 +192,22 @@
 <text x="-3.81" y="15.24" size="1.27" layer="25">&gt;NAME</text>
 <text x="-3.81" y="-16.51" size="1.27" layer="27">&gt;VALUE</text>
 </package>
+<package name="CAN">
+<text x="-7.25" y="9.74" size="1.27" layer="25">&gt;NAME</text>
+<text x="-7.01" y="-10.62" size="1.27" layer="27">&gt;VALUE</text>
+<hole x="5.25" y="6" drill="3"/>
+<hole x="5.25" y="-6" drill="3"/>
+<pad name="CTX" x="-5.75" y="1.27" drill="0.8" shape="square"/>
+<pad name="CRX" x="-5.75" y="-1.27" drill="0.8" shape="square"/>
+<pad name="CANH" x="-5.75" y="-3.81" drill="0.8" shape="square"/>
+<pad name="CANL" x="-5.75" y="-6.35" drill="0.8" shape="square"/>
+<pad name="GND" x="-5.75" y="3.81" drill="0.8" shape="square"/>
+<pad name="3V3" x="-5.75" y="6.35" drill="0.8" shape="square"/>
+<wire x1="-7.25" y1="8" x2="7.25" y2="8" width="0.127" layer="21"/>
+<wire x1="7.25" y1="8" x2="7.25" y2="-8" width="0.127" layer="21"/>
+<wire x1="7.25" y1="-8" x2="-7.25" y2="-8" width="0.127" layer="21"/>
+<wire x1="-7.25" y1="-8" x2="-7.25" y2="8" width="0.127" layer="21"/>
+</package>
 </packages>
 <symbols>
 <symbol name="SCU">
@@ -336,6 +352,24 @@
 <wire x1="-10.16" y1="-25.4" x2="-10.16" y2="25.4" width="0.254" layer="94"/>
 <text x="-7.62" y="27.94" size="1.27" layer="95">&gt;NAME</text>
 <text x="-7.62" y="-30.48" size="1.27" layer="96">&gt;VALUE</text>
+</symbol>
+<symbol name="CAN">
+<wire x1="15.24" y1="12.7" x2="15.24" y2="-12.7" width="0.254" layer="94"/>
+<wire x1="-15.24" y1="-12.7" x2="-15.24" y2="12.7" width="0.254" layer="94"/>
+<pin name="CTX" x="-20.32" y="2.54" length="middle"/>
+<pin name="GND" x="-20.32" y="7.62" length="middle"/>
+<pin name="3V3" x="-20.32" y="12.7" length="middle"/>
+<pin name="CRX" x="-20.32" y="-2.54" length="middle"/>
+<pin name="CANH" x="-20.32" y="-7.62" length="middle"/>
+<pin name="CANL" x="-20.32" y="-12.7" length="middle"/>
+<wire x1="-15.24" y1="12.7" x2="-15.24" y2="15.24" width="0.254" layer="94"/>
+<wire x1="-15.24" y1="15.24" x2="15.24" y2="15.24" width="0.254" layer="94"/>
+<wire x1="15.24" y1="15.24" x2="15.24" y2="12.7" width="0.254" layer="94"/>
+<wire x1="15.24" y1="-12.7" x2="15.24" y2="-15.24" width="0.254" layer="94"/>
+<wire x1="15.24" y1="-15.24" x2="-15.24" y2="-15.24" width="0.254" layer="94"/>
+<wire x1="-15.24" y1="-15.24" x2="-15.24" y2="-12.7" width="0.254" layer="94"/>
+<text x="-15.24" y="20.32" size="1.778" layer="95">&gt;NAME</text>
+<text x="-15.24" y="-22.86" size="1.778" layer="96">&gt;VALUE</text>
 </symbol>
 </symbols>
 <devicesets>
@@ -489,6 +523,26 @@
 <connect gate="G$1" pin="SCL" pad="SCL"/>
 <connect gate="G$1" pin="SDA" pad="SDA"/>
 <connect gate="G$1" pin="V" pad="V"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="CAN">
+<gates>
+<gate name="G$1" symbol="CAN" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="CAN">
+<connects>
+<connect gate="G$1" pin="3V3" pad="3V3"/>
+<connect gate="G$1" pin="CANH" pad="CANH"/>
+<connect gate="G$1" pin="CANL" pad="CANL"/>
+<connect gate="G$1" pin="CRX" pad="CRX"/>
+<connect gate="G$1" pin="CTX" pad="CTX"/>
+<connect gate="G$1" pin="GND" pad="GND"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -868,119 +922,6 @@ USE AT YOUR OWN RISK!&lt;p&gt;
 </deviceset>
 </devicesets>
 </library>
-<library name="MCP2551">
-<packages>
-<package name="SOIC-8">
-<smd name="TXD" x="-2.54" y="1.905" dx="1.27" dy="0.635" layer="1" rot="R180"/>
-<smd name="VSS" x="-2.54" y="0.635" dx="1.27" dy="0.635" layer="1" rot="R180"/>
-<smd name="VDD" x="-2.54" y="-0.635" dx="1.27" dy="0.635" layer="1" rot="R180"/>
-<smd name="RXD" x="-2.54" y="-1.905" dx="1.27" dy="0.635" layer="1" rot="R180"/>
-<smd name="VREF" x="2.54" y="-1.905" dx="1.27" dy="0.635" layer="1"/>
-<smd name="CANL" x="2.54" y="-0.635" dx="1.27" dy="0.635" layer="1"/>
-<smd name="CANH" x="2.54" y="0.635" dx="1.27" dy="0.635" layer="1"/>
-<smd name="RS" x="2.54" y="1.905" dx="1.27" dy="0.635" layer="1"/>
-<wire x1="1.905" y1="2.54" x2="-1.905" y2="2.54" width="0.127" layer="21"/>
-<wire x1="-1.905" y1="2.54" x2="-1.905" y2="-2.54" width="0.127" layer="21"/>
-<wire x1="-1.905" y1="-2.54" x2="1.905" y2="-2.54" width="0.127" layer="21"/>
-<wire x1="1.905" y1="-2.54" x2="1.905" y2="2.54" width="0.127" layer="21"/>
-<text x="-2.54" y="3.175" size="1.016" layer="25">MCP2551</text>
-<circle x="-1.27" y="1.905" radius="0.127" width="0.127" layer="21"/>
-</package>
-</packages>
-<symbols>
-<symbol name="MCP2551">
-<description>The MCP2551 is a high-speed CAN, fault-tolerant device that serves as the interface between a CAN 
-protocol controller and the physical bus. The MCP2551 provides differential transmit and receive capability 
-for the CAN protocol controller and is fully compatible with the ISO-11898 standard, including 24V requirements.  It will operate at speeds of up to 1 Mb/s. Typically, each node in a CAN system must have a device to convert the digital signals generated by a CAN controller to signals suitable for transmission over the bus cabling (differential output). It also provides a buffer between the CAN controller and the high-voltage spikes that can be generated on the CAN bus by outside sources (EMI, ESD, electrical transients, etc.).</description>
-<pin name="TXD" x="-15.24" y="2.54" visible="pin" length="middle"/>
-<pin name="VSS" x="-15.24" y="0" visible="pin" length="middle"/>
-<pin name="VDD" x="-15.24" y="-2.54" visible="pin" length="middle"/>
-<pin name="RXD" x="-15.24" y="-5.08" visible="pin" length="middle"/>
-<pin name="VREF" x="17.78" y="-5.08" visible="pin" length="middle" rot="R180"/>
-<pin name="CANL" x="17.78" y="-2.54" visible="pin" length="middle" rot="R180"/>
-<pin name="CANH" x="17.78" y="0" visible="pin" length="middle" rot="R180"/>
-<pin name="RS" x="17.78" y="2.54" visible="pin" length="middle" rot="R180"/>
-<circle x="-7.62" y="5.08" radius="0.508" width="0.127" layer="94"/>
-<wire x1="-10.16" y1="7.62" x2="-10.16" y2="-10.16" width="0.254" layer="94"/>
-<wire x1="-10.16" y1="-10.16" x2="12.7" y2="-10.16" width="0.254" layer="94"/>
-<wire x1="12.7" y1="-10.16" x2="12.7" y2="7.62" width="0.254" layer="94"/>
-<wire x1="-10.16" y1="7.62" x2="12.7" y2="7.62" width="0.254" layer="94"/>
-<text x="-5.08" y="-12.7" size="1.778" layer="95">MCP2551</text>
-</symbol>
-</symbols>
-<devicesets>
-<deviceset name="MCP2551">
-<description>The MCP2551 is a high-speed CAN, fault-tolerant device that serves as the interface 
-between a CAN protocol controller and the physical bus. The MCP2551 provides differential 
-transmit and receive capability for the CAN protocol controller and is fully compatible with the 
-ISO-11898 standard, including 24V requirements. It will operate at speeds of up to 1 Mb/s.
-Typically, each node in a CAN system must have a device to convert the digital signals generated by a CAN controller to signals suitable for transmission over the bus cabling (differential output). It also provides a buffer between the CAN controller and the high-voltage spikes that can be generated on the CAN bus by outside sources (EMI, ESD, electrical transients, etc.).</description>
-<gates>
-<gate name="G$1" symbol="MCP2551" x="-2.54" y="2.54"/>
-</gates>
-<devices>
-<device name="" package="SOIC-8">
-<connects>
-<connect gate="G$1" pin="CANH" pad="CANH"/>
-<connect gate="G$1" pin="CANL" pad="CANL"/>
-<connect gate="G$1" pin="RS" pad="RS"/>
-<connect gate="G$1" pin="RXD" pad="RXD"/>
-<connect gate="G$1" pin="TXD" pad="TXD"/>
-<connect gate="G$1" pin="VDD" pad="VDD"/>
-<connect gate="G$1" pin="VREF" pad="VREF"/>
-<connect gate="G$1" pin="VSS" pad="VSS"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
-</devicesets>
-</library>
-<library name="ngspice-simulation" urn="urn:adsk.eagle:library:527439">
-<description>SPICE compatible library parts</description>
-<packages>
-</packages>
-<symbols>
-<symbol name="R" urn="urn:adsk.eagle:symbol:5272030/1" library_version="16">
-<description>RESISTOR</description>
-<wire x1="-2.54" y1="-0.889" x2="2.54" y2="-0.889" width="0.254" layer="94"/>
-<wire x1="2.54" y1="0.889" x2="-2.54" y2="0.889" width="0.254" layer="94"/>
-<wire x1="2.54" y1="-0.889" x2="2.54" y2="0.889" width="0.254" layer="94"/>
-<wire x1="-2.54" y1="-0.889" x2="-2.54" y2="0.889" width="0.254" layer="94"/>
-<pin name="1" x="-5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1"/>
-<pin name="2" x="5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1" rot="R180"/>
-<text x="-2.54" y="2.54" size="1.778" layer="95">&gt;NAME</text>
-<text x="-2.54" y="-6.35" size="1.778" layer="97">&gt;SPICEMODEL</text>
-<text x="-2.54" y="-3.81" size="1.778" layer="96">&gt;VALUE</text>
-<text x="-2.54" y="-8.89" size="1.778" layer="97">&gt;SPICEEXTRA</text>
-</symbol>
-</symbols>
-<devicesets>
-<deviceset name="R" urn="urn:adsk.eagle:component:5272053/1" prefix="R" uservalue="yes" library_version="16">
-<description>RESISTOR</description>
-<gates>
-<gate name="G$1" symbol="R" x="0" y="0"/>
-</gates>
-<devices>
-<device name="">
-<technologies>
-<technology name="">
-<attribute name="_EXTERNAL_" value="" constant="no"/>
-</technology>
-</technologies>
-</device>
-</devices>
-<spice>
-<pinmapping spiceprefix="R">
-<pinmap gate="G$1" pin="1" pinorder="1"/>
-<pinmap gate="G$1" pin="2" pinorder="2"/>
-</pinmapping>
-</spice>
-</deviceset>
-</devicesets>
-</library>
 </libraries>
 <attributes>
 </attributes>
@@ -1008,16 +949,14 @@ Typically, each node in a CAN system must have a device to convert the digital s
 <part name="GND8" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="P3" library="con-jst-eh" deviceset="B7B-EH-A" device=""/>
 <part name="GND9" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="U$6" library="MCP2551" deviceset="MCP2551" device=""/>
 <part name="GND10" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="R1" library="ngspice-simulation" library_urn="urn:adsk.eagle:library:527439" deviceset="R" device=""/>
-<part name="GND11" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="P4" library="con-jst-eh" deviceset="B5B-EH-A" device=""/>
 <part name="P6" library="con-jst-eh" deviceset="B4B-EH-A" device=""/>
 <part name="GND12" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND13" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="P5" library="con-jst-eh" deviceset="B4B-EH-A" device=""/>
 <part name="P7" library="con-jst-eh" deviceset="B3B-EH-A" device=""/>
+<part name="U$7" library="bluepill" deviceset="CAN" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -1083,30 +1022,22 @@ Typically, each node in a CAN system must have a device to convert the digital s
 <instance part="GND9" gate="1" x="147.32" y="2.54" smashed="yes">
 <attribute name="VALUE" x="144.78" y="0" size="1.778" layer="96"/>
 </instance>
-<instance part="U$6" gate="G$1" x="-10.16" y="139.7" smashed="yes" rot="R180"/>
-<instance part="GND10" gate="1" x="12.7" y="137.16" smashed="yes">
-<attribute name="VALUE" x="10.16" y="134.62" size="1.778" layer="96"/>
+<instance part="GND10" gate="1" x="2.54" y="177.8" smashed="yes" rot="R90">
+<attribute name="VALUE" x="5.08" y="175.26" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="R1" gate="G$1" x="-22.86" y="127" smashed="yes">
-<attribute name="NAME" x="-25.4" y="129.54" size="1.778" layer="95"/>
-<attribute name="VALUE" x="-25.4" y="123.19" size="1.778" layer="96"/>
+<instance part="P4" gate="G$1" x="12.7" y="213.36" smashed="yes">
+<attribute name="NAME" x="11.43" y="221.615" size="1.778" layer="95"/>
+<attribute name="VALUE" x="11.43" y="203.2" size="1.778" layer="95"/>
 </instance>
-<instance part="GND11" gate="1" x="-10.16" y="124.46" smashed="yes">
-<attribute name="VALUE" x="-12.7" y="121.92" size="1.778" layer="96"/>
+<instance part="P6" gate="G$1" x="-43.18" y="213.36" smashed="yes" rot="R180">
+<attribute name="NAME" x="-41.91" y="205.105" size="1.778" layer="95" rot="R180"/>
+<attribute name="VALUE" x="-41.91" y="220.98" size="1.778" layer="95" rot="R180"/>
 </instance>
-<instance part="P4" gate="G$1" x="12.7" y="175.26" smashed="yes">
-<attribute name="NAME" x="11.43" y="183.515" size="1.778" layer="95"/>
-<attribute name="VALUE" x="11.43" y="165.1" size="1.778" layer="95"/>
+<instance part="GND12" gate="1" x="-38.1" y="203.2" smashed="yes">
+<attribute name="VALUE" x="-40.64" y="200.66" size="1.778" layer="96"/>
 </instance>
-<instance part="P6" gate="G$1" x="-43.18" y="175.26" smashed="yes" rot="R180">
-<attribute name="NAME" x="-41.91" y="167.005" size="1.778" layer="95" rot="R180"/>
-<attribute name="VALUE" x="-41.91" y="182.88" size="1.778" layer="95" rot="R180"/>
-</instance>
-<instance part="GND12" gate="1" x="-38.1" y="165.1" smashed="yes">
-<attribute name="VALUE" x="-40.64" y="162.56" size="1.778" layer="96"/>
-</instance>
-<instance part="GND13" gate="1" x="5.08" y="165.1" smashed="yes">
-<attribute name="VALUE" x="2.54" y="162.56" size="1.778" layer="96"/>
+<instance part="GND13" gate="1" x="5.08" y="203.2" smashed="yes">
+<attribute name="VALUE" x="2.54" y="200.66" size="1.778" layer="96"/>
 </instance>
 <instance part="P5" gate="G$1" x="66.04" y="-53.34" smashed="yes">
 <attribute name="NAME" x="64.77" y="-45.085" size="1.778" layer="95"/>
@@ -1115,6 +1046,10 @@ Typically, each node in a CAN system must have a device to convert the digital s
 <instance part="P7" gate="G$1" x="38.1" y="-55.88" smashed="yes" rot="R180">
 <attribute name="NAME" x="39.37" y="-61.595" size="1.778" layer="95" rot="R180"/>
 <attribute name="VALUE" x="39.37" y="-48.26" size="1.778" layer="95" rot="R180"/>
+</instance>
+<instance part="U$7" gate="G$1" x="-10.16" y="139.7" smashed="yes" rot="R270">
+<attribute name="NAME" x="10.16" y="154.94" size="1.778" layer="95" rot="R270"/>
+<attribute name="VALUE" x="-33.02" y="154.94" size="1.778" layer="96" rot="R270"/>
 </instance>
 </instances>
 <busses>
@@ -1182,24 +1117,20 @@ Typically, each node in a CAN system must have a device to convert the digital s
 <pinref part="GND9" gate="1" pin="GND"/>
 </segment>
 <segment>
-<pinref part="U$6" gate="G$1" pin="VSS"/>
-<pinref part="GND10" gate="1" pin="GND"/>
-<wire x1="5.08" y1="139.7" x2="12.7" y2="139.7" width="0.1524" layer="91"/>
-</segment>
-<segment>
-<pinref part="R1" gate="G$1" pin="2"/>
-<pinref part="GND11" gate="1" pin="GND"/>
-<wire x1="-17.78" y1="127" x2="-10.16" y2="127" width="0.1524" layer="91"/>
-</segment>
-<segment>
 <pinref part="P6" gate="G$1" pin="1"/>
 <pinref part="GND12" gate="1" pin="GND"/>
-<wire x1="-38.1" y1="170.18" x2="-38.1" y2="167.64" width="0.1524" layer="91"/>
+<wire x1="-38.1" y1="208.28" x2="-38.1" y2="205.74" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="GND13" gate="1" pin="GND"/>
 <pinref part="P4" gate="G$1" pin="5"/>
-<wire x1="5.08" y1="167.64" x2="7.62" y2="170.18" width="0.1524" layer="91"/>
+<wire x1="5.08" y1="205.74" x2="7.62" y2="208.28" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="U$7" gate="G$1" pin="GND"/>
+<wire x1="-2.54" y1="160.02" x2="-2.54" y2="177.8" width="0.1524" layer="91"/>
+<wire x1="-2.54" y1="177.8" x2="0" y2="177.8" width="0.1524" layer="91"/>
+<pinref part="GND10" gate="1" pin="GND"/>
 </segment>
 </net>
 <net name="5V_SCU" class="0">
@@ -1260,8 +1191,8 @@ Typically, each node in a CAN system must have a device to convert the digital s
 </segment>
 <segment>
 <pinref part="P4" gate="G$1" pin="1"/>
-<wire x1="7.62" y1="180.34" x2="-10.16" y2="180.34" width="0.1524" layer="91"/>
-<label x="-10.16" y="180.34" size="1.778" layer="95"/>
+<wire x1="7.62" y1="218.44" x2="-10.16" y2="218.44" width="0.1524" layer="91"/>
+<label x="-10.16" y="218.44" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$3" class="0">
@@ -1339,7 +1270,7 @@ Typically, each node in a CAN system must have a device to convert the digital s
 <wire x1="50.8" y1="50.8" x2="63.5" y2="50.8" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$6" class="0">
+<net name="SCL" class="0">
 <segment>
 <pinref part="U$1" gate="G$1" pin="PA8"/>
 <wire x1="30.48" y1="40.64" x2="33.02" y2="40.64" width="0.1524" layer="91"/>
@@ -1350,9 +1281,10 @@ Typically, each node in a CAN system must have a device to convert the digital s
 <wire x1="33.02" y1="119.38" x2="33.02" y2="187.96" width="0.1524" layer="91"/>
 <wire x1="33.02" y1="187.96" x2="63.5" y2="187.96" width="0.1524" layer="91"/>
 <junction x="33.02" y="119.38"/>
+<label x="33.02" y="93.98" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
-<net name="N$7" class="0">
+<net name="SDA" class="0">
 <segment>
 <pinref part="U$1" gate="G$1" pin="PC9"/>
 <wire x1="-30.48" y1="35.56" x2="-48.26" y2="35.56" width="0.1524" layer="91"/>
@@ -1365,6 +1297,7 @@ Typically, each node in a CAN system must have a device to convert the digital s
 <wire x1="27.94" y1="119.38" x2="27.94" y2="182.88" width="0.1524" layer="91"/>
 <wire x1="27.94" y1="182.88" x2="63.5" y2="182.88" width="0.1524" layer="91"/>
 <junction x="27.94" y="119.38"/>
+<label x="2.54" y="119.38" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$8" class="0">
@@ -1458,72 +1391,26 @@ Typically, each node in a CAN system must have a device to convert the digital s
 <wire x1="104.14" y1="-35.56" x2="129.54" y2="-10.16" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$19" class="0">
-<segment>
-<pinref part="U$1" gate="G$1" pin="PA12"/>
-<wire x1="15.24" y1="101.6" x2="22.86" y2="101.6" width="0.1524" layer="91"/>
-<pinref part="U$6" gate="G$1" pin="TXD"/>
-<wire x1="5.08" y1="137.16" x2="10.16" y2="132.08" width="0.1524" layer="91"/>
-<wire x1="10.16" y1="132.08" x2="22.86" y2="132.08" width="0.1524" layer="91"/>
-<wire x1="22.86" y1="132.08" x2="25.4" y2="129.54" width="0.1524" layer="91"/>
-<wire x1="25.4" y1="129.54" x2="25.4" y2="104.14" width="0.1524" layer="91"/>
-<wire x1="25.4" y1="104.14" x2="22.86" y2="101.6" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="5V_PCU" class="0">
-<segment>
-<pinref part="U$6" gate="G$1" pin="VDD"/>
-<wire x1="5.08" y1="142.24" x2="17.78" y2="142.24" width="0.1524" layer="91"/>
-<label x="7.62" y="142.24" size="1.778" layer="95"/>
-</segment>
-</net>
-<net name="N$16" class="0">
-<segment>
-<pinref part="U$1" gate="G$1" pin="PA11"/>
-<wire x1="15.24" y1="106.68" x2="17.78" y2="106.68" width="0.1524" layer="91"/>
-<wire x1="17.78" y1="106.68" x2="20.32" y2="109.22" width="0.1524" layer="91"/>
-<wire x1="20.32" y1="109.22" x2="20.32" y2="142.24" width="0.1524" layer="91"/>
-<wire x1="20.32" y1="142.24" x2="17.78" y2="144.78" width="0.1524" layer="91"/>
-<pinref part="U$6" gate="G$1" pin="RXD"/>
-<wire x1="17.78" y1="144.78" x2="5.08" y2="144.78" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$20" class="0">
-<segment>
-<pinref part="U$6" gate="G$1" pin="RS"/>
-<pinref part="R1" gate="G$1" pin="1"/>
-<wire x1="-27.94" y1="137.16" x2="-27.94" y2="127" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$21" class="0">
-<segment>
-<pinref part="P6" gate="G$1" pin="4"/>
-<pinref part="P4" gate="G$1" pin="2"/>
-<wire x1="-38.1" y1="177.8" x2="7.62" y2="177.8" width="0.1524" layer="91"/>
-</segment>
-</net>
 <net name="N$23" class="0">
 <segment>
-<pinref part="U$6" gate="G$1" pin="CANH"/>
-<wire x1="-27.94" y1="139.7" x2="-33.02" y2="144.78" width="0.1524" layer="91"/>
 <pinref part="P6" gate="G$1" pin="3"/>
 <pinref part="P4" gate="G$1" pin="3"/>
-<wire x1="-38.1" y1="175.26" x2="-33.02" y2="175.26" width="0.1524" layer="91"/>
-<wire x1="-33.02" y1="175.26" x2="7.62" y2="175.26" width="0.1524" layer="91"/>
-<wire x1="-33.02" y1="144.78" x2="-33.02" y2="175.26" width="0.1524" layer="91"/>
-<junction x="-33.02" y="175.26"/>
+<wire x1="-38.1" y1="213.36" x2="-17.78" y2="213.36" width="0.1524" layer="91"/>
+<wire x1="-17.78" y1="213.36" x2="7.62" y2="213.36" width="0.1524" layer="91"/>
+<pinref part="U$7" gate="G$1" pin="CANH"/>
+<wire x1="-17.78" y1="160.02" x2="-17.78" y2="213.36" width="0.1524" layer="91"/>
+<junction x="-17.78" y="213.36"/>
 </segment>
 </net>
 <net name="N$25" class="0">
 <segment>
-<pinref part="U$6" gate="G$1" pin="CANL"/>
-<wire x1="-27.94" y1="142.24" x2="-30.48" y2="144.78" width="0.1524" layer="91"/>
 <pinref part="P4" gate="G$1" pin="4"/>
 <pinref part="P6" gate="G$1" pin="2"/>
-<wire x1="7.62" y1="172.72" x2="-30.48" y2="172.72" width="0.1524" layer="91"/>
-<wire x1="-30.48" y1="172.72" x2="-38.1" y2="172.72" width="0.1524" layer="91"/>
-<wire x1="-30.48" y1="144.78" x2="-30.48" y2="172.72" width="0.1524" layer="91"/>
-<junction x="-30.48" y="172.72"/>
+<wire x1="7.62" y1="210.82" x2="-22.86" y2="210.82" width="0.1524" layer="91"/>
+<wire x1="-22.86" y1="210.82" x2="-38.1" y2="210.82" width="0.1524" layer="91"/>
+<pinref part="U$7" gate="G$1" pin="CANL"/>
+<wire x1="-22.86" y1="160.02" x2="-22.86" y2="210.82" width="0.1524" layer="91"/>
+<junction x="-22.86" y="210.82"/>
 </segment>
 </net>
 <net name="N$22" class="0">
@@ -1562,6 +1449,47 @@ Typically, each node in a CAN system must have a device to convert the digital s
 <wire x1="60.96" y1="-55.88" x2="43.18" y2="-55.88" width="0.1524" layer="91"/>
 </segment>
 </net>
+<net name="5V_CCU" class="0">
+<segment>
+<pinref part="P6" gate="G$1" pin="4"/>
+<pinref part="P4" gate="G$1" pin="2"/>
+<wire x1="-38.1" y1="215.9" x2="7.62" y2="215.9" width="0.1524" layer="91"/>
+<label x="-22.86" y="215.9" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="N$6" class="0">
+<segment>
+<pinref part="U$7" gate="G$1" pin="CRX"/>
+<wire x1="-12.7" y1="160.02" x2="-10.16" y2="157.48" width="0.1524" layer="91"/>
+<wire x1="-10.16" y1="157.48" x2="-10.16" y2="116.84" width="0.1524" layer="91"/>
+<wire x1="-10.16" y1="116.84" x2="-2.54" y2="109.22" width="0.1524" layer="91"/>
+<wire x1="-2.54" y1="109.22" x2="12.7" y2="109.22" width="0.1524" layer="91"/>
+<pinref part="U$1" gate="G$1" pin="PA11"/>
+<wire x1="12.7" y1="109.22" x2="15.24" y2="106.68" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$7" class="0">
+<segment>
+<pinref part="U$1" gate="G$1" pin="PA12"/>
+<wire x1="15.24" y1="101.6" x2="12.7" y2="104.14" width="0.1524" layer="91"/>
+<wire x1="12.7" y1="104.14" x2="7.62" y2="104.14" width="0.1524" layer="91"/>
+<wire x1="7.62" y1="104.14" x2="-5.08" y2="116.84" width="0.1524" layer="91"/>
+<wire x1="-5.08" y1="116.84" x2="-5.08" y2="157.48" width="0.1524" layer="91"/>
+<pinref part="U$7" gate="G$1" pin="CTX"/>
+<wire x1="-5.08" y1="157.48" x2="-7.62" y2="160.02" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$16" class="0">
+<segment>
+<pinref part="U$1" gate="G$1" pin="+3.3V"/>
+<wire x1="15.24" y1="96.52" x2="17.78" y2="99.06" width="0.1524" layer="91"/>
+<wire x1="17.78" y1="99.06" x2="17.78" y2="160.02" width="0.1524" layer="91"/>
+<wire x1="17.78" y1="160.02" x2="12.7" y2="165.1" width="0.1524" layer="91"/>
+<wire x1="12.7" y1="165.1" x2="2.54" y2="165.1" width="0.1524" layer="91"/>
+<pinref part="U$7" gate="G$1" pin="3V3"/>
+<wire x1="2.54" y1="165.1" x2="2.54" y2="160.02" width="0.1524" layer="91"/>
+</segment>
+</net>
 </nets>
 </sheet>
 </sheets>
@@ -1577,12 +1505,6 @@ with this version.
 Since Version 8.3, EAGLE supports URNs for individual library
 assets (packages, symbols, and devices). The URNs of those assets
 will not be understood (or retained) with this version.
-</note>
-<note version="8.4" severity="warning">
-Since Version 8.4, EAGLE supports properties for SPICE simulation. 
-Probes in schematics and SPICE mapping objects found in parts and library devices
-will not be understood with this version. Update EAGLE to the latest version
-for full support of SPICE simulation. 
 </note>
 </compatibility>
 </eagle>
