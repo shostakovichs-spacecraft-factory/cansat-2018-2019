@@ -10,65 +10,52 @@
 
 #include "madgwick.h"
 
-#define MAX_COUNT 3
-struct{
-	float koef_B;
-	quaternion_t orientation;
 
-	vector_t real_vectros[MAX_COUNT];
-	vector_t mesuared_vectros[MAX_COUNT];
-
-	vector_t gyro_data;
-	float portions[MAX_COUNT];
-
-	int is_vector_used[MAX_COUNT];
-
-
-}ahrs_parametres;
-
-void ahrs_init()
+ahrs_struct_t ahrs_init()
 {
-	ahrs_parametres.gyro_data = vec_zero();
-	ahrs_parametres.koef_B = 0.3;
-	ahrs_parametres.orientation = quat_init(1,0,0,0);
+	ahrs_struct_t ahrs_struct;
+	ahrs_struct.gyro_data = vec_zero();
+	ahrs_struct.koef_B = 0.3;
+	ahrs_struct.orientation = quat_init(1,0,0,0);
 
 	for(int i = 0; i < MAX_COUNT; i++)
 	{
-		ahrs_parametres.portions[i] = 1;
-		ahrs_parametres.is_vector_used[i] = 0;
+		ahrs_struct.portions[i] = 1;
+		ahrs_struct.is_vector_used[i] = 0;
 	}
+	return ahrs_struct;
 };
-void ahrs_deinit()
+void ahrs_deinit(ahrs_struct_t *ahrs_struct)
 {
 
 }
 
-void ahrs_setKoefB(float koef_B)
+void ahrs_setKoefB(ahrs_struct_t *ahrs_struct, float koef_B)
 {
-	ahrs_parametres.koef_B = koef_B;
+	ahrs_struct->koef_B = koef_B;
 }
-void ahrs_vectorActivate(enum Vector_type vec, int isUsed)
+void ahrs_vectorActivate(ahrs_struct_t *ahrs_struct, enum Vector_type vec, int isUsed)
 {
-	ahrs_parametres.is_vector_used[vec] = isUsed;
+	ahrs_struct->is_vector_used[vec] = isUsed;
 }
-void ahrs_updateVecMeasured(enum Vector_type vec, vector_t vector)
+void ahrs_updateVecMeasured(ahrs_struct_t *ahrs_struct, enum Vector_type vec, vector_t vector)
 {
-	ahrs_parametres.mesuared_vectros[vec] = vector;
+	ahrs_struct->mesuared_vectros[vec] = vector;
 }
-void ahrs_updateVecReal(enum Vector_type vec, vector_t vector)
+void ahrs_updateVecReal(ahrs_struct_t *ahrs_struct, enum Vector_type vec, vector_t vector)
 {
-	ahrs_parametres.real_vectros[vec] = vector;
+	ahrs_struct->real_vectros[vec] = vector;
 }
-void ahrs_updateVecPortion(enum Vector_type vec, float portion)
+void ahrs_updateVecPortion(ahrs_struct_t *ahrs_struct, enum Vector_type vec, float portion)
 {
-	ahrs_parametres.portions[vec] = portion;
+	ahrs_struct->portions[vec] = portion;
 }
 
-quaternion_t ahrs_getOrientation()
+quaternion_t ahrs_getOrientation(ahrs_struct_t *ahrs_struct)
 {
-	return ahrs_parametres.orientation;
+	return ahrs_struct->orientation;
 }
-int ahrs_calculateOrientation(float dt)
+int ahrs_calculateOrientation(ahrs_struct_t *ahrs_struct, float dt)
 {
 	vector_t *measured[MAX_COUNT];
 	vector_t *real[MAX_COUNT];
@@ -76,11 +63,11 @@ int ahrs_calculateOrientation(float dt)
 	int size = 0;
 	for(int i = 0; i < MAX_COUNT; i++)
 	{
-		if(ahrs_parametres.is_vector_used[i])
+		if(ahrs_struct->is_vector_used[i])
 		{
-			measured[size] = &ahrs_parametres.mesuared_vectros[i];
-			real[size] = &ahrs_parametres.real_vectros[i];
-			portions[size] = ahrs_parametres.portions[i];
+			measured[size] = &ahrs_struct->mesuared_vectros[i];
+			real[size] = &ahrs_struct->real_vectros[i];
+			portions[size] = ahrs_struct->portions[i];
 			size++;
 		}
 	}
@@ -89,23 +76,23 @@ int ahrs_calculateOrientation(float dt)
 	quaternion_t result;
 
 	int err = 0;
-	err |= madgwick_getErrorOri(&error, real, measured, portions, size, &ahrs_parametres.orientation);
-	err |= madgwick_getGyroDerOri(&gyroDer, &ahrs_parametres.gyro_data, dt, &ahrs_parametres.orientation);
-	err |= madgwick_getEstimatedOri(&result, &gyroDer, &error, dt, ahrs_parametres.koef_B, &ahrs_parametres.orientation);
+	err |= madgwick_getErrorOri(&error, real, measured, portions, size, &ahrs_struct->orientation);
+	err |= madgwick_getGyroDerOri(&gyroDer, &ahrs_struct->gyro_data, dt, &ahrs_struct->orientation);
+	err |= madgwick_getEstimatedOri(&result, &gyroDer, &error, dt, ahrs_struct->koef_B, &ahrs_struct->orientation);
 	quat_normalize(&result);
 
-	ahrs_parametres.orientation = result;
+	ahrs_struct->orientation = result;
 
 	return err;
 }
 
-int ahrs_updateError()
+int ahrs_updateError(ahrs_struct_t *ahrs_struct)
 {
 	return 0;
 }
 
-void ahrs_updateGyroData(vector_t gyro_data)
+void ahrs_updateGyroData(ahrs_struct_t *ahrs_struct, vector_t gyro_data)
 {
-	ahrs_parametres.gyro_data = gyro_data;
+	ahrs_struct->gyro_data = gyro_data;
 }
 

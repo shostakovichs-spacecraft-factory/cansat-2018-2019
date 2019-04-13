@@ -28,16 +28,16 @@ void toEulerAngle(quaternion_t *q, float *roll, float *pitch, float *yaw)
 }
 int main()
 {
-	ahrs_init();
-	ahrs_setKoefB(0.05);
+	ahrs_struct_t ahrs_struct = ahrs_init();
+	ahrs_setKoefB(&ahrs_struct, 0.05);
 
-	ahrs_vectorActivate(LIGHT, 0);
-	ahrs_vectorActivate(ACCEL, 1);
-	ahrs_vectorActivate(MAG, 1);
+	ahrs_vectorActivate(&ahrs_struct, LIGHT, 0);
+	ahrs_vectorActivate(&ahrs_struct, ACCEL, 1);
+	ahrs_vectorActivate(&ahrs_struct, MAG, 1);
 
-	ahrs_updateVecPortion(ACCEL, 1);
-	ahrs_updateVecPortion(MAG, 1);
-	ahrs_updateVecPortion(LIGHT, 1);
+	ahrs_updateVecPortion(&ahrs_struct, ACCEL, 1);
+	ahrs_updateVecPortion(&ahrs_struct, MAG, 1);
+	ahrs_updateVecPortion(&ahrs_struct, LIGHT, 1);
 	float dt = 1.0/200.0;
 
 
@@ -46,9 +46,9 @@ int main()
 	vector_t light = vec_init(1,1,-0.5);
 	vector_t gyro;
 
-	ahrs_updateVecReal(ACCEL, accel);
-	ahrs_updateVecReal(MAG, mag);
-	ahrs_updateVecReal(LIGHT, light);
+	ahrs_updateVecReal(&ahrs_struct, ACCEL, accel);
+	ahrs_updateVecReal(&ahrs_struct, MAG, mag);
+	ahrs_updateVecReal(&ahrs_struct, LIGHT, light);
 
 	float angle_per_second = 0.1;
 	vector_t axis = {0,1,1};
@@ -71,12 +71,12 @@ int main()
 		light = simulation_getLight();
 		gyro = simulation_getGyro();
 
-		ahrs_updateVecMeasured(ACCEL, accel);
-		ahrs_updateVecMeasured(MAG, mag);
-		ahrs_updateVecMeasured(LIGHT, light);
-		ahrs_updateGyroData(gyro);
-		ahrs_calculateOrientation(dt);
-		my_ahrs = ahrs_getOrientation();
+		ahrs_updateVecMeasured(&ahrs_struct, ACCEL, accel);
+		ahrs_updateVecMeasured(&ahrs_struct, MAG, mag);
+		ahrs_updateVecMeasured(&ahrs_struct, LIGHT, light);
+		ahrs_updateGyroData(&ahrs_struct, gyro);
+		ahrs_calculateOrientation(&ahrs_struct, dt);
+		my_ahrs = ahrs_getOrientation(&ahrs_struct);
 
 
 		MadgwickAHRSupdate(gyro.x, gyro.y, gyro.z,accel.x, accel.y, accel.z, mag.x,mag.y,mag.z);
