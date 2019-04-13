@@ -10,7 +10,7 @@
 #include <math.h>
 #include <stdio.h>
 
-quaternion_t quat_mulByNum(quaternion_t * a, double k) {
+quaternion_t quat_mulByNum(quaternion_t * a, float k) {
 
 	quaternion_t result;
 
@@ -46,38 +46,44 @@ void quat_sub(quaternion_t *left, quaternion_t *right)
 	left->z -= right->z;
 }
 
-double quat_getNorm(quaternion_t * a) {
-	double t = a->w * a->w + a->x * a->x + a->y * a->y + a->z * a->z;
+float quat_getNorm(quaternion_t * a) {
+	float t = a->w * a->w + a->x * a->x + a->y * a->y + a->z * a->z;
 	t = sqrt(t);
 	return t;
 }
 
+float vec_getNorm(vector_t *vec)
+{
+	float t = vec->x*vec->x + vec->y*vec->y + vec->z*vec->z;
+	t = sqrt(t);
+	return t;
+}
+void vec_normalize(vector_t *vec)
+{
+	float t = vec_getNorm(vec);
+	vec->x /= t;
+	vec->y /= t;
+	vec->z /= t;
+}
 void quat_normalize(quaternion_t * a) {
 
 	*a = quat_mulByNum(a, 1 / quat_getNorm(a) );
 }
 
-quaternion_t quat_getConj(quaternion_t *a)
+void quat_getConjugate(quaternion_t *a)
 {
-
-	quaternion_t result;
-
-	result.w = a->w;
-	result.x = -a->x;
-	result.y = -a->y;
-	result.z = -a->z;
-
-
-	return result;
+	a->x = -a->x;
+	a->y = -a->y;
+	a->z = -a->z;
 }
 
 quaternion_t quat_getInverted(quaternion_t * a) {
 
-	quaternion_t result = quat_getConj(a);
+	quat_getConjugate(a);
 
 	float k = quat_getNorm(a);
 
-	return quat_mulByNum(&result, 1 / (k * k));
+	return quat_mulByNum(a, 1 / (k * k));
 }
 
 quaternion_t quat_mulByQuat(quaternion_t * a, quaternion_t * b) {
@@ -100,7 +106,8 @@ quaternion_t quat_mulByVec(quaternion_t * a, vector_t * b) {
 }
 
 vector_t vec_rotate(vector_t * vect, quaternion_t * rotation) {
-	quaternion_t rot_normal = *rotation;//quat_normalize(rotation);
+	quaternion_t rot_normal = *rotation;
+	quat_normalize(rotation);
 
 	quaternion_t tmp = quat_mulByVec(&rot_normal, vect);
 	quaternion_t inverted = quat_getInverted(&rot_normal);
@@ -169,7 +176,7 @@ int matrixToQuat(quaternion_t *result, Matrixf *m)
 	return 0;
 }
 
-quaternion_t quat_init(double w, double x, double y, double z)
+quaternion_t quat_init(float w, float x, float y, float z)
 {
 	quaternion_t res = {w,x,y,z};
 	return res;
@@ -180,7 +187,7 @@ quaternion_t quat_zero()
 	return quat_init(0,0,0,0);
 }
 
-vector_t vec_init(double x, double y, double z)
+vector_t vec_init(float x, float y, float z)
 {
 	vector_t res = {x,y,z};
 	return res;
@@ -196,3 +203,16 @@ void quat_print(quaternion_t *a)
 	printf("%2.3lf %2.3lf %2.3lf %2.3lf\n", a->w, a->x, a->y, a->z);
 }
 
+
+quaternion_t quat_makeRotQuat(float angle, vector_t *axis)
+{
+	quaternion_t result = vecToQuat(axis);
+	quat_normalize(&result);
+	result.w = cos(angle);
+	float s = sin(angle);
+	result.x *= s;
+	result.y *= s;
+	result.z *= s;
+
+	return result;
+}

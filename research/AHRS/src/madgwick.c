@@ -83,7 +83,7 @@ int madgwick_getGyroDerOri(quaternion_t *result, vector_t *gyro_data, float dt, 
 
 	*result = quat_mulByQuat(previous, &S);
 	*result = quat_mulByNum(result, 0.5);
-	quat_add(result, previous);
+	//quat_add(result, previous);
 
 	return 0;
 }/*
