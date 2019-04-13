@@ -13,15 +13,21 @@
 #define NULL ((uint8_t *)0x00)
 #endif
 
+#ifndef MIN
+#define MIN(A, B) (A < B? A:B)
+#endif
+
 #define TIMEOUT 10000
 #define TRY_UNTIL_TIMEOUT_HEADER for(cycles = 0; cycles < TIMEOUT; cycles++)
 #define TRY_UNTIL_TIMEOUT_FOOTER if(cycles == TIMEOUT - 1) {status == SX1268_TIMEOUT; goto end;}
+
+#define UINT24_T_FORM(SOURCE, BYTE0, BYTE1, BYTE2)		BYTE0 = SOURCE & 0xFF; BYTE1 = (SOURCE >> 8) & 0xFF; BYTE2 = (SOURCE >> 16) & 0xFF;
+#define UINT24_T_DECODE(SOURCE, BYTE0, BYTE1, BYTE2)	SOURCE = BYTE0 | (BYTE1 << 8) | (BYTE2 << 16);
 
 
 static sx1268_status_t _cmd(sx1268_t * self, uint8_t opcode, uint8_t * buff, uint8_t arglength)
 {
 	sx1268_status_t status = SX1268_OK;
-	int cycles = 0;
 
 	HAL_GPIO_WritePin(self->cs_port, self->cs_pin, GPIO_PIN_RESET);
 
@@ -161,16 +167,36 @@ static inline sx1268_status_t _cmd_ReadRegister_burst(sx1268_t * self,	uint8_t *
 	return _cmd(self, 0x1D, data, length);
 }
 
-//NOTE: address should be already in the first elements of data (16 bit, MSB first)
-static inline sx1268_status_t _cmd_WriteBuffer(sx1268_t * self,	uint8_t * data, uint8_t length)
+static inline sx1268_status_t _cmd_WriteBuffer(sx1268_t * self,	uint8_t addr, uint8_t * data, uint8_t length)
 {
-	return _cmd(self, 0x0E, data, length);
+	sx1268_status_t status = SX1268_OK;
+
+	HAL_GPIO_WritePin(self->cs_port, self->cs_pin, GPIO_PIN_RESET);
+
+	uint8_t opcode = 0x0E;
+	HAL_SPI_Transmit(self->bus, &opcode, 1, TIMEOUT);
+	HAL_SPI_Transmit(self->bus, &addr, 1, TIMEOUT);
+	HAL_SPI_Transmit(self->bus, data, length, TIMEOUT);
+
+end:
+	HAL_GPIO_WritePin(self->cs_port, self->cs_pin, GPIO_PIN_SET);
+	return status;
 }
 
-//NOTE: address should be already in the first elements of data (16 bit, MSB first)
-static inline sx1268_status_t _cmd_ReadBuffer(sx1268_t * self,	uint8_t * data, uint8_t length)
+static inline sx1268_status_t _cmd_ReadBuffer(sx1268_t * self,	uint8_t addr, uint8_t * data, uint8_t length)
 {
-	return _cmd(self, 0x1E, data, length);
+	sx1268_status_t status = SX1268_OK;
+
+	HAL_GPIO_WritePin(self->cs_port, self->cs_pin, GPIO_PIN_RESET);
+
+	uint8_t opcode = 0x1E;
+	HAL_SPI_Transmit(self->bus, &opcode, 1, TIMEOUT);
+	HAL_SPI_Transmit(self->bus, &addr, 1, TIMEOUT);
+	HAL_SPI_Receive()(self->bus, data, length, TIMEOUT);
+
+end:
+	HAL_GPIO_WritePin(self->cs_port, self->cs_pin, GPIO_PIN_SET);
+	return status;
 }
 
 static inline sx1268_status_t _cmd_SetDioIrqParams(sx1268_t * self, uint16_t irqmask, \
@@ -188,6 +214,17 @@ static inline sx1268_status_t _cmd_SetDioIrqParams(sx1268_t * self, uint16_t irq
 
 	return _cmd(self, 0x08, buff, 8);
 }
+
+#define IRQFLAG_TXDONE	(1 << 0)
+#define IRQFLAG_RXDONE	(1 << 1)
+#define IRQFLAG_PREAMBLEDETECTED	(1 << 2)
+#define IRQFLAG_SYNCWORDWALID	(1 << 3)
+#define IRQFLAG_HEADERvALID	(1 << 4)
+#define IRQFLAG_HEADERERR	(1 << 5)
+#define IRQFLAG_CRCERR	(1 << 6)
+#define IRQFLAG_CADDONE	(1 << 7)
+#define IRQFLAG_CADDETECTED	(1 << 8)
+#define IRQFLAG_TIMEOUT	(1 << 9)
 
 static inline sx1268_status_t _cmd_GetIrqStatus(sx1268_t * self, uint8_t * Status, uint16_t *IrqStatus)
 {
@@ -267,17 +304,51 @@ static inline sx1268_status_t _cmd_SetTxParams(sx1268_t * self, uint8_t power, u
 	return _cmd(self, 0x8E, buff, 2);
 }
 
+typedef struct
+{
+	uint8_t br2, br1, br0, //defines baudrate (br = 32 * Fxtal / bit rate)
+	PulseShape, //datasheet, table 13-44
+	Bandwidth, //datasheet, table 13-45
+	Fdev2, Fdev1, Fdev0; //Fdev = (Frequency Deviation * 2^25) / Fxtal
+} sx1268_modparams_gfsk_t;
+
+typedef struct //you'd better see a datasheet... (13.4.5.2)
+{
+	uint8_t sf, bw, cr, LowDataRateOptimize;
+	uint32_t margin;
+} sx1268_modparams_LoRa_t;
+
 // Mod_Params - array of 8 uint8_t representing modulation params (see 13.4.5 section of datasheet)
 static inline sx1268_status_t _cmd_SetModulationParams(sx1268_t * self, uint8_t * Mod_Params)
 {
-
 	return _cmd(self, 0x8B, Mod_Params, 8);
 }
+
+typedef struct
+{
+	uint8_t PreambleLength1, PreambleLength0, //Length of preamble, in bits
+	PreambleDetectorLength, //Preamble detector length. 0 - off, 4-7 - represents 1-4 bytes
+	SyncWordLength, //Sync word len in bits. Sync word should be written to 0x06C0 - 0x06C7 registers
+	AddrComp, //Address filtering. 0 - disabled, 1 - node (reg 0x06CD) only, 2 - node and broadcast (0x06CE)
+	PacketType, //0 - fixed size, 1 - dynamic size
+	PayloadLength, //Size to transmit or maximum receiveable
+	CRCType, //1 - off, 0 - 1b, 2 - 2b, 4 - 1b_inv, 6 - 2b_inv
+	Whitening; //0 - off, 1 - on
+} sx1268_packparams_gfsk_t;
+
+typedef struct
+{
+	uint8_t PreambleLength1, PreambleLength0, //Length of premblamble, in bits
+	HeaderType, //0 - variable size, 1 - fixed size
+	PayloadLength, //Size to transmit or maximum receiveable
+	CRCType, //0 - off, 1 - on
+	InvertIQ, //1 - inverted IQ
+	margin1, margin2, margin3; //structure should be 9 bytes long
+} sx1268_packparams_LoRa_t;
 
 // Mod_Params - array of 8 uint8_t representing packet handling params (see 13.4.6 section of datasheet)
 static inline sx1268_status_t _cmd_SetPacketParams(sx1268_t * self, uint8_t * Packet_Params)
 {
-
 	return _cmd(self, 0x8C, Packet_Params, 9);
 }
 
@@ -307,16 +378,93 @@ static inline sx1268_status_t _cmd_GetStatus(sx1268_t * self, uint8_t * status)
 	return _cmd(self, 0xC0, status, 1);
 }
 
+static inline sx1268_status_t _cmd_GetRxBufferStatus(sx1268_t * self, uint8_t * Status, uint8_t * PayloadLengthRx, uint8_t * RxStartBufferPointer)
+{
+	uint8_t buff[3];
+	return _cmd(self, 0x13, buff, 3);
+
+	*Status = buff[0];
+	*PayloadLengthRx = buff[1];
+	*RxStartBufferPointer = buff[2];
+}
+
+#define FIFO_FREESPACE(FIFO) ((FIFO->tail - FIFO->head) % FIFO->length)
+#define FIFO_USEDSPACE(FIFO) ((FIFO->head - FIFO->tail) % FIFO->length)
+
+static sx1268_status_t _fifo_write(sx1268_fifo_t * fifo, uint8_t * data, int len)
+{
+	if(FIFO_FREESPACE(fifo) < len & !fifo->empty)
+		return SX1268_ERR_BUFSIZE;
+
+	int copylen = MIN(fifo->length - fifo->head, len);
+	memcpy(fifo->mem + fifo->head, data, copylen);
+	fifo->head = (fifo->head + copylen) % fifo->length;
+
+	memcpy(fifo->mem + fifo->head, data + copylen, len - copylen);
+	fifo->head += (len - copylen) % fifo->length;
+
+	fifo->empty = false;
+	return SX1268_OK;
+}
+
+//TODO
+static sx1268_status_t _fifo_read(sx1268_fifo_t * fifo, uint8_t * data, int len)
+{
+	if(!fifo->empty)
+	{
+		if(fifo->length < len)
+			return SX1268_ERR_BUFSIZE;
+	}
+	else if(FIFO_USEDSPACE(fifo) < len)
+		return SX1268_ERR_BUFSIZE;
+
+	int copylen = MIN(fifo->length - fifo->head, len);
+	memcpy(fifo->mem + fifo->head, data, copylen);
+	fifo->head = (fifo->head + copylen) % fifo->length;
+
+	memcpy(fifo->mem + fifo->head, data + copylen, len - copylen);
+	fifo->head += (len - copylen) % fifo->length;
+
+	fifo->empty = false;
+	return SX1268_OK;
+}
+
+static void _sendpackparams(sx1268_t * self, uint8_t PayloadLength) //yeees, it's a very dumb way. But it's forced to be used by dumb transceiver
+{
+	sx1268_packparams_gfsk_t packparams;
+	packparams.PreambleLength0 = 80;
+	packparams.PreambleLength1 = 0;
+	packparams.PreambleDetectorLength = 64; //FIXME maybe should be less
+	packparams.SyncWordLength = 64;
+	packparams.AddrComp = 0;
+	packparams.PacketType = 1;
+	packparams.PayloadLength = PayloadLength; // FIXME ?CoRrEcT?
+	packparams.CRCType = 0;
+	packparams.Whitening = 1;
+	_cmd_SetPacketParams(self, (uint8_t *) &packparams);
+}
+
+static void _dotx(sx1268_t * self, uint8_t * buff, int len)
+{
+	_cmd_SetTxParams(self, POWER_LOW_HIGHEST, RAMPTIME_200U);
+	_cmd_SetBufferBaseAddress(self, 0, 0);
+	_cmd_WriteBuffer(self, 0, buff, len);
+	_sendpackparams(self, len);
+	_cmd_SetTX(self, 64000); //1 second timeout
+}
+
 void sx1268_struct_init(sx1268_t * self, uint8_t * rxbuff, int rxbufflen, uint8_t * txbuff, int txbufflen){
 	self->fifo_rx.mem = rxbuff;
 	self->fifo_rx.length = rxbufflen;
 	self->fifo_rx.head = 0;
 	self->fifo_rx.tail = 0;
+	self->fifo_rx.empty = true;
 
 	self->fifo_tx.mem = txbuff;
 	self->fifo_tx.length = txbufflen;
 	self->fifo_tx.head = 0;
 	self->fifo_tx.tail = 0;
+	self->fifo_tx.empty = true;
 }
 
 sx1268_status_t sx1268_init(sx1268_t * self)
@@ -327,26 +475,75 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 	if(STATUS_CHIPMODE(status) != STATUS_CHIPMODE_STBY_RC)
 		_cmd_SetStandby(self, false);
 
-	_cmd_SetPacketType(self, true);
+	_cmd_SetPacketType(self, false); //set gfsk
 	_cmd_SetRfFrequency(self, RFFREQ_CALC(432000000));
-	_cmd_SetTxParams(self, POWER_LOW_HIGHEST, RAMPTIME_200U);
-	_cmd_SetBufferBaseAddress(self, 0, 0);
-	//_cmd_SetModulationParams(self, ///) TODO
+	//TODO maybe SetDIO3AsTcxoCtrl() ?
+	_cmd_CalibrateImage(self, 0x6B, 0x6F); //430-440 MHz, according to datasheet
 
-	/*configure irq, maybe through calling msp function, which should be defined by user*/
+	sx1268_modparams_gfsk_t modparams;
+	uint32_t br = 32 * 32000000 / 4800;
+	UINT24_T_FORM(br, modparams.br0, modparams.br1, modparams.br2);
+	UINT24_T_FORM(1024, modparams.Fdev0, modparams.Fdev1, modparams.Fdev2);
+	modparams.Bandwidth = 0x1D;
+	modparams.PulseShape = 0x09;
+	_cmd_SetModulationParams(self, (uint8_t *) &modparams);
+
+	_sendpackparams(self, 255);
+
+	_cmd_WriteRegister_burst(self, "antonloh", 8);
+
+	return SX1268_OK; //TODO
 }
 
 sx1268_status_t sx1268_send(sx1268_t * self, uint8_t * data, int len)
 {
-	//TODO
+	if( HAL_GPIO_ReadPin(self->busy_port, self->busy_pin) )
+	{
+		//TODO FIFO, but now...
+		return SX1268_BUSY;
+	}
+
+	uint8_t status;
+	_cmd_GetStatus(self, &status);
+
+	_dotx(self, data, len);
+
+	return SX1268_OK;
 }
 
 sx1268_status_t sx1268_receive(sx1268_t * self, uint8_t * data, int len)
 {
-	//TODO
+
 }
 
-sx1268_status_t sx1268_event(sx1268_t * self)
+void sx1268_event(sx1268_t * self)
 {
-	//TODO
+	uint16_t irqstatus;
+	uint8_t status;
+	uint8_t buff[256];
+	_cmd_GetIrqStatus(self, &status, &irqstatus);
+
+	if(irqstatus & IRQFLAG_RXDONE)
+	{
+		if(STATUS_COMMAND(status) == STATUS_COMMAND_AVAIL)
+		{
+			uint8_t start, len;
+			_cmd_GetRxBufferStatus(self, &status, &start, &len);
+			_cmd_ReadBuffer(self, start, buff, len);
+			_fifo_write(&self->fifo_rx, buff, len);
+		}
+	}
+
+	if(irqstatus & IRQFLAG_TXDONE)
+	{
+		if(!self->fifo_tx.empty)
+		{
+			int len = FIFO_USEDSPACE(&self->fifo_tx);
+			len = MIN(len, 255);
+
+			_fifo_read(&self->fifo_tx, buff, len);
+			_dotx(self, buff, len);
+		}
+	}
 }
+
