@@ -453,7 +453,8 @@ static void _dotx(sx1268_t * self, uint8_t * buff, int len)
 	_cmd_SetTX(self, 64000); //1 second timeout
 }
 
-void sx1268_struct_init(sx1268_t * self, uint8_t * rxbuff, int rxbufflen, uint8_t * txbuff, int txbufflen){
+void sx1268_struct_init(sx1268_t * self, uint8_t * rxbuff, int rxbufflen, uint8_t * txbuff, int txbufflen)
+{
 	self->fifo_rx.mem = rxbuff;
 	self->fifo_rx.length = rxbufflen;
 	self->fifo_rx.head = 0;
@@ -499,21 +500,28 @@ sx1268_status_t sx1268_send(sx1268_t * self, uint8_t * data, int len)
 {
 	if( HAL_GPIO_ReadPin(self->busy_port, self->busy_pin) )
 	{
-		//TODO FIFO, but now...
-		return SX1268_BUSY;
+		return _fifo_write(self->fifo_tx, data, len);
 	}
 
 	uint8_t status;
 	_cmd_GetStatus(self, &status);
 
-	_dotx(self, data, len);
+	_dotx(self, data, MIN(len, 255));
+
+	if(len > 255) //we can send only 255 bytes in one packet, so everything except should be saved to fifo
+	{
+		_fifo_write(self->fifo_tx, data + 255, len - 255);
+	}
 
 	return SX1268_OK;
 }
 
 sx1268_status_t sx1268_receive(sx1268_t * self, uint8_t * data, int len)
 {
+	if(FIFO_USEDSPACE(self->fifo_rx) < len)
+		return SX1268_ERR_BUFSIZE;
 
+	_fifo_read(self->fifo_rx, data, len);
 }
 
 void sx1268_event(sx1268_t * self)
@@ -534,16 +542,13 @@ void sx1268_event(sx1268_t * self)
 		}
 	}
 
-	if(irqstatus & IRQFLAG_TXDONE)
+	if(!self->fifo_tx.empty)
 	{
-		if(!self->fifo_tx.empty)
-		{
-			int len = FIFO_USEDSPACE(&self->fifo_tx);
-			len = MIN(len, 255);
+		int len = FIFO_USEDSPACE(&self->fifo_tx);
+		len = MIN(len, 255);
 
-			_fifo_read(&self->fifo_tx, buff, len);
-			_dotx(self, buff, len);
-		}
+		_fifo_read(&self->fifo_tx, buff, len);
+		_dotx(self, buff, len);
 	}
 }
 
