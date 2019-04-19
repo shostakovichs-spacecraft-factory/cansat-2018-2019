@@ -15893,6 +15893,8 @@ naming: grid - package width</description>
 <part name="MK" library="con-garry" library_urn="urn:adsk.eagle:library:147" deviceset="332-02" device="" package3d_urn="urn:adsk.eagle:package:6810/1"/>
 <part name="10K2" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="10K"/>
 <part name="GND6" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
+<part name="GND15" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
+<part name="GND16" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -16032,6 +16034,12 @@ naming: grid - package width</description>
 <instance part="GND6" gate="1" x="20.32" y="152.4" smashed="yes">
 <attribute name="VALUE" x="17.78" y="149.86" size="1.778" layer="96"/>
 </instance>
+<instance part="GND15" gate="1" x="-40.64" y="111.76" smashed="yes" rot="R90">
+<attribute name="VALUE" x="-38.1" y="109.22" size="1.778" layer="96" rot="R90"/>
+</instance>
+<instance part="GND16" gate="1" x="55.88" y="81.28" smashed="yes" rot="R90">
+<attribute name="VALUE" x="58.42" y="78.74" size="1.778" layer="96" rot="R90"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -16068,6 +16076,11 @@ naming: grid - package width</description>
 <pinref part="C2" gate="G$1" pin="2"/>
 <wire x1="-81.28" y1="-7.62" x2="-81.28" y2="-10.16" width="0.1524" layer="91"/>
 <junction x="-81.28" y="-7.62"/>
+</segment>
+<segment>
+<pinref part="U$4" gate="G$1" pin="5V_0"/>
+<wire x1="50.8" y1="106.68" x2="50.8" y2="121.92" width="0.1524" layer="91"/>
+<label x="50.8" y="114.3" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="GND" class="0">
@@ -16217,6 +16230,18 @@ naming: grid - package width</description>
 <wire x1="20.32" y1="157.48" x2="20.32" y2="154.94" width="0.1524" layer="91"/>
 <pinref part="MK" gate="-1" pin="S"/>
 <wire x1="15.24" y1="157.48" x2="15.24" y2="129.54" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="U$4" gate="G$1" pin="GND_1"/>
+<wire x1="-45.72" y1="106.68" x2="-45.72" y2="111.76" width="0.1524" layer="91"/>
+<wire x1="-45.72" y1="111.76" x2="-43.18" y2="111.76" width="0.1524" layer="91"/>
+<pinref part="GND15" gate="1" pin="GND"/>
+</segment>
+<segment>
+<pinref part="U$4" gate="G$1" pin="GND_0"/>
+<wire x1="50.8" y1="71.12" x2="53.34" y2="71.12" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="71.12" x2="53.34" y2="81.28" width="0.1524" layer="91"/>
+<pinref part="GND16" gate="1" pin="GND"/>
 </segment>
 </net>
 <net name="3.3V" class="0">
