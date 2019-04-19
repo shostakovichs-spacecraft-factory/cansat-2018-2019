@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.3.2">
+<eagle version="9.3.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -16044,8 +16044,8 @@ naming: grid - package width</description>
 <instance part="GND15" gate="1" x="-40.64" y="111.76" smashed="yes" rot="R90">
 <attribute name="VALUE" x="-38.1" y="109.22" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="GND16" gate="1" x="55.88" y="81.28" smashed="yes" rot="R90">
-<attribute name="VALUE" x="58.42" y="78.74" size="1.778" layer="96" rot="R90"/>
+<instance part="GND16" gate="1" x="55.88" y="83.82" smashed="yes" rot="R180">
+<attribute name="VALUE" x="58.42" y="86.36" size="1.778" layer="96" rot="R180"/>
 </instance>
 </instances>
 <busses>
@@ -16086,8 +16086,8 @@ naming: grid - package width</description>
 </segment>
 <segment>
 <pinref part="U$4" gate="G$1" pin="5V_0"/>
-<wire x1="50.8" y1="106.68" x2="50.8" y2="121.92" width="0.1524" layer="91"/>
-<label x="50.8" y="114.3" size="1.778" layer="95" rot="R90"/>
+<wire x1="50.8" y1="106.68" x2="50.8" y2="119.38" width="0.1524" layer="91"/>
+<label x="48.26" y="119.38" size="1.778" layer="95" rot="R270"/>
 </segment>
 </net>
 <net name="GND" class="0">
@@ -16246,8 +16246,8 @@ naming: grid - package width</description>
 </segment>
 <segment>
 <pinref part="U$4" gate="G$1" pin="GND_0"/>
-<wire x1="50.8" y1="71.12" x2="53.34" y2="71.12" width="0.1524" layer="91"/>
-<wire x1="53.34" y1="71.12" x2="53.34" y2="81.28" width="0.1524" layer="91"/>
+<wire x1="50.8" y1="71.12" x2="55.88" y2="71.12" width="0.1524" layer="91"/>
+<wire x1="55.88" y1="71.12" x2="55.88" y2="81.28" width="0.1524" layer="91"/>
 <pinref part="GND16" gate="1" pin="GND"/>
 </segment>
 </net>
