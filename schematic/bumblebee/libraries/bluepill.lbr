@@ -829,20 +829,20 @@
 <text x="-45.72" y="-68.58" size="1.778" layer="96">&gt;VALUE</text>
 </symbol>
 <symbol name="LSM303C">
-<pin name="SCL" x="-14" y="0" length="middle"/>
-<pin name="GND" x="-14" y="4" length="middle"/>
-<pin name="3V3" x="-14" y="8" length="middle"/>
-<pin name="5V" x="-14" y="12" length="middle"/>
-<pin name="SDA" x="-14" y="-4" length="middle"/>
-<pin name="CSA" x="-14" y="-8" length="middle"/>
-<pin name="CSM" x="-14" y="-12" length="middle"/>
-<pin name="DRYM" x="14" y="0" length="middle" rot="R180"/>
-<pin name="INTA" x="14" y="4" length="middle" rot="R180"/>
-<pin name="INTM" x="14" y="-4" length="middle" rot="R180"/>
-<wire x1="-9" y1="14" x2="-9" y2="-14" width="0.254" layer="94"/>
-<wire x1="9" y1="-14" x2="9" y2="14" width="0.254" layer="94"/>
-<wire x1="-9" y1="-14" x2="9" y2="-14" width="0.254" layer="94"/>
-<wire x1="9" y1="14" x2="-9" y2="14" width="0.254" layer="94"/>
+<pin name="SCL" x="-17.78" y="0" length="middle"/>
+<pin name="GND" x="-17.78" y="5.08" length="middle"/>
+<pin name="3V3" x="-17.78" y="10.16" length="middle"/>
+<pin name="5V" x="-17.78" y="15.24" length="middle"/>
+<pin name="SDA" x="-17.78" y="-5.08" length="middle"/>
+<pin name="CSA" x="-17.78" y="-10.16" length="middle"/>
+<pin name="CSM" x="-17.78" y="-15.24" length="middle"/>
+<pin name="DRYM" x="17.78" y="0" length="middle" rot="R180"/>
+<pin name="INTA" x="17.78" y="5.08" length="middle" rot="R180"/>
+<pin name="INTM" x="17.78" y="-5.08" length="middle" rot="R180"/>
+<wire x1="-12.7" y1="-17.78" x2="-12.7" y2="17.78" width="0.254" layer="94"/>
+<wire x1="-12.7" y1="17.78" x2="12.7" y2="17.78" width="0.254" layer="94"/>
+<wire x1="12.7" y1="17.78" x2="12.7" y2="-17.78" width="0.254" layer="94"/>
+<wire x1="12.7" y1="-17.78" x2="-12.7" y2="-17.78" width="0.254" layer="94"/>
 </symbol>
 </symbols>
 <devicesets>
