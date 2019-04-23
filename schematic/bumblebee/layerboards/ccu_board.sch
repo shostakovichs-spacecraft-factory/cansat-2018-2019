@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.3.0">
+<eagle version="9.3.2">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -2855,9 +2855,9 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="GND2" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="FROM_ICU" library="con-jst-eh" deviceset="B4B-EH-A" device=""/>
 <part name="GND6" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="U$4" library="bluepill" deviceset="CAN" device=""/>
+<part name="CAN" library="bluepill" deviceset="CAN" device=""/>
 <part name="GND4" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="IC1" library="burr-brown" library_urn="urn:adsk.eagle:library:111" deviceset="REG1117" device="" package3d_urn="urn:adsk.eagle:package:4940/1"/>
+<part name="LDO" library="burr-brown" library_urn="urn:adsk.eagle:library:111" deviceset="REG1117" device="" package3d_urn="urn:adsk.eagle:package:4940/1"/>
 <part name="GND5" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="C1" library="SparkFun-Capacitors" deviceset="22UF" device="-0805-6.3V-20%" value="22uF"/>
 <part name="C2" library="SparkFun-Capacitors" deviceset="22UF" device="-0805-16V-20%" value="10uF"/>
@@ -2888,14 +2888,14 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <instance part="GND6" gate="1" x="106.68" y="-38.1" smashed="yes" rot="R270">
 <attribute name="VALUE" x="104.14" y="-35.56" size="1.778" layer="96" rot="R270"/>
 </instance>
-<instance part="U$4" gate="G$1" x="104.14" y="7.62" smashed="yes" rot="R90">
+<instance part="CAN" gate="G$1" x="104.14" y="7.62" smashed="yes" rot="R90">
 <attribute name="NAME" x="83.82" y="-7.62" size="1.778" layer="95" rot="R90"/>
 <attribute name="VALUE" x="127" y="-7.62" size="1.778" layer="96" rot="R90"/>
 </instance>
 <instance part="GND4" gate="1" x="101.6" y="-30.48" smashed="yes" rot="R90">
 <attribute name="VALUE" x="104.14" y="-33.02" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="IC1" gate="G$1" x="93.98" y="-76.2" smashed="yes">
+<instance part="LDO" gate="G$1" x="93.98" y="-76.2" smashed="yes">
 <attribute name="NAME" x="86.36" y="-70.485" size="1.778" layer="95" ratio="10"/>
 <attribute name="VALUE" x="88.9" y="-73.66" size="1.778" layer="96" ratio="10"/>
 </instance>
@@ -2952,7 +2952,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="124.46" y="-27.94" size="1.778" layer="95" rot="R270"/>
 </segment>
 <segment>
-<pinref part="IC1" gate="G$1" pin="VIN"/>
+<pinref part="LDO" gate="G$1" pin="VIN"/>
 <wire x1="81.28" y1="-76.2" x2="76.2" y2="-76.2" width="0.1524" layer="91"/>
 <label x="71.12" y="-76.2" size="1.778" layer="95"/>
 <pinref part="C2" gate="G$1" pin="1"/>
@@ -2987,7 +2987,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="109.22" y1="-38.1" x2="111.76" y2="-40.64" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="IC1" gate="G$1" pin="GND"/>
+<pinref part="LDO" gate="G$1" pin="GND"/>
 <pinref part="GND5" gate="1" pin="GND"/>
 <wire x1="93.98" y1="-99.06" x2="93.98" y2="-91.44" width="0.1524" layer="91"/>
 <wire x1="93.98" y1="-91.44" x2="93.98" y2="-88.9" width="0.1524" layer="91"/>
@@ -3011,7 +3011,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <pinref part="CAM_UP" gate="G$1" pin="1"/>
 </segment>
 <segment>
-<pinref part="U$4" gate="G$1" pin="GND"/>
+<pinref part="CAN" gate="G$1" pin="GND"/>
 <wire x1="96.52" y1="-12.7" x2="96.52" y2="-30.48" width="0.1524" layer="91"/>
 <wire x1="96.52" y1="-30.48" x2="99.06" y2="-30.48" width="0.1524" layer="91"/>
 <pinref part="GND4" gate="1" pin="GND"/>
@@ -3032,7 +3032,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="N$6" class="0">
 <segment>
-<pinref part="U$4" gate="G$1" pin="CANL"/>
+<pinref part="CAN" gate="G$1" pin="CANL"/>
 <wire x1="116.84" y1="-12.7" x2="116.84" y2="-22.86" width="0.1524" layer="91"/>
 <wire x1="116.84" y1="-22.86" x2="114.3" y2="-25.4" width="0.1524" layer="91"/>
 <pinref part="FROM_ICU" gate="G$1" pin="3"/>
@@ -3041,7 +3041,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="N$8" class="0">
 <segment>
-<pinref part="U$4" gate="G$1" pin="CANH"/>
+<pinref part="CAN" gate="G$1" pin="CANH"/>
 <wire x1="111.76" y1="-12.7" x2="111.76" y2="-20.32" width="0.1524" layer="91"/>
 <wire x1="111.76" y1="-20.32" x2="116.84" y2="-25.4" width="0.1524" layer="91"/>
 <pinref part="FROM_ICU" gate="G$1" pin="2"/>
@@ -3050,12 +3050,12 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="3V3" class="0">
 <segment>
-<pinref part="U$4" gate="G$1" pin="3V3"/>
+<pinref part="CAN" gate="G$1" pin="3V3"/>
 <wire x1="91.44" y1="-12.7" x2="91.44" y2="-25.4" width="0.1524" layer="91"/>
 <label x="91.44" y="-25.4" size="1.778" layer="95" rot="R90"/>
 </segment>
 <segment>
-<pinref part="IC1" gate="G$1" pin="VOUT"/>
+<pinref part="LDO" gate="G$1" pin="VOUT"/>
 <wire x1="106.68" y1="-76.2" x2="111.76" y2="-76.2" width="0.1524" layer="91"/>
 <label x="111.76" y="-76.2" size="1.778" layer="95"/>
 <pinref part="C1" gate="G$1" pin="1"/>
@@ -3110,7 +3110,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="CRX" class="0">
 <segment>
-<pinref part="U$4" gate="G$1" pin="CRX"/>
+<pinref part="CAN" gate="G$1" pin="CRX"/>
 <wire x1="106.68" y1="-12.7" x2="106.68" y2="-22.86" width="0.1524" layer="91"/>
 <label x="106.68" y="-22.86" size="1.778" layer="95" rot="R90"/>
 </segment>
@@ -3122,7 +3122,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="CTX" class="0">
 <segment>
-<pinref part="U$4" gate="G$1" pin="CTX"/>
+<pinref part="CAN" gate="G$1" pin="CTX"/>
 <wire x1="101.6" y1="-12.7" x2="101.6" y2="-22.86" width="0.1524" layer="91"/>
 <label x="101.6" y="-22.86" size="1.778" layer="95" rot="R90"/>
 </segment>
@@ -3171,6 +3171,13 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </nets>
 </sheet>
 </sheets>
+<errors>
+<approved hash="110,1,-10.16,-30.48,RX1,SWD,,,,"/>
+<approved hash="110,1,-10.16,-30.48,RX1,SWD,,,,"/>
+<approved hash="110,1,-7.62,-27.94,SWD,TX1,,,,"/>
+<approved hash="110,1,-7.62,-27.94,SWD,TX1,,,,"/>
+<approved hash="113,1,21.59,-78.4183,LED1,,,,,"/>
+</errors>
 </schematic>
 </drawing>
 <compatibility>
