@@ -276,8 +276,8 @@
 <hole x="2.5" y="-7" drill="3"/>
 <wire x1="-6.5" y1="9" x2="6.5" y2="9" width="0.127" layer="21"/>
 <wire x1="6.5" y1="9" x2="6.5" y2="-9" width="0.127" layer="21"/>
-<wire x1="6.5" y1="-9" x2="-6.5" y2="-9" width="0.127" layer="255"/>
-<wire x1="-6.5" y1="-9" x2="-6.5" y2="9" width="0.127" layer="255"/>
+<wire x1="6.5" y1="-9" x2="-6.5" y2="-9" width="0.127" layer="21"/>
+<wire x1="-6.5" y1="-9" x2="-6.5" y2="9" width="0.127" layer="21"/>
 </package>
 <package name="CAN">
 <text x="-7.25" y="9.74" size="1.27" layer="25">&gt;NAME</text>
@@ -3118,7 +3118,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </class>
 </classes>
 <parts>
-<part name="U$1" library="bluepill" deviceset="SCU" device=""/>
+<part name="STM32H405" library="bluepill" deviceset="SCU" device=""/>
 <part name="U$2" library="bluepill" deviceset="BME" device=""/>
 <part name="GND1" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="GND2" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
@@ -3160,7 +3160,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <plain>
 </plain>
 <instances>
-<instance part="U$1" gate="G$1" x="5.08" y="2.54" smashed="yes">
+<instance part="STM32H405" gate="G$1" x="5.08" y="2.54" smashed="yes">
 <attribute name="NAME" x="-22.86" y="53.34" size="1.27" layer="95"/>
 <attribute name="VALUE" x="-22.86" y="-78.74" size="1.27" layer="96"/>
 </instance>
@@ -3302,7 +3302,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </segment>
 <segment>
 <pinref part="GND2" gate="1" pin="GND"/>
-<pinref part="U$1" gate="G$1" pin="GND_2"/>
+<pinref part="STM32H405" gate="G$1" pin="GND_2"/>
 <wire x1="-55.88" y1="-12.7" x2="-55.88" y2="-10.16" width="0.1524" layer="91"/>
 <wire x1="-55.88" y1="-10.16" x2="-30.48" y2="-10.16" width="0.1524" layer="91"/>
 </segment>
@@ -3395,7 +3395,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="71.12" y="25.4" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U$1" gate="G$1" pin="VIN"/>
+<pinref part="STM32H405" gate="G$1" pin="VIN"/>
 <wire x1="-30.48" y1="40.64" x2="-45.72" y2="40.64" width="0.1524" layer="91"/>
 <label x="-45.72" y="40.64" size="1.778" layer="95"/>
 </segment>
@@ -3449,7 +3449,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="SCL3" class="0">
 <segment>
-<pinref part="U$1" gate="G$1" pin="PA8"/>
+<pinref part="STM32H405" gate="G$1" pin="PA8"/>
 <label x="38.1" y="40.64" size="1.778" layer="95"/>
 <wire x1="30.48" y1="40.64" x2="43.18" y2="40.64" width="0.1524" layer="91"/>
 </segment>
@@ -3475,7 +3475,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="SDA3" class="0">
 <segment>
-<pinref part="U$1" gate="G$1" pin="PC9"/>
+<pinref part="STM32H405" gate="G$1" pin="PC9"/>
 <wire x1="-30.48" y1="35.56" x2="-48.26" y2="35.56" width="0.1524" layer="91"/>
 <label x="-45.72" y="35.56" size="1.778" layer="95"/>
 </segment>
@@ -3501,7 +3501,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="ADC_OUT_1" class="0">
 <segment>
-<pinref part="U$1" gate="G$1" pin="PA1"/>
+<pinref part="STM32H405" gate="G$1" pin="PA1"/>
 <wire x1="-30.48" y1="-5.08" x2="-48.26" y2="-5.08" width="0.1524" layer="91"/>
 <label x="-48.26" y="-5.08" size="1.778" layer="95"/>
 </segment>
@@ -3535,7 +3535,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="N$22" class="0">
 <segment>
-<pinref part="U$1" gate="G$1" pin="SW-DAT"/>
+<pinref part="STM32H405" gate="G$1" pin="SW-DAT"/>
 <wire x1="7.62" y1="-38.1" x2="7.62" y2="-35.56" width="0.1524" layer="91"/>
 <wire x1="7.62" y1="-35.56" x2="10.16" y2="-33.02" width="0.1524" layer="91"/>
 <wire x1="10.16" y1="-33.02" x2="33.02" y2="-33.02" width="0.1524" layer="91"/>
@@ -3551,7 +3551,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="45.72" y1="-50.8" x2="25.4" y2="-30.48" width="0.1524" layer="91"/>
 <wire x1="25.4" y1="-30.48" x2="5.08" y2="-30.48" width="0.1524" layer="91"/>
 <wire x1="5.08" y1="-30.48" x2="2.54" y2="-33.02" width="0.1524" layer="91"/>
-<pinref part="U$1" gate="G$1" pin="SW-CLK"/>
+<pinref part="STM32H405" gate="G$1" pin="SW-CLK"/>
 <wire x1="2.54" y1="-33.02" x2="2.54" y2="-38.1" width="0.1524" layer="91"/>
 </segment>
 </net>
@@ -3584,13 +3584,13 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <wire x1="-10.16" y1="157.48" x2="-10.16" y2="116.84" width="0.1524" layer="91"/>
 <wire x1="-10.16" y1="116.84" x2="-2.54" y2="109.22" width="0.1524" layer="91"/>
 <wire x1="-2.54" y1="109.22" x2="12.7" y2="109.22" width="0.1524" layer="91"/>
-<pinref part="U$1" gate="G$1" pin="PA11"/>
+<pinref part="STM32H405" gate="G$1" pin="PA11"/>
 <wire x1="12.7" y1="109.22" x2="15.24" y2="106.68" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$7" class="0">
 <segment>
-<pinref part="U$1" gate="G$1" pin="PA12"/>
+<pinref part="STM32H405" gate="G$1" pin="PA12"/>
 <wire x1="15.24" y1="101.6" x2="12.7" y2="104.14" width="0.1524" layer="91"/>
 <wire x1="12.7" y1="104.14" x2="7.62" y2="104.14" width="0.1524" layer="91"/>
 <wire x1="7.62" y1="104.14" x2="-5.08" y2="116.84" width="0.1524" layer="91"/>
@@ -3601,7 +3601,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="N$16" class="0">
 <segment>
-<pinref part="U$1" gate="G$1" pin="+3.3V"/>
+<pinref part="STM32H405" gate="G$1" pin="+3.3V"/>
 <wire x1="15.24" y1="96.52" x2="17.78" y2="99.06" width="0.1524" layer="91"/>
 <wire x1="17.78" y1="99.06" x2="17.78" y2="160.02" width="0.1524" layer="91"/>
 <wire x1="17.78" y1="160.02" x2="12.7" y2="165.1" width="0.1524" layer="91"/>
@@ -3619,7 +3619,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="SOL_D_2" class="0">
 <segment>
-<pinref part="U$1" gate="G$1" pin="PC3"/>
+<pinref part="STM32H405" gate="G$1" pin="PC3"/>
 <wire x1="-15.24" y1="66.04" x2="-27.94" y2="66.04" width="0.1524" layer="91"/>
 <label x="-27.94" y="66.04" size="1.778" layer="95"/>
 </segment>
@@ -3635,7 +3635,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="SOL_D_3" class="0">
 <segment>
-<pinref part="U$1" gate="G$1" pin="PC4"/>
+<pinref part="STM32H405" gate="G$1" pin="PC4"/>
 <wire x1="-30.48" y1="5.08" x2="-45.72" y2="5.08" width="0.1524" layer="91"/>
 <label x="-45.72" y="5.08" size="1.778" layer="95"/>
 </segment>
@@ -3651,7 +3651,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="SOL_D_4" class="0">
 <segment>
-<pinref part="U$1" gate="G$1" pin="PC5"/>
+<pinref part="STM32H405" gate="G$1" pin="PC5"/>
 <wire x1="-15.24" y1="76.2" x2="-27.94" y2="76.2" width="0.1524" layer="91"/>
 <label x="-27.94" y="76.2" size="1.778" layer="95"/>
 </segment>
@@ -3667,7 +3667,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="3V3" class="0">
 <segment>
-<pinref part="U$1" gate="G$1" pin="3.3V"/>
+<pinref part="STM32H405" gate="G$1" pin="3.3V"/>
 <wire x1="-15.24" y1="55.88" x2="-33.02" y2="55.88" width="0.1524" layer="91"/>
 <label x="-30.48" y="55.88" size="1.778" layer="95"/>
 </segment>
@@ -3711,7 +3711,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="ADC_OUT_2" class="0">
 <segment>
-<pinref part="U$1" gate="G$1" pin="PA3"/>
+<pinref part="STM32H405" gate="G$1" pin="PA3"/>
 <wire x1="-30.48" y1="0" x2="-50.8" y2="0" width="0.1524" layer="91"/>
 <label x="-48.26" y="0" size="1.778" layer="95"/>
 </segment>
@@ -3728,7 +3728,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="50.8" y="55.88" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U$1" gate="G$1" pin="PB12"/>
+<pinref part="STM32H405" gate="G$1" pin="PB12"/>
 <wire x1="-15.24" y1="86.36" x2="-30.48" y2="86.36" width="0.1524" layer="91"/>
 <label x="-27.94" y="86.36" size="1.778" layer="95"/>
 </segment>
@@ -3740,7 +3740,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="50.8" y="50.8" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U$1" gate="G$1" pin="PB15"/>
+<pinref part="STM32H405" gate="G$1" pin="PB15"/>
 <wire x1="-15.24" y1="91.44" x2="-30.48" y2="91.44" width="0.1524" layer="91"/>
 <label x="-27.94" y="91.44" size="1.778" layer="95"/>
 </segment>
@@ -3752,7 +3752,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="50.8" y="45.72" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U$1" gate="G$1" pin="PB13"/>
+<pinref part="STM32H405" gate="G$1" pin="PB13"/>
 <wire x1="-30.48" y1="15.24" x2="-48.26" y2="15.24" width="0.1524" layer="91"/>
 <label x="-45.72" y="15.24" size="1.778" layer="95"/>
 </segment>
@@ -3764,14 +3764,14 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="50.8" y="60.96" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U$1" gate="G$1" pin="PB14"/>
+<pinref part="STM32H405" gate="G$1" pin="PB14"/>
 <wire x1="-30.48" y1="20.32" x2="-48.26" y2="20.32" width="0.1524" layer="91"/>
 <label x="-45.72" y="20.32" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="SCK_3" class="0">
 <segment>
-<pinref part="U$1" gate="G$1" pin="PC10"/>
+<pinref part="STM32H405" gate="G$1" pin="PC10"/>
 <wire x1="30.48" y1="25.4" x2="48.26" y2="25.4" width="0.1524" layer="91"/>
 <label x="38.1" y="25.4" size="1.778" layer="95"/>
 </segment>
@@ -3783,7 +3783,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="MOSI_3" class="0">
 <segment>
-<pinref part="U$1" gate="G$1" pin="PC12"/>
+<pinref part="STM32H405" gate="G$1" pin="PC12"/>
 <wire x1="30.48" y1="20.32" x2="48.26" y2="20.32" width="0.1524" layer="91"/>
 <label x="38.1" y="20.32" size="1.778" layer="95"/>
 </segment>
@@ -3795,7 +3795,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="MISO_3" class="0">
 <segment>
-<pinref part="U$1" gate="G$1" pin="PC11"/>
+<pinref part="STM32H405" gate="G$1" pin="PC11"/>
 <wire x1="15.24" y1="86.36" x2="30.48" y2="86.36" width="0.1524" layer="91"/>
 <label x="20.32" y="86.36" size="1.778" layer="95"/>
 </segment>
@@ -3807,7 +3807,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </net>
 <net name="NSS_3" class="0">
 <segment>
-<pinref part="U$1" gate="G$1" pin="PD2"/>
+<pinref part="STM32H405" gate="G$1" pin="PD2"/>
 <wire x1="15.24" y1="81.28" x2="30.48" y2="81.28" width="0.1524" layer="91"/>
 <label x="20.32" y="81.28" size="1.778" layer="95"/>
 </segment>
@@ -3828,7 +3828,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="-83.82" y="33.02" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U$1" gate="G$1" pin="PA5"/>
+<pinref part="STM32H405" gate="G$1" pin="PA5"/>
 <wire x1="30.48" y1="0" x2="45.72" y2="0" width="0.1524" layer="91"/>
 <label x="35.56" y="0" size="1.778" layer="95"/>
 </segment>
@@ -3844,7 +3844,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="-83.82" y="27.94" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U$1" gate="G$1" pin="PC1"/>
+<pinref part="STM32H405" gate="G$1" pin="PC1"/>
 <wire x1="30.48" y1="-5.08" x2="45.72" y2="-5.08" width="0.1524" layer="91"/>
 <label x="35.56" y="-5.08" size="1.778" layer="95"/>
 </segment>
@@ -3860,7 +3860,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="-83.82" y="15.24" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U$1" gate="G$1" pin="PA7"/>
+<pinref part="STM32H405" gate="G$1" pin="PA7"/>
 <wire x1="30.48" y1="-10.16" x2="45.72" y2="-10.16" width="0.1524" layer="91"/>
 <label x="35.56" y="-10.16" size="1.778" layer="95"/>
 </segment>
@@ -3876,7 +3876,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="-83.82" y="10.16" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U$1" gate="G$1" pin="PB1"/>
+<pinref part="STM32H405" gate="G$1" pin="PB1"/>
 <wire x1="30.48" y1="-20.32" x2="45.72" y2="-20.32" width="0.1524" layer="91"/>
 <label x="35.56" y="-20.32" size="1.778" layer="95"/>
 </segment>
@@ -3892,7 +3892,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="-83.82" y="-58.42" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U$1" gate="G$1" pin="PC2"/>
+<pinref part="STM32H405" gate="G$1" pin="PC2"/>
 <wire x1="-30.48" y1="-20.32" x2="-33.02" y2="-20.32" width="0.1524" layer="91"/>
 <wire x1="-33.02" y1="-20.32" x2="-38.1" y2="-25.4" width="0.1524" layer="91"/>
 <wire x1="-38.1" y1="-25.4" x2="-48.26" y2="-25.4" width="0.1524" layer="91"/>
