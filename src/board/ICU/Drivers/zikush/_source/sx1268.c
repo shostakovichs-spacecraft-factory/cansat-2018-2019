@@ -6,6 +6,7 @@
  */
 
 #include <stdbool.h>
+#include <string.h>
 
 #include "sx1268.h"
 
@@ -18,8 +19,6 @@
 #endif
 
 #define TIMEOUT 10000
-#define TRY_UNTIL_TIMEOUT_HEADER for(cycles = 0; cycles < TIMEOUT; cycles++)
-#define TRY_UNTIL_TIMEOUT_FOOTER if(cycles == TIMEOUT - 1) {status == SX1268_TIMEOUT; goto end;}
 
 #define UINT24_T_FORM(SOURCE, BYTE0, BYTE1, BYTE2)		BYTE0 = SOURCE & 0xFF; BYTE1 = (SOURCE >> 8) & 0xFF; BYTE2 = (SOURCE >> 16) & 0xFF;
 #define UINT24_T_DECODE(SOURCE, BYTE0, BYTE1, BYTE2)	SOURCE = BYTE0 | (BYTE1 << 8) | (BYTE2 << 16);
@@ -34,7 +33,6 @@ static sx1268_status_t _cmd(sx1268_t * self, uint8_t opcode, uint8_t * buff, uin
 	HAL_SPI_Transmit(self->bus, &opcode, 1, TIMEOUT);
 	HAL_SPI_TransmitReceive(self->bus, buff, buff, arglength, TIMEOUT);
 
-end:
 	HAL_GPIO_WritePin(self->cs_port, self->cs_pin, GPIO_PIN_SET);
 	return status;
 }
@@ -106,7 +104,7 @@ static inline sx1268_status_t _cmd_SetTxInfinitePreamble(sx1268_t * self)
 
 static inline sx1268_status_t _cmd_SetRegulatorMode(sx1268_t * self, bool useDCDC)
 {
-	return _cmd(self, 0x96, &useDCDC, 1);
+	return _cmd(self, 0x96, (uint8_t *)&useDCDC, 1);
 }
 
 static inline sx1268_status_t _cmd_Calibrate(sx1268_t * self, uint8_t calibParam)
@@ -178,7 +176,6 @@ static inline sx1268_status_t _cmd_WriteBuffer(sx1268_t * self,	uint8_t addr, ui
 	HAL_SPI_Transmit(self->bus, &addr, 1, TIMEOUT);
 	HAL_SPI_Transmit(self->bus, data, length, TIMEOUT);
 
-end:
 	HAL_GPIO_WritePin(self->cs_port, self->cs_pin, GPIO_PIN_SET);
 	return status;
 }
@@ -192,9 +189,8 @@ static inline sx1268_status_t _cmd_ReadBuffer(sx1268_t * self,	uint8_t addr, uin
 	uint8_t opcode = 0x1E;
 	HAL_SPI_Transmit(self->bus, &opcode, 1, TIMEOUT);
 	HAL_SPI_Transmit(self->bus, &addr, 1, TIMEOUT);
-	HAL_SPI_Receive()(self->bus, data, length, TIMEOUT);
+	HAL_SPI_Receive(self->bus, data, length, TIMEOUT);
 
-end:
 	HAL_GPIO_WritePin(self->cs_port, self->cs_pin, GPIO_PIN_SET);
 	return status;
 }
@@ -245,7 +241,7 @@ static inline sx1268_status_t _cmd_ClearIrqStatus(sx1268_t * self, uint16_t Clea
 
 static inline sx1268_status_t _cmd_SetDIO2AsRfSwitchCtrl(sx1268_t * self, bool enable)
 {
-	return _cmd(self, 0x9D, &enable, 1);
+	return _cmd(self, 0x9D, (uint8_t *)&enable, 1);
 }
 
 static inline sx1268_status_t _cmd_SetDIO3AsTCXOCtrl(sx1268_t * self, uint8_t txcoVoltage, uint32_t timeout)
@@ -258,7 +254,7 @@ static inline sx1268_status_t _cmd_SetDIO3AsTCXOCtrl(sx1268_t * self, uint8_t tx
 	return _cmd(self, 0x97, buff, 4);
 }
 
-#define RFFREQ_CALC(FREQ)	(FREQ * 32000000 / 2 ^ 25)
+#define RFFREQ_CALC(FREQ)	(FREQ / 2 ^ 25 * 32000000)
 
 static inline sx1268_status_t _cmd_SetRfFrequency(sx1268_t * self, uint32_t RfFreq)
 {
@@ -272,14 +268,14 @@ static inline sx1268_status_t _cmd_SetRfFrequency(sx1268_t * self, uint32_t RfFr
 
 static inline sx1268_status_t _cmd_SetPacketType(sx1268_t * self, bool LoRa)
 {
-	return _cmd(self, 0x8A, &LoRa, 1);
+	return _cmd(self, 0x8A, (uint8_t *)&LoRa, 1);
 }
 
 static inline sx1268_status_t _cmd_GetPacketType(sx1268_t * self, bool * LoRa)
 {
 	uint8_t buff[2];
 	return _cmd(self, 0x11, buff, 2);
-	LoRa = buff[1];
+	*LoRa = buff[1];
 }
 
 #define RAMPTIME_10U 	0x00
@@ -358,8 +354,8 @@ static inline sx1268_status_t _cmd_SetBufferBaseAddress(sx1268_t * self, uint8_t
 	return _cmd(self, 0x8F, buff, 2);
 }
 
-#define STATUS_CHIPMODE(STATUS)	(STATUS>>4)&0x07
-#define STATUS_COMMAND(STATUS)	(STATUS>>1)&0x07
+#define STATUS_CHIPMODE(STATUS)	((STATUS>>4)&0x07)
+#define STATUS_COMMAND(STATUS)	((STATUS>>1)&0x07)
 
 #define STATUS_CHIPMODE_STBY_RC		0x02
 #define STATUS_CHIPMODE_STBY_XOSC	0x03
@@ -389,7 +385,7 @@ static inline sx1268_status_t _cmd_GetRxBufferStatus(sx1268_t * self, uint8_t * 
 }
 
 #define FIFO_FREESPACE(FIFO) ((FIFO->tail - FIFO->head) % FIFO->length)
-#define FIFO_USEDSPACE(FIFO) ((FIFO->head - FIFO->tail) % FIFO->length)
+#define FIFO_USEDSPACE(FIFO) ((FIFO->head - FIFO->tail) % (FIFO->length))
 
 static sx1268_status_t _fifo_write(sx1268_fifo_t * fifo, uint8_t * data, int len)
 {
@@ -446,11 +442,16 @@ static void _sendpackparams(sx1268_t * self, uint8_t PayloadLength) //yeees, it'
 
 static void _dotx(sx1268_t * self, uint8_t * buff, int len)
 {
+	volatile uint8_t status;
 	_cmd_SetTxParams(self, POWER_LOW_HIGHEST, RAMPTIME_200U);
+	_cmd_GetStatus(self, &status);
 	_cmd_SetBufferBaseAddress(self, 0, 0);
+	_cmd_GetStatus(self, &status);
 	_cmd_WriteBuffer(self, 0, buff, len);
+	_cmd_GetStatus(self, &status);
 	_sendpackparams(self, len);
-	_cmd_SetTX(self, 64000); //1 second timeout
+	_cmd_GetStatus(self, &status);
+	_cmd_SetTX(self, 640); //1 second timeout
 }
 
 void sx1268_struct_init(sx1268_t * self, uint8_t * rxbuff, int rxbufflen, uint8_t * txbuff, int txbufflen)
@@ -470,16 +471,20 @@ void sx1268_struct_init(sx1268_t * self, uint8_t * rxbuff, int rxbufflen, uint8_
 
 sx1268_status_t sx1268_init(sx1268_t * self)
 {
-	uint8_t status;
+	volatile uint8_t status;
 	_cmd_GetStatus(self, &status);
 
-	if(STATUS_CHIPMODE(status) != STATUS_CHIPMODE_STBY_RC)
-		_cmd_SetStandby(self, false);
+	_cmd_SetStandby(self, false);
+
+	_cmd_GetStatus(self, &status);
 
 	_cmd_SetPacketType(self, false); //set gfsk
-	_cmd_SetRfFrequency(self, RFFREQ_CALC(432000000));
+	_cmd_GetStatus(self, &status);
+	_cmd_SetRfFrequency(self, RFFREQ_CALC(433000000));
+	_cmd_GetStatus(self, &status);
 	//TODO maybe SetDIO3AsTcxoCtrl() ?
 	_cmd_CalibrateImage(self, 0x6B, 0x6F); //430-440 MHz, according to datasheet
+	_cmd_GetStatus(self, &status);
 
 	sx1268_modparams_gfsk_t modparams;
 	uint32_t br = 32 * 32000000 / 4800;
@@ -488,10 +493,18 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 	modparams.Bandwidth = 0x1D;
 	modparams.PulseShape = 0x09;
 	_cmd_SetModulationParams(self, (uint8_t *) &modparams);
+	_cmd_GetStatus(self, &status);
 
 	_sendpackparams(self, 255);
+	_cmd_GetStatus(self, &status);
 
-	_cmd_WriteRegister_burst(self, "antonloh", 8);
+	uint8_t syncstring[] = "antonloh";
+	_cmd_WriteRegister_burst(self, syncstring, 8);
+	_cmd_GetStatus(self, &status);
+
+	uint16_t TXRXDONEANDTIMEOUT = (1 << 0) | (1 << 1) | (1 << 9);
+	_cmd_SetDioIrqParams(self, TXRXDONEANDTIMEOUT, TXRXDONEANDTIMEOUT, 0, 0);
+	_cmd_GetStatus(self, &status);
 
 	return SX1268_OK; //TODO
 }
@@ -500,17 +513,20 @@ sx1268_status_t sx1268_send(sx1268_t * self, uint8_t * data, int len)
 {
 	if( HAL_GPIO_ReadPin(self->busy_port, self->busy_pin) )
 	{
-		return _fifo_write(self->fifo_tx, data, len);
+		return _fifo_write(&self->fifo_tx, data, len);
 	}
 
 	uint8_t status;
 	_cmd_GetStatus(self, &status);
 
+	if(STATUS_CHIPMODE(status) != STATUS_CHIPMODE_STBY_RC)
+		_cmd_SetStandby(self, false);
+
 	_dotx(self, data, MIN(len, 255));
 
 	if(len > 255) //we can send only 255 bytes in one packet, so everything except should be saved to fifo
 	{
-		_fifo_write(self->fifo_tx, data + 255, len - 255);
+		_fifo_write(&self->fifo_tx, data + 255, len - 255);
 	}
 
 	return SX1268_OK;
@@ -518,18 +534,19 @@ sx1268_status_t sx1268_send(sx1268_t * self, uint8_t * data, int len)
 
 sx1268_status_t sx1268_receive(sx1268_t * self, uint8_t * data, int len)
 {
-	if(FIFO_USEDSPACE(self->fifo_rx) < len)
+	if(FIFO_USEDSPACE((&self->fifo_rx)) < len)
 		return SX1268_ERR_BUFSIZE;
 
-	_fifo_read(self->fifo_rx, data, len);
+	return _fifo_read(&self->fifo_rx, data, len);
 }
 
 void sx1268_event(sx1268_t * self)
 {
-	uint16_t irqstatus;
-	uint8_t status;
+	volatile uint16_t irqstatus;
+	volatile uint8_t status;
 	uint8_t buff[256];
 	_cmd_GetIrqStatus(self, &status, &irqstatus);
+	_cmd_ClearIrqStatus(self, irqstatus);
 
 	if(irqstatus & IRQFLAG_RXDONE)
 	{
@@ -544,7 +561,7 @@ void sx1268_event(sx1268_t * self)
 
 	if(!self->fifo_tx.empty)
 	{
-		int len = FIFO_USEDSPACE(&self->fifo_tx);
+		int len = FIFO_USEDSPACE((&self->fifo_tx));
 		len = MIN(len, 255);
 
 		_fifo_read(&self->fifo_tx, buff, len);
