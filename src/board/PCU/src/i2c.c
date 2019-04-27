@@ -10,6 +10,15 @@
 #include <stdlib.h>
 
 
+#define I2C_IT_BUF                      ((uint16_t)0x0400)
+#define I2C_IT_EVT                      ((uint16_t)0x0200)
+#define I2C_IT_ERR                      ((uint16_t)0x0100)
+
+#define I2C_DIRECTION_TX 0
+#define I2C_DIRECTION_RX 1
+
+
+
 typedef struct
 {
 	uint8_t slave_address;
@@ -45,7 +54,7 @@ static void _init_bus_common(I2C_TypeDef * bus)
 	bus_init.I2C_Ack = I2C_Ack_Enable;
 	bus_init.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	bus_init.I2C_ClockSpeed = 400*1000;
-	bus_init.I2C_DutyCycle = I2C_DutyCycle_16_9;
+	bus_init.I2C_DutyCycle = I2C_DutyCycle_2;
 	bus_init.I2C_Mode = I2C_Mode_I2C;
 	bus_init.I2C_OwnAddress1 = 0x00;
 
@@ -95,197 +104,255 @@ void i2c_init_bus2(void)
 }
 
 
-int i2c_read(I2C_TypeDef * bus, uint8_t slave, void * buffer, size_t buffer_size)
+int i2c_read(I2C_TypeDef * bus, uint8_t slave, void * buffer_, size_t buffer_size)
 {
-	i2c_bus_state_t * const state = _get_bus_state(bus);
-	/* Enable EVT IT*/
-	bus->CR2 |= I2C_IT_EVT;
-	/* Enable BUF IT */
-	bus->CR2 |= I2C_IT_BUF;
-	/* Set the I2C direction to reception */
-	state->xfer_direction = I2C_Direction_Receiver;
-	state->slave_address = slave << 1;
-	state->xfer_buffer = (uint8_t*)buffer;
-	state->xfer_size = buffer_size;
-	state->error = 0;
+	uint32_t temp = 0;
+	uint32_t Timeout = 0;
+	uint8_t * buffer = (uint8_t*)buffer_;
 
-	/* Send START condition */
-	I2C_GenerateSTART(bus, ENABLE);
-	/* Wait until the START condition is generated on the bus: START bit is cleared by hardware */
-	while ((bus->CR1 & 0x100) == 0x100);
-	/* Wait until BUSY flag is reset (until a STOP is generated) */
-	while ((bus->SR2 & 0x0002) == 0x0002);
-	/* Enable Acknowledgement to be ready for another reception */
-	I2C_AcknowledgeConfig(bus, ENABLE);
-	//bus->CR1 |= CR1_ACK_Set;
-
-	return state->error;
-}
-
-
-int i2c_write(I2C_TypeDef * bus, uint8_t slave, void * buffer, size_t buffer_size)
-{
-	i2c_bus_state_t * const state = _get_bus_state(bus);
-	/* Enable Error IT */
+	/* Enable I2C errors interrupts (used in all modes: Polling, DMA and Interrupts */
 	bus->CR2 |= I2C_IT_ERR;
-	/* Enable EVT IT*/
-	bus->CR2 |= I2C_IT_EVT;
-	/* Enable BUF IT */
-	bus->CR2 |= I2C_IT_BUF;
-	/* Set the I2C direction to Transmission */
-	state->xfer_direction = I2C_Direction_Transmitter;
-	state->slave_address = slave << 1;
-	state->xfer_buffer = (uint8_t*)buffer;
-	state->xfer_size = buffer_size;
-	state->error = 0;
 
-	/* Send START condition */
-	I2C_GenerateSTART(bus, ENABLE);
-	//I2Cx->CR1 |= CR1_START_Set;
-	/* Wait until the START condition is generated on the bus: the START bit is cleared by hardware */
-	while ((bus->CR1 & 0x100) == 0x100);
-	/* Wait until BUSY flag is reset: a STOP has been generated on the bus signaling the end
-	of transmission */
-	while ((bus->SR2 & 0x0002) == 0x0002);
+	int Error = -1;
 
-	return state->error;
-}
-
-
-static void _i2c_ev_it_handler(I2C_TypeDef * bus)
-{
-	i2c_bus_state_t * const state = _get_bus_state(bus);
-	volatile uint32_t SR1Register = 0;
-	volatile uint32_t SR2Register = 0;
-
-	/* Read the bus SR1 and SR2 status registers */
-	SR1Register = bus->SR1;
-	SR2Register = bus->SR2;
-
-	/* If SB = 1, I2C1 master sent a START on the bus: EV5) */
-	if ((SR1Register & 0x0001) == 0x0001)
+	if (buffer_size == 1)
 	{
-		/* Send the slave address for transmssion or for reception (according to the configured value
-			in the write master write routine */
-		I2C_Send7bitAddress(bus, state->slave_address, state->xfer_direction);
-		//I2C2->DR = state->slave_address;
-		SR1Register = 0;
-		SR2Register = 0;
+		Timeout = 0xFFFF;
+		/* Send START condition */
+		I2C_GenerateSTART(bus, ENABLE);
+		/* Wait until SB flag is set: EV5  */
+		while ((bus->SR1 & 0x0001) != 0x0001)
+		{
+			if (Timeout-- == 0)
+				return Error;
+		}
+		/* Send slave address */
+		I2C_Send7bitAddress(bus, slave << 1, I2C_Direction_Receiver);
+
+		/* Wait until ADDR is set: EV6_3, then program ACK = 0, clear ADDR
+		and program the STOP just after ADDR is cleared. The EV6_3
+		software sequence must complete before the current byte end of transfer.*/
+		/* Wait until ADDR is set */
+		Timeout = 0xFFFF;
+		while ((bus->SR1 & 0x0002) != 0x0002)
+		{
+			if (Timeout-- == 0)
+				return Error;
+		}
+		/* Clear ACK bit */
+		I2C_AcknowledgeConfig(bus, DISABLE);
+		/* Disable all active IRQs around ADDR clearing and STOP programming because the EV6_3
+		software sequence must complete before the current byte end of transfer */
+		__disable_irq();
+		/* Clear ADDR flag */
+		temp = bus->SR2;
+		/* Program the STOP */
+		I2C_GenerateSTOP(bus, ENABLE);
+		/* Re-enable IRQs */
+		__enable_irq();
+		/* Wait until a data is received in DR register (RXNE = 1) EV7 */
+		while ((bus->SR1 & 0x00040) != 0x000040);
+		/* Read the data */
+		*buffer = bus->DR;
+		/* Make sure that the STOP bit is cleared by Hardware before CR1 write access */
+		while ((bus->CR1&0x200) == 0x200);
+		/* Enable Acknowledgement to be ready for another reception */
+		I2C_AcknowledgeConfig(bus, ENABLE);
+
 	}
-
-	/* If I2C2 is Master (MSL flag = 1) */
-	if ((SR2Register &0x0001) == 0x0001)
+	else if (buffer_size == 2)
 	{
-		/* If ADDR = 1, EV6 */
-		if ((SR1Register &0x0002) == 0x0002)
+		/* Set POS bit */
+		I2C_PECPositionConfig(bus, I2C_PECPosition_Next);
+		Timeout = 0xFFFF;
+		/* Send START condition */
+		I2C_GenerateSTART(bus, ENABLE);
+		/* Wait until SB flag is set: EV5 */
+		while ((bus->SR1 & 0x0001) != 0x0001)
 		{
-			/* Write the first data in case the Master is Transmitter */
-			if (state->xfer_direction == I2C_Direction_Transmitter)
-			{
-				/* Write the first data in the data register */
-				bus->DR = *(state->xfer_buffer++);
-				/* Decrement the number of bytes to be written */
-				state->xfer_size--;
-				/* If no further data to be sent, disable the I2C BUF IT
-				in order to not have a TxE  interrupt */
-				if (state->xfer_size == 0)
-				{
-					bus->CR2 &= (uint16_t)~I2C_IT_BUF;
-				}
-
-			}
-			/* Master Receiver */
-			else
-			{
-				/* At this stage, ADDR is cleared because both SR1 and SR2 were read.*/
-				/* EV6_1: used for single byte reception. The ACK disable and the STOP
-				Programming should be done just after ADDR is cleared. */
-				if (state->xfer_size == 1)
-				{
-					/* Clear ACK */
-					I2C_AcknowledgeConfig(bus, DISABLE);
-					//I2C2->CR1 &= CR1_ACK_Reset;
-					/* Program the STOP */
-					I2C_GenerateSTOP(bus, ENABLE);
-					//I2C2->CR1 |= CR1_STOP_Set;
-				}
-			}
-			SR1Register = 0;
-			SR2Register = 0;
-
+			if (Timeout-- == 0)
+				return Error;
 		}
-		/* Master transmits the remaing data: from data2 until the last one.  */
-		/* If TXE is set */
-		if ((SR1Register &0x0084) == 0x0080)
+		Timeout = 0xFFFF;
+		/* Send slave address */
+		I2C_Send7bitAddress(bus, slave << 1, I2C_Direction_Receiver);
+		/* Wait until ADDR is set: EV6 */
+		while ((bus->SR1 & 0x0002) != 0x0002)
 		{
-			/* If there is still data to write */
-			if (state->xfer_size != 0)
+			if (Timeout-- == 0)
+				return Error;
+		}
+		/* EV6_1: The acknowledge disable should be done just after EV6,
+		that is after ADDR is cleared, so disable all active IRQs around ADDR clearing and
+		ACK clearing */
+		__disable_irq();
+		/* Clear ADDR by reading SR2 register  */
+		temp = bus->SR2;
+		/* Clear ACK */
+		I2C_AcknowledgeConfig(bus, DISABLE);
+		/*Re-enable IRQs */
+		__enable_irq();
+		/* Wait until BTF is set */
+		while ((bus->SR1 & 0x00004) != 0x000004);
+		/* Disable IRQs around STOP programming and data reading because of the limitation ?*/
+		__disable_irq();
+		/* Program the STOP */
+		I2C_GenerateSTOP(bus, ENABLE);
+		/* Read first data */
+		*buffer = bus->DR;
+		/* Re-enable IRQs */
+		__enable_irq();
+		/**/
+		buffer++;
+		/* Read second data */
+		*buffer = bus->DR;
+		/* Make sure that the STOP bit is cleared by Hardware before CR1 write access */
+		while ((bus->CR1&0x200) == 0x200);
+		/* Enable Acknowledgement to be ready for another reception */
+		I2C_AcknowledgeConfig(bus, ENABLE);
+		/* Clear POS bit */
+		I2C_PECPositionConfig(bus, I2C_PECPosition_Current);
+	}
+	else
+	{
+		Timeout = 0xFFFF;
+		/* Send START condition */
+		I2C_GenerateSTART(bus, ENABLE);
+		/* Wait until SB flag is set: EV5 */
+		while ((bus->SR1 & 0x0001) != 0x0001)
+		{
+			if (Timeout-- == 0)
+				return Error;
+		}
+		Timeout = 0xFFFF;
+		/* Send slave address */
+		I2C_Send7bitAddress(bus, slave << 1, I2C_Direction_Receiver);
+		/* Wait until ADDR is set: EV6 */
+		while ((bus->SR1 & 0x0002) != 0x0002)
+		{
+			if (Timeout-- == 0)
+				return Error;
+		}
+		/* Clear ADDR by reading SR2 status register */
+		temp = bus->SR2;
+		/* While there is data to be read */
+		while (buffer_size)
+		{
+			/* Receive bytes from first byte until byte N-3 */
+			if (buffer_size != 3)
 			{
-				/* Write the data in DR register */
-				bus->DR = *(state->xfer_buffer++);
-				/* Decrment the number of data to be written */
-				state->xfer_size--;
-				/* If  no data remains to write, disable the BUF IT in order
-				to not have again a TxE interrupt. */
-				if (state->xfer_size == 0)
-				{
-					/* Disable the BUF IT */
-					bus->CR2 &= (uint16_t)~I2C_IT_BUF;
-				}
+				/* Poll on BTF to receive data because in polling mode we can not guarantee the
+				EV7 software sequence is managed before the current byte transfer completes */
+				while ((bus->SR1 & 0x00004) != 0x000004);
+				/* Read data */
+				*buffer = bus->DR;
+				/* */
+				buffer++;
+				/* Decrement the read bytes counter */
+				buffer_size--;
 			}
-			SR1Register = 0;
-			SR2Register = 0;
-		}
 
-		/* If BTF and TXE are set (EV8_2), program the STOP */
-		if ((SR1Register &0x0084) == 0x0084)
-		{
-
-			/* Program the STOP */
-			I2C_GenerateSTOP(bus, ENABLE);
-			//I2C2->CR1 |= CR1_STOP_Set;
-			/* Disable EVT IT In order to not have again a BTF IT */
-			I2C2->CR2 &= (uint16_t)~I2C_IT_EVT;
-			SR1Register = 0;
-			SR2Register = 0;
-		}
-
-		/* If RXNE is set */
-		if ((SR1Register &0x0040) == 0x0040)
-		{
-			/* Read the data register */
-			*(state->xfer_buffer++) = (uint8_t)bus->DR;
-			/* Decrement the number of bytes to be read */
-			state->xfer_size--;
-
-			/* If it remains only one byte to read, disable ACK and program the STOP (EV7_1) */
-			if (state->xfer_size == 1)
+			/* it remains to read three data: data N-2, data N-1, Data N */
+			if (buffer_size == 3)
 			{
+
+				/* Wait until BTF is set: Data N-2 in DR and data N -1 in shift register */
+				while ((bus->SR1 & 0x00004) != 0x000004);
 				/* Clear ACK */
 				I2C_AcknowledgeConfig(bus, DISABLE);
-				//I2C2->CR1 &= CR1_ACK_Reset;
+
+				/* Disable IRQs around data reading and STOP programming because of the
+				limitation ? */
+				__disable_irq();
+				/* Read Data N-2 */
+				*buffer = bus->DR;
+				/* Increment */
+				buffer++;
 				/* Program the STOP */
 				I2C_GenerateSTOP(bus, ENABLE);
-				//I2C2->CR1 |= CR1_STOP_Set;
+				/* Read DataN-1 */
+				*buffer = bus->DR;
+				/* Re-enable IRQs */
+				__enable_irq();
+				/* Increment */
+				buffer++;
+				/* Wait until RXNE is set (DR contains the last data) */
+				while ((bus->SR1 & 0x00040) != 0x000040);
+				/* Read DataN */
+				*buffer = bus->DR;
+				/* Reset the number of bytes to be read by master */
+				buffer_size = 0;
 			}
-			SR1Register = 0;
-			SR2Register = 0;
 		}
+		/* Make sure that the STOP bit is cleared by Hardware before CR1 write access */
+		while ((bus->CR1 & 0x200) == 0x200);
+		/* Enable Acknowledgement to be ready for another reception */
+		I2C_AcknowledgeConfig(bus, ENABLE);
 	}
+
+	return 0;
 }
 
 
-void I2C1_EV_IRQHandler(void)
+int i2c_write(I2C_TypeDef * bus, uint8_t slave, void * buffer_, size_t buffer_size)
 {
-	_i2c_ev_it_handler(I2C1);
+	uint32_t temp = 0;
+	uint32_t Timeout = 0;
+	int Error = -1;
+	uint8_t * buffer = (uint8_t*)buffer_;
+
+	/* Enable Error IT (used in all modes: DMA, Polling and Interrupts */
+	bus->CR2 |= I2C_IT_ERR;
+
+	Timeout = 0xFFFF;
+	/* Send START condition */
+	I2C_GenerateSTART(bus, ENABLE);
+	/* Wait until SB flag is set: EV5 */
+	while ((bus->SR1 & 0x0001) != 0x0001)
+	{
+		if (Timeout-- == 0)
+			return Error;
+	}
+
+	/* Send slave address */
+	/* Reset the address bit0 for write*/
+	I2C_Send7bitAddress(bus, slave << 1, I2C_Direction_Transmitter);
+	Timeout = 0xFFFF;
+	/* Wait until ADDR is set: EV6 */
+	while ((bus->SR1 & 0x0002) != 0x0002)
+	{
+		if (Timeout-- == 0)
+			return Error;
+	}
+
+	/* Clear ADDR flag by reading SR2 register */
+	temp = bus->SR2;
+	/* Write the first data in DR register (EV8_1) */
+	bus->DR = *buffer;
+	/* Increment */
+	buffer++;
+	/* Decrement the number of bytes to be written */
+	buffer_size--;
+	/* While there is data to be written */
+	while (buffer_size--)
+	{
+		/* Poll on BTF to receive data because in polling mode we can not guarantee the
+		  EV8 software sequence is managed before the current byte transfer completes */
+		while ((bus->SR1 & 0x00004) != 0x000004);
+		/* Send the current byte */
+		bus->DR = *buffer;
+		/* Point to the next byte to be written */
+		buffer++;
+	}
+	/* EV8_2: Wait until BTF is set before programming the STOP */
+	while ((bus->SR1 & 0x00004) != 0x000004);
+	/* Send STOP condition */
+	I2C_GenerateSTOP(bus, ENABLE);
+	/* Make sure that the STOP bit is cleared by Hardware */
+	while ((bus->CR1 & 0x200) == 0x200);
+
+	return 0;
 }
-
-
-void I2C2_EV_IRQHandler(void)
-{
-	_i2c_ev_it_handler(I2C2);
-}
-
 
 
 static void _i2c_er_it_handler(I2C_TypeDef * bus)

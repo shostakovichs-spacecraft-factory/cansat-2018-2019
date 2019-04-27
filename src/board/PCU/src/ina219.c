@@ -104,7 +104,6 @@ static int _read_reg(ina219_t * device, uint8_t reg_addr, uint16_t * reg_value)
 
 	// помним, что ина работает в big_endian, а мы в little
 	*reg_value = (raw_reg_value << 8) | (raw_reg_value >> 8);
-	*reg_value = raw_reg_value;
 	return error;
 }
 
@@ -141,14 +140,14 @@ static uint16_t _make_cfg_reg(const ina219_cfg_t * cfg)
 //! нарезка значения "первичных" регистров на "исходные" данные
 inline static void _slice_prim_data(const uint16_t * primregs, ina219_primary_data_t * primdata)
 {
-	// тут нужно хитро. нужно скопировать бфайты из uint16_t так, чтобы они воспринимались
+	// тут нужно хитро. нужно скопировать байты из uint16_t так, чтобы они воспринимались
 	// как int16_t
 	uint16_t * const uintptr = (uint16_t *)&primdata->shuntv;
 	*uintptr = primregs[0];
 
 	const uint16_t busvreg = primregs[1];
-	primdata->busv = INA219_GET_BITS(busvreg , INA219_BUSVREG__BUSV);
-	primdata->cnvr = INA219_GET_BITS(busvreg , INA219_BUSVREG__CNVR);
+	primdata->busv = INA219_GET_BITS(busvreg, INA219_BUSVREG__BUSV);
+	primdata->cnvr = INA219_GET_BITS(busvreg, INA219_BUSVREG__CNVR);
 	primdata->ovf = INA219_GET_BITS(busvreg, INA219_BUSVREG__OVF);
 
 }
