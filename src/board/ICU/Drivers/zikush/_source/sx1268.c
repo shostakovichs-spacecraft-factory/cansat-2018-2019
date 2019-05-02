@@ -37,22 +37,22 @@ static sx1268_status_t _cmd(sx1268_t * self, uint8_t opcode, uint8_t * buff, uin
 	return status;
 }
 
-static sx1268_status_t _cmd_SetSleep(sx1268_t * self, uint8_t sleepConfig)
+static inline sx1268_status_t _cmd_SetSleep(sx1268_t * self, uint8_t sleepConfig)
 {
 	return _cmd(self, 0x84, &sleepConfig, 1);
 }
 
-static sx1268_status_t _cmd_SetStandby(sx1268_t * self, uint8_t standbyConfig)
+static inline sx1268_status_t _cmd_SetStandby(sx1268_t * self, uint8_t standbyConfig)
 {
 	return _cmd(self, 0x80, &standbyConfig, 1);
 }
 
-static sx1268_status_t _cmd_SetFS(sx1268_t * self)
+static inline sx1268_status_t _cmd_SetFS(sx1268_t * self)
 {
 	return _cmd(self, 0xC1, NULL, 0);
 }
 
-static sx1268_status_t _cmd_SetTX(sx1268_t * self, uint32_t timeout)
+static inline sx1268_status_t _cmd_SetTX(sx1268_t * self, uint32_t timeout)
 {
 	uint8_t buff[3];
 	buff[0] = (timeout >> 16) & 0xFF;
@@ -61,7 +61,7 @@ static sx1268_status_t _cmd_SetTX(sx1268_t * self, uint32_t timeout)
 	return _cmd(self, 0x83, buff, 3);
 }
 
-static sx1268_status_t _cmd_SetRX(sx1268_t * self, uint32_t timeout)
+static inline sx1268_status_t _cmd_SetRX(sx1268_t * self, uint32_t timeout)
 {
 	uint8_t buff[3];
 	buff[0] = (timeout >> 16) & 0xFF;
@@ -70,12 +70,12 @@ static sx1268_status_t _cmd_SetRX(sx1268_t * self, uint32_t timeout)
 	return _cmd(self, 0x82, buff, 3);
 }
 
-static sx1268_status_t _cmd_StopTimerOnPreamble(sx1268_t * self, bool enable)
+static inline sx1268_status_t _cmd_StopTimerOnPreamble(sx1268_t * self, bool enable)
 {
 	return _cmd(self, 0x9F, (uint8_t *)&enable, 1); //FIXME pay attention to endianness
 }
 
-static sx1268_status_t _cmd_SetRxDutyCycle(sx1268_t * self, uint32_t rxPeriod, uint32_t sleepPeriod)
+static inline sx1268_status_t _cmd_SetRxDutyCycle(sx1268_t * self, uint32_t rxPeriod, uint32_t sleepPeriod)
 {
 	uint8_t buff[6];
 	buff[0] = (rxPeriod >> 16) & 0xFF;
@@ -87,32 +87,32 @@ static sx1268_status_t _cmd_SetRxDutyCycle(sx1268_t * self, uint32_t rxPeriod, u
 	return _cmd(self, 0x9F, buff, 6);
 }
 
-static sx1268_status_t _cmd_SetCad(sx1268_t * self)
+static inline sx1268_status_t _cmd_SetCad(sx1268_t * self)
 {
 	return _cmd(self, 0xC5, NULL, 0);
 }
 
-static sx1268_status_t _cmd_SetTxContinuousWave(sx1268_t * self)
+static inline sx1268_status_t _cmd_SetTxContinuousWave(sx1268_t * self)
 {
 	return _cmd(self, 0xD1, NULL, 0);
 }
 
-static sx1268_status_t _cmd_SetTxInfinitePreamble(sx1268_t * self)
+static inline sx1268_status_t _cmd_SetTxInfinitePreamble(sx1268_t * self)
 {
 	return _cmd(self, 0xD2, NULL, 0);
 }
 
-static sx1268_status_t _cmd_SetRegulatorMode(sx1268_t * self, bool useDCDC)
+static inline sx1268_status_t _cmd_SetRegulatorMode(sx1268_t * self, bool useDCDC)
 {
 	return _cmd(self, 0x96, (uint8_t *)&useDCDC, 1);
 }
 
-static sx1268_status_t _cmd_Calibrate(sx1268_t * self, uint8_t calibParam)
+static inline sx1268_status_t _cmd_Calibrate(sx1268_t * self, uint8_t calibParam)
 {
 	return _cmd(self, 0x89, &calibParam, 1);
 }
 
-static sx1268_status_t _cmd_CalibrateImage(sx1268_t * self, uint8_t freg1, uint8_t freg2)
+static inline sx1268_status_t _cmd_CalibrateImage(sx1268_t * self, uint8_t freg1, uint8_t freg2)
 {
 	uint8_t buff[2];
 	buff[0] = freg1;
@@ -120,7 +120,7 @@ static sx1268_status_t _cmd_CalibrateImage(sx1268_t * self, uint8_t freg1, uint8
 	return _cmd(self, 0x98, buff, 1);
 }
 
-static sx1268_status_t _cmd_SetPaConfig(sx1268_t * self, uint8_t paDutyCycle, uint8_t hpMax)
+static inline sx1268_status_t _cmd_SetPaConfig(sx1268_t * self, uint8_t paDutyCycle, uint8_t hpMax)
 {
 	uint8_t buff[4];
 	buff[0] = paDutyCycle;
@@ -130,12 +130,12 @@ static sx1268_status_t _cmd_SetPaConfig(sx1268_t * self, uint8_t paDutyCycle, ui
 	return _cmd(self, 0x95, buff, 4);
 }
 
-static sx1268_status_t _cmd_SetRxTxFallbackMode(sx1268_t * self, uint8_t fallbackMode)
+static inline sx1268_status_t _cmd_SetRxTxFallbackMode(sx1268_t * self, uint8_t fallbackMode)
 {
 	return _cmd(self, 0x93, &fallbackMode, 1);
 }
 
-static sx1268_status_t _cmd_WriteRegister_single(sx1268_t * self, uint16_t addr, uint8_t data)
+static inline sx1268_status_t _cmd_WriteRegister_single(sx1268_t * self, uint16_t addr, uint8_t data)
 {
 	uint8_t buff[3];
 	buff[0] = (addr >> 8) & 0xFF;
@@ -144,7 +144,7 @@ static sx1268_status_t _cmd_WriteRegister_single(sx1268_t * self, uint16_t addr,
 	return _cmd(self, 0x0D, buff, 3);
 }
 
-static sx1268_status_t _cmd_ReadRegister_single(sx1268_t * self, uint16_t addr, uint8_t * data)
+static inline sx1268_status_t _cmd_ReadRegister_single(sx1268_t * self, uint16_t addr, uint8_t * data)
 {
 	uint8_t buff[3];
 	buff[0] = (addr >> 8) & 0xFF;
@@ -154,18 +154,18 @@ static sx1268_status_t _cmd_ReadRegister_single(sx1268_t * self, uint16_t addr, 
 }
 
 //NOTE: address should be already in the first elements of data (16 bit, MSB first)
-static sx1268_status_t _cmd_WriteRegister_burst(sx1268_t * self,	uint8_t * data, uint8_t length)
+static inline sx1268_status_t _cmd_WriteRegister_burst(sx1268_t * self,	uint8_t * data, uint8_t length)
 {
 	return _cmd(self, 0x0D, data, length);
 }
 
 //NOTE: address should be already in the first elements of data (16 bit, MSB first)
-static sx1268_status_t _cmd_ReadRegister_burst(sx1268_t * self,	uint8_t * data, uint8_t length)
+static inline sx1268_status_t _cmd_ReadRegister_burst(sx1268_t * self,	uint8_t * data, uint8_t length)
 {
 	return _cmd(self, 0x1D, data, length);
 }
 
-static sx1268_status_t _cmd_WriteBuffer(sx1268_t * self,	uint8_t addr, uint8_t * data, uint8_t length)
+static inline sx1268_status_t _cmd_WriteBuffer(sx1268_t * self,	uint8_t addr, uint8_t * data, uint8_t length)
 {
 	sx1268_status_t status = SX1268_OK;
 
@@ -180,7 +180,7 @@ static sx1268_status_t _cmd_WriteBuffer(sx1268_t * self,	uint8_t addr, uint8_t *
 	return status;
 }
 
-static sx1268_status_t _cmd_ReadBuffer(sx1268_t * self,	uint8_t addr, uint8_t * data, uint8_t length)
+static inline sx1268_status_t _cmd_ReadBuffer(sx1268_t * self,	uint8_t addr, uint8_t * data, uint8_t length)
 {
 	sx1268_status_t status = SX1268_OK;
 
@@ -195,7 +195,7 @@ static sx1268_status_t _cmd_ReadBuffer(sx1268_t * self,	uint8_t addr, uint8_t * 
 	return status;
 }
 
-static sx1268_status_t _cmd_SetDioIrqParams(sx1268_t * self, uint16_t irqmask, \
+static inline sx1268_status_t _cmd_SetDioIrqParams(sx1268_t * self, uint16_t irqmask, \
 												uint16_t dio1mask, uint16_t dio2mask, uint16_t dio3mask)
 {
 	uint8_t buff[8];
@@ -222,16 +222,17 @@ static sx1268_status_t _cmd_SetDioIrqParams(sx1268_t * self, uint16_t irqmask, \
 #define IRQFLAG_CADDETECTED	(1 << 8)
 #define IRQFLAG_TIMEOUT	(1 << 9)
 
-static sx1268_status_t _cmd_GetIrqStatus(sx1268_t * self, uint8_t * Status, uint16_t *IrqStatus)
+static inline sx1268_status_t _cmd_GetIrqStatus(sx1268_t * self, uint8_t * Status, uint16_t *IrqStatus)
 {
 	uint8_t buff[3];
-	return _cmd(self, 0x12, buff, 3);
+	sx1268_status_t retval = _cmd(self, 0x12, buff, 3);
 
 	*Status = buff[0];
 	*IrqStatus = buff[2] | (buff[1] << 8);
+	return retval;
 }
 
-static sx1268_status_t _cmd_ClearIrqStatus(sx1268_t * self, uint16_t ClearIrqParam)
+static inline sx1268_status_t _cmd_ClearIrqStatus(sx1268_t * self, uint16_t ClearIrqParam)
 {
 	uint8_t buff[2];
 	buff[0] = (ClearIrqParam >> 8) & 0xFF;
@@ -239,12 +240,12 @@ static sx1268_status_t _cmd_ClearIrqStatus(sx1268_t * self, uint16_t ClearIrqPar
 	return _cmd(self, 0x02, buff, 2);
 }
 
-static sx1268_status_t _cmd_SetDIO2AsRfSwitchCtrl(sx1268_t * self, bool enable)
+static inline sx1268_status_t _cmd_SetDIO2AsRfSwitchCtrl(sx1268_t * self, bool enable)
 {
 	return _cmd(self, 0x9D, (uint8_t *)&enable, 1);
 }
 
-static sx1268_status_t _cmd_SetDIO3AsTCXOCtrl(sx1268_t * self, uint8_t txcoVoltage, uint32_t timeout)
+static inline sx1268_status_t _cmd_SetDIO3AsTCXOCtrl(sx1268_t * self, uint8_t txcoVoltage, uint32_t timeout)
 {
 	uint8_t buff[4];
 	buff[0] = txcoVoltage;
@@ -254,7 +255,10 @@ static sx1268_status_t _cmd_SetDIO3AsTCXOCtrl(sx1268_t * self, uint8_t txcoVolta
 	return _cmd(self, 0x97, buff, 4);
 }
 
-#define RFFREQ_CALC(FREQ)	(FREQ / 2 ^ 25 * 32000000)
+#define XTAL_FREQ					(float) 32000000
+#define FREQ_STEP					(float) 33554432 //2 ** 25
+#define RFFREQ_CALC(FREQUENCY)		((uint32_t)(FREQUENCY / XTAL_FREQ * FREQ_STEP))
+#define FREQ_ERR					0.47683715820312
 
 static inline sx1268_status_t _cmd_SetRfFrequency(sx1268_t * self, uint32_t RfFreq)
 {
@@ -369,12 +373,12 @@ static inline sx1268_status_t _cmd_SetBufferBaseAddress(sx1268_t * self, uint8_t
 #define STATUS_COMMAND_FAIL			0x05
 #define STATUS_COMMAND_DONE			0x06
 
-static sx1268_status_t _cmd_GetStatus(sx1268_t * self, uint8_t * status)
+static inline sx1268_status_t _cmd_GetStatus(sx1268_t * self, uint8_t * status)
 {
 	return _cmd(self, 0xC0, status, 1);
 }
 
-static sx1268_status_t _cmd_GetRxBufferStatus(sx1268_t * self, uint8_t * Status, uint8_t * PayloadLengthRx, uint8_t * RxStartBufferPointer)
+static inline sx1268_status_t _cmd_GetRxBufferStatus(sx1268_t * self, uint8_t * Status, uint8_t * PayloadLengthRx, uint8_t * RxStartBufferPointer)
 {
 	uint8_t buff[3];
 	return _cmd(self, 0x13, buff, 3);
@@ -389,7 +393,7 @@ static sx1268_status_t _cmd_GetRxBufferStatus(sx1268_t * self, uint8_t * Status,
 
 static sx1268_status_t _fifo_write(sx1268_fifo_t * fifo, uint8_t * data, int len)
 {
-	if(FIFO_FREESPACE(fifo) < len && !fifo->empty)
+	if(FIFO_FREESPACE(fifo) < len & !fifo->empty)
 		return SX1268_ERR_BUFSIZE;
 
 	int copylen = MIN(fifo->length - fifo->head, len);
@@ -442,7 +446,7 @@ static void _sendpackparams(sx1268_t * self, uint8_t PayloadLength) //yeees, it'
 
 static void _dotx(sx1268_t * self, uint8_t * buff, int len)
 {
-	uint8_t status;
+	volatile uint8_t status;
 	_cmd_SetTxParams(self, POWER_LOW_HIGHEST, RAMPTIME_200U);
 	_cmd_GetStatus(self, &status);
 	_cmd_SetBufferBaseAddress(self, 0, 0);
@@ -451,7 +455,8 @@ static void _dotx(sx1268_t * self, uint8_t * buff, int len)
 	_cmd_GetStatus(self, &status);
 	_sendpackparams(self, len);
 	_cmd_GetStatus(self, &status);
-	_cmd_SetTX(self, 640); //1 second timeout
+	_cmd_SetTX(self, 64000); //1 second timeout
+	_cmd_GetStatus(self, &status);
 }
 
 void sx1268_struct_init(sx1268_t * self, uint8_t * rxbuff, int rxbufflen, uint8_t * txbuff, int txbufflen)
@@ -471,22 +476,24 @@ void sx1268_struct_init(sx1268_t * self, uint8_t * rxbuff, int rxbufflen, uint8_
 
 sx1268_status_t sx1268_init(sx1268_t * self)
 {
-	uint8_t status = 0x00;
+	volatile uint8_t status;
 	_cmd_GetStatus(self, &status);
 
 	_cmd_SetStandby(self, false);
-	status = 0x00;
+
 	_cmd_GetStatus(self, &status);
 
-	_cmd_SetPacketType(self, false); //set gfsk
-	status = 0x00;
+	_cmd_SetDIO3AsTCXOCtrl(self, 0x01, 320); //'magic' values from mbed driver
+	_cmd_GetStatus(self, &status);
+	_cmd_Calibrate(self, 0x7F); //also mbed magic
+	_cmd_SetDIO2AsRfSwitchCtrl(self, true);
+	_cmd_CalibrateImage(self, 0x6B, 0x6F); //430-440 MHz, according to datasheet
 	_cmd_GetStatus(self, &status);
 	_cmd_SetRfFrequency(self, RFFREQ_CALC(433000000));
 	_cmd_GetStatus(self, &status);
-	//TODO maybe SetDIO3AsTcxoCtrl() ?
-	_cmd_CalibrateImage(self, 0x6B, 0x6F); //430-440 MHz, according to datasheet
-	_cmd_GetStatus(self, &status);
 
+	_cmd_SetPacketType(self, false); //set gfsk
+	_cmd_GetStatus(self, &status);
 	sx1268_modparams_gfsk_t modparams;
 	uint32_t br = 32 * 32000000 / 4800;
 	UINT24_T_FORM(br, modparams.br0, modparams.br1, modparams.br2);
@@ -499,8 +506,10 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 	_sendpackparams(self, 255);
 	_cmd_GetStatus(self, &status);
 
-	uint8_t syncstring[] = "antonloh";
-	_cmd_WriteRegister_burst(self, syncstring, 8);
+	uint8_t syncstring[] = "  antonloh";
+	syncstring[0] = 0x06;
+	syncstring[1] = 0xC0;
+	_cmd_WriteRegister_burst(self, syncstring, 10);
 	_cmd_GetStatus(self, &status);
 
 	uint16_t TXRXDONEANDTIMEOUT = (1 << 0) | (1 << 1) | (1 << 9);
@@ -524,6 +533,7 @@ sx1268_status_t sx1268_send(sx1268_t * self, uint8_t * data, int len)
 		_cmd_SetStandby(self, false);
 
 	_dotx(self, data, MIN(len, 255));
+	_cmd_GetStatus(self, &status);
 
 	if(len > 255) //we can send only 255 bytes in one packet, so everything except should be saved to fifo
 	{
@@ -543,8 +553,8 @@ sx1268_status_t sx1268_receive(sx1268_t * self, uint8_t * data, int len)
 
 void sx1268_event(sx1268_t * self)
 {
-	uint16_t irqstatus;
-	uint8_t status;
+	volatile uint16_t irqstatus;
+	volatile uint8_t status;
 	uint8_t buff[256];
 	_cmd_GetIrqStatus(self, &status, &irqstatus);
 	_cmd_ClearIrqStatus(self, irqstatus);
