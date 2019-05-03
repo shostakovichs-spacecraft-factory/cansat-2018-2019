@@ -95,11 +95,11 @@ int main(void)
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
   	sx1268_struct_init(&radio, radio_rxbuf, 255, radio_txbuf, 255);
-  	radio.bus = &hspi2;
-  	radio.busy_port = RADIO_BUSY_GPIO_Port;
-  	radio.busy_pin = RADIO_BUSY_Pin;
-  	radio.cs_port = RADIO_NSS_GPIO_Port;
-  	radio.cs_pin = RADIO_NSS_Pin;
+  	radio.platform_specific.bus = &hspi2;
+  	radio.platform_specific.busy_port = RADIO_BUSY_GPIO_Port;
+  	radio.platform_specific.busy_pin = RADIO_BUSY_Pin;
+  	radio.platform_specific.cs_port = RADIO_NSS_GPIO_Port;
+  	radio.platform_specific.cs_pin = RADIO_NSS_Pin;
   	sx1268_init(&radio);
   /* USER CODE END 2 */
 

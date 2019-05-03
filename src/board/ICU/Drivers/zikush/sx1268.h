@@ -14,6 +14,8 @@
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx_hal_spi.h"
 
+#define TIMEOUT 10000 //Timeout for SPI operations, ms
+
 typedef struct
 {
 	uint8_t * mem;
@@ -23,12 +25,16 @@ typedef struct
 
 typedef struct
 {
-	SPI_HandleTypeDef * bus;
-	GPIO_TypeDef * cs_port;
-	uint16_t cs_pin;
-	GPIO_TypeDef * busy_port;
-	uint16_t busy_pin;
 	sx1268_fifo_t fifo_rx, fifo_tx;
+
+	struct
+	{
+		SPI_HandleTypeDef * bus;
+		GPIO_TypeDef * cs_port;
+		uint16_t cs_pin;
+		GPIO_TypeDef * busy_port;
+		uint16_t busy_pin;
+	}	platform_specific;
 } sx1268_t;
 
 typedef enum
