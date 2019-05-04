@@ -37,9 +37,14 @@ class Message:
         # Ключ словарика - идентификатор IE. Значение - само IE
         self.ies: typing.Dict[int, InformationElement] = {}
 
-    def add_ie(self, ie: InformationElement):
-        """ Добавиления IE к этому сообщению """
+    def insert_ie(self, ie: InformationElement):
+        """ Добавиления IE к этому сообщению
+            Если такой IE уже есть в сообщении - перезаписывает его """
         if ie.__class__ not in self.IE_CLASSES:
             raise ValueError(f"Invalid IE class {ie.__class__} added to message")
 
         self.ies[ie.IEI] = ie
+
+    def get_ie(self, iei: IEIEnum, default=None):
+        """ Получение IE из сообщения по его идентификатору"""
+        return self.ies.get(iei, default)

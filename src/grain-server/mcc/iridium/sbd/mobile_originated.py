@@ -1,3 +1,4 @@
+import typing
 import struct
 import datetime as dt
 
@@ -75,8 +76,9 @@ class MOIELocationInformation(InformationElement):
             raise ValueError(f"Invalid Data in geoloc flags 0x{codes:02X}")
 
         # Пересчитываем долготу и широту в человеческие значения
-        lat = lat + latmins/100.0
-        lon = lon + lonmins/100.0
+        latmins, lonmins = latmins/1000, lonmins/1000
+        lat = lat + latmins/60
+        lon = lon + lonmins/60
 
         # Учитываем знаки
         if codes & 0x02 != 0:
@@ -104,12 +106,38 @@ class MOIEConfirmation(InformationElement):
         return bytes([self.confirmation_status])
 
     def _unpack_body(self, body_data: bytes):
-        raise NotImplementedError()
+        self.confirmation_status = ConfirmationStatus(body_data[0])
 
 
 class MOMessage(Message):
     """ SBD сообщение с терминала, которое передает нам шлюз иридиума """
     IE_CLASSES = [MOIEHeader, MOIEPayload, MOIELocationInformation]
+
+    @property
+    def header(self) -> typing.Optional[MOIEHeader]:
+        return self.get_ie(MOIEHeader.IEI)
+
+    @header.setter
+    def header(self, value: MOIEHeader):
+        self.insert_ie(value)
+
+
+    @property
+    def loc_info(self) -> typing.Optional[MOIELocationInformation]:
+        return self.get_ie(MOIELocationInformation.IEI)
+
+    @loc_info.setter
+    def loc_info(self, value: MOIELocationInformation):
+        self.insert_ie(value)
+
+
+    @property
+    def payload(self) -> typing.Optional[MOIEPayload]:
+        return self.get_ie(MOIEPayload.IEI)
+
+    @payload.setter
+    def payload(self, value: MOIEPayload):
+        self.insert_ie(value)
 
 
 class MOMessageConfirmation(Message):
@@ -121,5 +149,24 @@ class MOMessageConfirmation(Message):
     def __init__(self, confirmation_status: ConfirmationStatus = None):
         super().__init__()
         if confirmation_status is not None:
-            self.add_ie(MOIEConfirmation(confirmation_status))
+            self.insert_ie(MOIEConfirmation(confirmation_status))
 
+
+    @property
+    def conf_ie(self) -> typing.Optional[MOIEConfirmation]:
+        return self.get_ie(MOIEConfirmation.IEI)
+
+    @conf_ie.setter
+    def conf_ie(self, value: MOIEConfirmation):
+        self.insert_ie(value)
+
+
+    @property
+    def conf_status(self)->typing.Optional[ConfirmationStatus]:
+        ie = self.conf_ie
+        return ie.confirmation_status if ie else None
+
+    @conf_status.setter
+    def conf_status(self, value: ConfirmationStatus):
+        ie = MOIEConfirmation(confirmation_status=value)
+        self.insert_ie(ie)

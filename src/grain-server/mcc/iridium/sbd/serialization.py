@@ -43,7 +43,7 @@ class MessageParser:
             ie = ie_class()
             ie.unpack(ie_payload)
 
-            retval.add_ie(ie)
+            retval.insert_ie(ie)
 
         return retval
 
