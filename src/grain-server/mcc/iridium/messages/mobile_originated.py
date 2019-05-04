@@ -10,7 +10,7 @@ class MOIEHeader(InformationElement):
     """ Заголовок Mobile Originated сообщения """
 
     IEI = IEI.MO_HEADER
-    BODY_STRUCT = struct.Struct("<L15sBHHL")
+    BODY_STRUCT = struct.Struct(">L15sBHHL")
 
     def __init__(self):
         self.cdr: int = None
@@ -31,7 +31,7 @@ class MOIEHeader(InformationElement):
         session_status = SessionStatus(values[2])
         momsn = values[3]
         mtmsn = values[4]
-        time_of_session = dt.datetime.utcfromtimestamp(values[5])
+        time_of_session = dt.datetime.fromtimestamp(values[5], tz=dt.timezone.utc)
 
         self.cdr = cdr
         self.imei = imei
@@ -58,7 +58,7 @@ class MOIEPayload(InformationElement):
 class MOIELocationInformation(InformationElement):
     """ Информация о положении терминала, которую вычисляет система иридиума """
     IEI = IEI.MO_LOCATION_INFORMATION
-    BODY_STRUCT = struct.Struct("<BBHBHL")
+    BODY_STRUCT = struct.Struct(">BBHBHL")
 
     def __init__(self):
         self.lat: float = None
