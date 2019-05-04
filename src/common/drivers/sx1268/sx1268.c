@@ -522,6 +522,9 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 	_cmd_SetDioIrqParams(self, TXRXDONEANDTIMEOUT, TXRXDONEANDTIMEOUT, 0, 0);
 	_cmd_GetStatus(self, &status);
 
+	_cmd_SetBufferBaseAddress(self, 0, 0);
+	_cmd_SetRX(self, 0xFFFFFFFF);
+
 	return SX1268_OK; //TODO
 }
 
@@ -573,6 +576,7 @@ void sx1268_event(sx1268_t * self)
 			_cmd_GetRxBufferStatus(self, &status, &start, &len);
 			_cmd_ReadBuffer(self, start, buff, len);
 			_fifo_write(&self->fifo_rx, buff, len);
+			_cmd_SetBufferBaseAddress(self, 0, 0);
 		}
 	}
 
@@ -584,4 +588,7 @@ void sx1268_event(sx1268_t * self)
 		_fifo_read(&self->fifo_tx, buff, len);
 		_dotx(self, buff, len);
 	}
+
+	else
+		_cmd_SetRX(self, 0xFFFFFFFF);
 }

@@ -11,10 +11,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "stm32f1xx_hal.h"
-#include "stm32f1xx_hal_spi.h"
-
 #define TIMEOUT 10000 //Timeout for SPI operations, ms
+
+#ifdef SX1268_STM32
+#include "sx1268_stm32.h"
+#elif defined SX1268_RPI
+#include "sx1268_rpi.h"
+#endif
+
+#define RXLEN(SELF)	(self.fifo_rx.length)
 
 typedef struct
 {
@@ -26,15 +31,7 @@ typedef struct
 typedef struct
 {
 	sx1268_fifo_t fifo_rx, fifo_tx;
-
-	struct
-	{
-		SPI_HandleTypeDef * bus;
-		GPIO_TypeDef * cs_port;
-		uint16_t cs_pin;
-		GPIO_TypeDef * busy_port;
-		uint16_t busy_pin;
-	}	platform_specific;
+	void * platform_specific;
 } sx1268_t;
 
 typedef enum
@@ -46,7 +43,7 @@ typedef enum
 } sx1268_status_t;
 
 //Inits all descriptor fields as they should be by default
-void sx1268_struct_init(sx1268_t * self, uint8_t * rxbuff, int rxbufflen, uint8_t * txbuff, int txbufflen);
+void sx1268_struct_init(sx1268_t * self, void * platform_specific, uint8_t * rxbuff, int rxbufflen, uint8_t * txbuff, int txbufflen);
 
 //Do basic initialization
 sx1268_status_t sx1268_init(sx1268_t * self);
