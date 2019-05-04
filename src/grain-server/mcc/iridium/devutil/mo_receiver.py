@@ -4,7 +4,7 @@ import sys
 import argparse
 from socketserver import BaseRequestHandler
 
-from ..network.sbd_server import SBDServiceServer
+from ..network.mo_server import MOServiceServer
 from ..messages.mobile_originated import MOMessage
 
 _log = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ class ReqHandler(BaseRequestHandler):
 
 
 def main(iface: str, port: int, blog_stream: typing.BinaryIO = None):
-    server = SBDServiceServer(
+    server = MOServiceServer(
         server_address=(iface, port,),
         request_handler_cls=ReqHandler,
         bind_and_activate=True,

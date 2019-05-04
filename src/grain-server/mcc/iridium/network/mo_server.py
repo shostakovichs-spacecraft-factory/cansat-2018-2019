@@ -10,11 +10,11 @@ from iridium.messages.enum import ConfirmationStatus
 _log = logging.getLogger(__name__)
 
 
-class _SBDTcpRequestHandler(BaseRequestHandler):
+class _MOTcpRequestHandler(BaseRequestHandler):
     """ Хендлер TCP сообщений от иридиумного гейтевея """
 
     def __init__(self, request, client_address, server):
-        srv: SBDServiceServer = server
+        srv: MOServiceServer = server
         self.parser = srv.parser
         self.serializer = srv.serializer
         self.send_ack = srv.send_ack
@@ -85,7 +85,7 @@ class _SBDTcpRequestHandler(BaseRequestHandler):
             _log.warning("Unable to send ACK message", exc_info=True)
 
 
-class SBDServiceServer(TCPServer):
+class MOServiceServer(TCPServer):
     """ Сервер для приёма входящих SBD сообщений от иридиумового гетевея
         Работает как классичеческий socketserver. Для обработки запросов создает
         объект пользовательского класса, унаследованного от socketserver.BaseRequestHandler.
@@ -109,7 +109,7 @@ class SBDServiceServer(TCPServer):
         :param blog_stream:         Стрим для логгирования сырых сообщений еще до их разбора
         """
         # Базовому классу дает свой собственный хендлер
-        super().__init__(server_address, _SBDTcpRequestHandler, bind_and_activate)
+        super().__init__(server_address, _MOTcpRequestHandler, bind_and_activate)
 
         # А клиентский хендлер запоминаем для себя
         self.sbd_handler_cls = request_handler_cls
@@ -129,6 +129,6 @@ class SBDServiceServer(TCPServer):
         return SBDMessageSerializer()
 
     def server_close(self):
-        super(self, SBDServiceServer).server_close()
+        super(self, MOServiceServer).server_close()
         if self.blog_stream:
             self.blog_stream.close()

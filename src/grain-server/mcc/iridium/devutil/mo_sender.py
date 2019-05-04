@@ -17,7 +17,7 @@ def main(host, port, stream):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
-        _log.info("connecting")
+        _log.info(f"connecting to {host}:{port}")
         sock.connect((host, port,))
         _log.info("sending data")
         sock.sendall(stream.read())
@@ -33,12 +33,12 @@ def main(host, port, stream):
             accum += data
         if not accum:
             _log.info("got no data in response")
-
-        msg = conf_parser.parse(accum)
-        if isinstance(msg, MOMessageConfirmation):
-            _log.info("got confirmation message with status: %s" % msg.conf_status)
         else:
-            _log.info("got some message in response: %s" % msg)
+            msg = conf_parser.parse(accum)
+            if isinstance(msg, MOMessageConfirmation):
+                _log.info("got confirmation message with status: %s" % msg.conf_status)
+            else:
+                _log.info("got some message in response: %s" % msg)
 
     except Exception:
         _log.exception("An error occurred")
