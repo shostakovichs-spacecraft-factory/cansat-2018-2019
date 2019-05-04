@@ -71,6 +71,8 @@ void HAL_UART1_MspInit(void);
 void HAL_UART1_MspDeInit(void);
 void HAL_I2C1_MspInit(void);
 void HAL_I2C1_MspDeInit(void);
+void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc);
+void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc);
 
 /**
   * @brief  Initializes the Global MSP.
@@ -80,10 +82,14 @@ void HAL_I2C1_MspDeInit(void);
   */
 void HAL_MspInit(void)
 {
-	__GPIOA_CLK_ENABLE();
+	//__GPIOA_CLK_ENABLE();
 	__GPIOB_CLK_ENABLE();
-	HAL_UART1_MspInit();
+	//__HAL_RCC_GPIOA_CLK_ENABLE();
+	//__HAL_RCC_ADC1_CLK_ENABLE();
+
+	//HAL_UART1_MspInit();
 	HAL_I2C1_MspInit();
+	//HAL_ADC_MspInit(0);
 }
 
 /**
@@ -95,9 +101,13 @@ void HAL_MspInit(void)
 void HAL_MspDeInit(void)
 {
 	HAL_UART1_MspDeInit();
-	HAL_I2C1_MspDeInit();
+	HAL_I2C1_MspDeInit();;
+	HAL_ADC_MspDeInit(0);
+
 	__GPIOA_CLK_DISABLE();
 	__GPIOB_CLK_DISABLE();
+	__HAL_RCC_ADC1_CLK_DISABLE();
+	__HAL_RCC_GPIOA_CLK_DISABLE();
 }
 
 /**
@@ -212,6 +222,36 @@ void HAL_I2C1_MspDeInit(void)
 
 	__I2C1_CLK_DISABLE();
 }
+
+void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
+{
+
+	GPIO_InitTypeDef pa_init;
+
+	pa_init.Pin = GPIO_PIN_0;
+	pa_init.Mode = GPIO_MODE_ANALOG;
+	pa_init.Speed = GPIO_SPEED_FREQ_LOW;
+	pa_init.Pull = GPIO_NOPULL;
+
+	HAL_GPIO_Init(GPIOA, &pa_init);
+	pa_init.Pin = GPIO_PIN_1;
+	HAL_GPIO_Init(GPIOA, &pa_init);
+}
+void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
+{
+	GPIO_InitTypeDef pa_init;
+
+	pa_init.Pin = GPIO_PIN_0;
+	pa_init.Mode = GPIO_MODE_ANALOG;
+	pa_init.Speed = GPIO_SPEED_FREQ_HIGH;
+	pa_init.Pull = GPIO_NOPULL;
+
+	HAL_GPIO_Init(GPIOA, &pa_init);
+
+	pa_init.Pin = GPIO_PIN_1;
+	HAL_GPIO_Init(GPIOA, &pa_init);
+}
+
 /**
   * @}
   */

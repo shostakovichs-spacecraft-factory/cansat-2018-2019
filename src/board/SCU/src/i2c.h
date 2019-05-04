@@ -14,8 +14,12 @@
 
 I2C_HandleTypeDef I2C_init_for_bme280(int i2c_number);
 
-void I2C_deinit(I2C_HandleTypeDef *i2c_handler);
+int i2c_init(I2C_HandleTypeDef * hi2c);
 
+int i2c_config_default(I2C_HandleTypeDef * hi2c);
+int i2c_deinit(I2C_HandleTypeDef *hi2c);
 
+int i2c_pin_scl_init(GPIO_TypeDef* GPIOX, uint32_t pin);
+int i2c_pin_sda_init(GPIO_TypeDef* GPIOX, uint32_t pin);
 
 #endif /* I2C_H_ */
