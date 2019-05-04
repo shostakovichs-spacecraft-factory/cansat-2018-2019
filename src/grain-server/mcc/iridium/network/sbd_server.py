@@ -3,9 +3,9 @@ import socket
 import logging
 from socketserver import BaseRequestHandler, TCPServer
 
-from iridium.sbd.serialization import MessageParser as SBDMessageParser, MessageSerializer as SBDMessageSerializer
-from iridium.sbd.mobile_originated import Message, MOMessage, MOMessageConfirmation
-from iridium.sbd.enum import ConfirmationStatus
+from iridium.messages.serialization import MessageParser as SBDMessageParser, MessageSerializer as SBDMessageSerializer
+from iridium.messages.mobile_originated import Message, MOMessage, MOMessageConfirmation
+from iridium.messages.enum import ConfirmationStatus
 
 _log = logging.getLogger(__name__)
 
@@ -25,9 +25,18 @@ class _SBDTcpRequestHandler(BaseRequestHandler):
         super().__init__(request, client_address, server)
 
     def handle(self):
-        msg = self.read_sbd_message()
-        _log.info("Got sbd message: %s", msg)
+        _log.debug("got a request from %s", self.client_address)
+
         try:
+            raw_data = self.read_all()
+            if self.blog_stream:
+                _log.debug("logging raw data to blog stream")
+                self.blog_stream.write(raw_data)
+                self.blog_stream.flush()
+
+            msg = self.parser.parse(raw_data)
+            _log.info("got SBD message: %s", msg)
+
             self.handle_sbd_message(msg)
             # Хендлер делает все свои дела в конструкторе (почему блин?)
             # поэтому если консторуктор отработал, то все ок
@@ -35,12 +44,12 @@ class _SBDTcpRequestHandler(BaseRequestHandler):
             if self.send_ack:
                 self.send_ack_message(ConfirmationStatus.SUCCESS)
         except Exception:
-            _log.exception("Error on SBD message processing")
+            _log.exception("error on SBD message processing")
             if self.send_ack:
                 self.send_ack_message(ConfirmationStatus.FAILURE)
                 raise  # пихаем дальше
 
-    def read_sbd_message(self):
+    def read_all(self):
         """ Парсинг SBD сообщения из всех байт полученных в сокет """
         sock: socket.socket = self.request
 
@@ -52,14 +61,10 @@ class _SBDTcpRequestHandler(BaseRequestHandler):
                 break
             accum += data
 
-        if self.blog_stream:
-            self.blog_stream.write(accum)
-
-        msg = self.parser.parse(accum)
-        return msg
+        return accum
 
     def handle_sbd_message(self, msg: Message):
-        _log.debug("Handling sbd message")
+        _log.debug("Handling messages message")
 
         self.sbd_handler_cls(
             request=msg,
@@ -67,7 +72,7 @@ class _SBDTcpRequestHandler(BaseRequestHandler):
             server=self.server,
         )
 
-        _log.debug("sbd message handled sucessfully")
+        _log.debug("messages message handled sucessfully")
 
     def send_ack_message(self, conf_status: ConfirmationStatus):
         _log.info("sending back ack message with conf status %s", conf_status)
@@ -93,7 +98,7 @@ class SBDServiceServer(TCPServer):
             request_handler_cls: typing.Type[BaseRequestHandler],
             bind_and_activate=True,
             send_ack=True,
-            blog_stream=None
+            blog_stream: typing.BinaryIO = None
     ):
         """
         :param server_address:      Адрес сервера - кортеж с адресом интерфейса на котором слушаем

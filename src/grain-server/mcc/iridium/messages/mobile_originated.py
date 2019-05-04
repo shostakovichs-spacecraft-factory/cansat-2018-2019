@@ -13,12 +13,12 @@ class MOIEHeader(InformationElement):
     BODY_STRUCT = struct.Struct("<L15sBHHL")
 
     def __init__(self):
-        self.cdr = None
-        self.imei = None
-        self.session_status = None
-        self.momsn = None
-        self.mtmsn = None
-        self.time_of_session = None
+        self.cdr: int = None
+        self.imei: str = None
+        self.session_status: ConfirmationStatus = None
+        self.momsn: int = None
+        self.mtmsn: int = None
+        self.time_of_session: dt.datetime = None
 
     def _pack_body(self) -> bytes:
         raise NotImplementedError()
@@ -46,7 +46,7 @@ class MOIEPayload(InformationElement):
     IEI = IEI.MO_PAYLOAD
 
     def __init__(self):
-        self.raw_payload = None
+        self.raw_payload: bytes = None
 
     def _pack_body(self) -> bytes:
         raise NotImplementedError()
@@ -61,9 +61,9 @@ class MOIELocationInformation(InformationElement):
     BODY_STRUCT = struct.Struct("<BBHBHL")
 
     def __init__(self):
-        self.lat = None
-        self.lon = None
-        self.CEP_radius = None
+        self.lat: float = None
+        self.lon: float = None
+        self.CEP_radius: int = None
 
     def _pack_body(self) -> bytes:
         raise NotImplementedError()

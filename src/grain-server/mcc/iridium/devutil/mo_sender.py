@@ -1,21 +1,30 @@
 import argparse
 import socket
 import sys
+import logging
 
-from ..sbd.serialization import MessageParser
-from ..sbd.mobile_originated import MOMessageConfirmation
+from ..messages.serialization import MessageParser
+from ..messages.mobile_originated import MOMessageConfirmation
+
+
+_log = logging.getLogger(__name__)
 
 
 def main(host, port, stream):
     conf_parser = MessageParser(MOMessageConfirmation)
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((host, port,))
-    sock.sendall(stream.read())
-    sock.shutdown(socket.SHUT_WR)
-
     rc = 0
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
     try:
+        _log.info("connecting")
+        sock.connect((host, port,))
+        _log.info("sending data")
+        sock.sendall(stream.read())
+        _log.debug("data sent, sending EOF")
+        sock.shutdown(socket.SHUT_WR)
+        _log.debug("eof sent")
+
         accum = bytes()
         while True:
             data = sock.recv(4096)
@@ -23,28 +32,33 @@ def main(host, port, stream):
                 break
             accum += data
         if not accum:
-            print("got no data in response")
+            _log.info("got no data in response")
 
         msg = conf_parser.parse(accum)
-        print("got some message in response: %s" % msg)
+        if isinstance(msg, MOMessageConfirmation):
+            _log.info("got confirmation message with status: %s" % msg.conf_status)
+        else:
+            _log.info("got some message in response: %s" % msg)
+
     except Exception:
+        _log.exception("An error occurred")
         rc = 1
-        raise
 
     finally:
-        print("WHAT")
         sock.close()
 
+    _log.info("end of it")
     return rc
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("fake SBD sender", add_help=True)
+    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+
+    parser = argparse.ArgumentParser("devutil SBD sender", add_help=True)
     parser.add_argument("--host", action="store", dest="host", nargs="?", type=str, default="localhost")
     parser.add_argument("--port", action="store", dest="port", nargs="?", type=int, required=True)
     parser.add_argument("infile", action="store", nargs="?", type=argparse.FileType('rb'), default="-")
 
-    import sys
     args = parser.parse_args(sys.argv[1:])
 
     # Если нам дают данные из stdin-а, то оно не бинарное а текстовое
