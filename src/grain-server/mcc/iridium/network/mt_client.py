@@ -23,6 +23,18 @@ class MTClient:
         self.serializer = MessageSerializer()
         self.parser = MessageParser(MTMessageConfirmation)
 
+    def send_simple_message(
+            self,
+            imei: str,  # IMEI модема, на который отправляется сообщение
+            payload: bytes,
+            priority: MTMessagePriority = None,  # Пририрет сообщения
+    ):
+        msg = MTMessage(
+            imei=imei,
+            priority=priority,
+            payload=payload,
+        )
+
     def send_message(self, message: MTMessage):
         """ Самый "низкий" уровень. Отправка сообщения, подготовленного где-то во вне
             и получение в ответ сырого сообщения-подтверждения

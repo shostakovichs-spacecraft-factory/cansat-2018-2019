@@ -28,7 +28,7 @@ class MTIEHeader(InformationElement):
     IEI = IEI.MT_HEADER
     BODY_STRUCT = struct.Struct(">L15sH")
 
-    def __init__(self, uid: int = None, imei: str = None, flags: typing.Union[int, MTDispositionFlags] = None):
+    def __init__(self, uid: int = None, imei: str = None, flags: typing.Union[int, MTDispositionFlags] = 0):
         if uid is None:
             self.uid = MOIECounterGenerator.next_uid()
         else:
@@ -42,7 +42,7 @@ class MTIEHeader(InformationElement):
         return self.BODY_STRUCT.pack(
             self.uid,
             self.imei.encode("ascii"),
-            self.flags.value if self.flags else 0,
+            int(self.flags),
         )
 
     def _unpack_body(self, body_data: bytes):
@@ -113,7 +113,7 @@ class MTMessage(Message):
             self,
             uid: int = None,
             imei: str = None,
-            flags: typing.Union[int, MTDispositionFlags] = None,
+            flags: typing.Union[int, MTDispositionFlags] = 0,
             priority: MTMessagePriority = None,
             payload: bytes = None,
     ):
