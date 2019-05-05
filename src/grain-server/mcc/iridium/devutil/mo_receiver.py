@@ -46,6 +46,7 @@ class ReqHandler(BaseRequestHandler):
             _log.warning("no payload present")
 
 
+# noinspection PyBroadException
 def main(iface: str, port: int, blog_stream: typing.BinaryIO = None):
     server = MOServiceServer(
         server_address=(iface, port,),
@@ -59,12 +60,13 @@ def main(iface: str, port: int, blog_stream: typing.BinaryIO = None):
     try:
         _log.info("starting server")
         server.serve_forever()
+
     except KeyboardInterrupt:
         _log.info("server stopped by ctrl+c")
 
     except Exception:
-        _log.exception("an error occured")
         rc = 1
+        _log.exception("an error occured")
 
     finally:
         server.shutdown()
@@ -72,13 +74,14 @@ def main(iface: str, port: int, blog_stream: typing.BinaryIO = None):
     return rc
 
 
-if __name__ == "__main__":
+def main_exec():
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
     parser = argparse.ArgumentParser("devutil SBD receiver", add_help=True)
     parser.add_argument("--iface", action="store", dest="iface", nargs="?", type=str, default="0.0.0.0")
     parser.add_argument("--port", action="store", dest="port", nargs="?", type=int, required=True)
-    parser.add_argument("--blog-file", action="store", dest="blogfile", nargs="?", type=argparse.FileType('wb'), default=None)
+    parser.add_argument("--blog-file", action="store", dest="blogfile", nargs="?", type=argparse.FileType('wb'),
+                        default=None)
 
     args = parser.parse_args(sys.argv[1:])
 
@@ -89,7 +92,11 @@ if __name__ == "__main__":
         _log.info("using blog stream as %s", args.blogfile)
         stream = getattr(args.blogfile, "buffer", args.blogfile)
 
-    port = args.port
-    iface = args.iface
-    rc = main(iface, port, stream)
-    exit(rc)
+    arg_iface = args.iface
+    arg_port = args.port
+
+    return main(arg_iface, arg_port, stream)
+
+
+if __name__ == "__main__":
+    exit(main_exec())

@@ -1,5 +1,5 @@
 import typing
-from .enum import IEI as IEIEnum
+from . import enum
 
 
 class InformationElement:
@@ -7,7 +7,7 @@ class InformationElement:
         Этот класс олицетворяет такие элементы
     """
 
-    IEI: IEIEnum = None
+    IEI: enum.IEI = None
     """ Идентификатор информационного элемента. Реализуется в сабклассе """
 
     def unpack(self, ie_payload):
@@ -45,6 +45,6 @@ class Message:
 
         self.ies[ie.IEI] = ie
 
-    def get_ie(self, iei: IEIEnum, default=None):
+    def get_ie(self, iei: enum.IEI, default=None):
         """ Получение IE из сообщения по его идентификатору"""
         return self.ies.get(iei, default)

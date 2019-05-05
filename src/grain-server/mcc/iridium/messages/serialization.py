@@ -118,6 +118,7 @@ class MessageSerializer:
         msg_data = self._msg_join(msg_payload)
         return msg_data
 
+    # noinspection PyMethodMayBeStatic
     def _ie_join(self, iei: int, ie_payload: bytes):
         """ Построение IE в бинарной форме из идентификатора и его тела """
         size = len(ie_payload)

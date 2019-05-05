@@ -72,12 +72,6 @@ class MTDispositionFlags(IntEnum):
     ASSIGN_MTMSN = 32
     """ Use the value in the Unique ID field as the MTMSN """
 
-    FLUSH_MT_QUEUE__SEND_RING_ALERT = FLUSH_MT_QUEUE | SEND_RING_ALERT
-    """ Combination of FLUSH_MT_QUEUE and SEND_RING_ALERT """
-
-    FLUSH_MT_QUEUE__ASSIGN_MTMSN = FLUSH_MT_QUEUE | ASSIGN_MTMSN
-    """ Combination of FLUSH_MT_QUEUE and  ASSIGN_MTMSN """
-
 
 class MTMessageStatus(IntEnum):
     """ Статус обработки MT сообщения терминалом
@@ -128,3 +122,16 @@ class MTMessageStatus(IntEnum):
 
     MTMSN_OUT_OF_RANGE = -11
     """ MTMSN value is out of range (valid range is 1 – 65,535)s """
+
+
+class MTMessagePriority:
+    """ Приоритет отправляемого сообщения
+        1 - наивысший приоритет. 5 - низший
+        Любое значение не из диапазона 1-5 считается как 5
+    """
+
+    PRIO_1 = 1
+    PRIO_2 = 2
+    PRIO_3 = 3
+    PRIO_4 = 4
+    PRIO_5 = 5

@@ -12,6 +12,7 @@ _log = logging.getLogger(__name__)
 
 class _MOTcpRequestHandler(BaseRequestHandler):
     """ Хендлер TCP сообщений от иридиумного гейтевея """
+    serializer: SBDMessageSerializer
 
     def __init__(self, request, client_address, server):
         srv: MOServiceServer = server
@@ -24,6 +25,7 @@ class _MOTcpRequestHandler(BaseRequestHandler):
         # Поскольку вся обработка проходит в конструкторе базы - вызываем его последним
         super().__init__(request, client_address, server)
 
+    # noinspection PyBroadException
     def handle(self):
         _log.debug("got a request from %s", self.client_address)
 
@@ -81,7 +83,7 @@ class _MOTcpRequestHandler(BaseRequestHandler):
             msg_data = self.serializer.serialize(msg)
             sock: socket.socket = self.request
             sock.send(msg_data)
-        except Exception:
+        except OSError:
             _log.warning("Unable to send ACK message", exc_info=True)
 
 
@@ -122,9 +124,11 @@ class MOServiceServer(TCPServer):
         # И сериализатор для MOConfirmation сообщений
         self.serializer = self._build_serializer()
 
+    # noinspection PyMethodMayBeStatic
     def _build_parser(self):
         return SBDMessageParser(MOMessage)
 
+    # noinspection PyMethodMayBeStatic
     def _build_serializer(self):
         return SBDMessageSerializer()
 

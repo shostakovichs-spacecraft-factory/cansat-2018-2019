@@ -1,7 +1,7 @@
 import typing
 import struct
 
-from .enum import IEI, MTDispositionFlags, MTMessageStatus
+from .enum import IEI, MTDispositionFlags, MTMessageStatus, MTMessagePriority
 from .basic import InformationElement, Message
 
 
@@ -17,9 +17,9 @@ class MOIECounterGenerator:
         if cls.NEXT_VALUE is None:
             cls.NEXT_VALUE = cls.START_VALUE
 
-        next = cls.NEXT_VALUE
+        next_ = cls.NEXT_VALUE
         cls.NEXT_VALUE = (cls.NEXT_VALUE + 1) & cls.UID_MASK
-        return next
+        return next_
 
 
 class MTIEHeader(InformationElement):
@@ -28,7 +28,7 @@ class MTIEHeader(InformationElement):
     IEI = IEI.MT_HEADER
     BODY_STRUCT = struct.Struct(">L15sH")
 
-    def __init__(self, uid: int = None, imei: str = None, flags: MTDispositionFlags = None):
+    def __init__(self, uid: int = None, imei: str = None, flags: typing.Union[int, MTDispositionFlags] = None):
         if uid is None:
             self.uid = MOIECounterGenerator.next_uid()
         else:
@@ -70,8 +70,7 @@ class MTIEPriority(InformationElement):
     IEI = IEI.MT_MESSAGE_PRIORITY
     BODY_STRUCT = struct.Struct(">H")
 
-    def __init__(self, priority_level: int = None):
-        """ Допустимые значения от 1 до 5. Все остальное преобразуется в 5 """
+    def __init__(self, priority_level: MTMessagePriority = None):
         self.priority_level = priority_level
 
     def _pack_body(self) -> bytes:
@@ -114,13 +113,13 @@ class MTMessage(Message):
             self,
             uid: int = None,
             imei: str = None,
-            flags: str = None,
-            priority: int = None,
+            flags: typing.Union[int, MTDispositionFlags] = None,
+            priority: MTMessagePriority = None,
             payload: bytes = None,
     ):
         super().__init__()
-        if uid or imei or flags:
-            self.insert_ie(MTIEHeader(uid=uid, imei=imei, flags=flags))
+        # Заголовок всегда будет
+        self.insert_ie(MTIEHeader(uid=uid, imei=imei, flags=flags))
 
         if payload:
             self.insert_ie(MTIEPayload(payload_data=payload))
@@ -128,7 +127,18 @@ class MTMessage(Message):
         if priority:
             self.insert_ie(MTIEPriority(priority_level=priority))
 
+    def insert_ie(self, ie: InformationElement):
+        """ Перегружаем этот метод для управления флагами """
+        if isinstance(ie, MTIEPriority):
+            # Если ставится приоритет - должен быть соответсвующий флаг
+            self.header_ie.flags = self.header_ie.flags | MTDispositionFlags.HIGH_PRIO
+        elif isinstance(ie, MTIEPayload):
+            # Если ставится пейлоад, то ринг алерт уже не катит
+            self.header_ie.flags &= ~MTDispositionFlags.SEND_RING_ALERT
 
+        super().insert_ie(ie)
+
+    # ===
     @property
     def header_ie(self)->typing.Optional[MTIEHeader]:
         return self.get_ie(MTIEHeader.IEI)
@@ -137,7 +147,7 @@ class MTMessage(Message):
     def header_ie(self, value: MTIEHeader):
         self.insert_ie(value)
 
-
+    # ===
     @property
     def payload_ie(self)->typing.Optional[MTIEPayload]:
         return self.get_ie(MTIEPayload.IEI)
@@ -146,7 +156,7 @@ class MTMessage(Message):
     def payload_ie(self, value: MTIEPayload):
         self.insert_ie(value)
 
-
+    # ===
     @property
     def payload(self)->typing.Optional[bytes]:
         ie: MTIEPayload = self.get_ie(MTIEPayload.IEI)
@@ -156,7 +166,7 @@ class MTMessage(Message):
     def payload(self, value: bytes):
         self.insert_ie(MTIEPayload(payload_data=value))
 
-
+    # ===
     @property
     def prio_ie(self)->typing.Optional[MTIEPriority]:
         return self.get_ie(MTIEPriority.IEI)
@@ -165,14 +175,14 @@ class MTMessage(Message):
     def prio_ie(self, value: MTIEPriority):
         self.insert_ie(value)
 
-
+    # ===
     @property
-    def priority(self)->typing.Optional[int]:
+    def priority(self)->typing.Optional[MTMessagePriority]:
         ie: MTIEPriority = self.get_ie(MTIEPriority.IEI)
         return ie.priority_level if ie else None
 
     @priority.setter
-    def priority(self, value: int):
+    def priority(self, value: MTMessagePriority):
         self.insert_ie(MTIEPriority(priority_level=value))
 
 

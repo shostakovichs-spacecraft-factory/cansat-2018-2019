@@ -10,17 +10,18 @@ from ..messages.mobile_originated import MOMessageConfirmation
 _log = logging.getLogger(__name__)
 
 
-def main(host, port, stream):
+# noinspection PyBroadException
+def main(host, port, data):
     conf_parser = MessageParser(MOMessageConfirmation)
 
-    rc = 0
+    retcode = 0
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
         _log.info(f"connecting to {host}:{port}")
         sock.connect((host, port,))
         _log.info("sending data")
-        sock.sendall(stream.read())
+        sock.sendall(data)
         _log.debug("data sent, sending EOF")
         sock.shutdown(socket.SHUT_WR)
         _log.debug("eof sent")
@@ -41,17 +42,17 @@ def main(host, port, stream):
                 _log.info("got some message in response: %s" % msg)
 
     except Exception:
+        retcode = 1
         _log.exception("An error occurred")
-        rc = 1
 
     finally:
         sock.close()
 
     _log.info("end of it")
-    return rc
+    return retcode
 
 
-if __name__ == "__main__":
+def main_exec():
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
     parser = argparse.ArgumentParser("devutil SBD sender", add_help=True)
@@ -64,6 +65,9 @@ if __name__ == "__main__":
     # Если нам дают данные из stdin-а, то оно не бинарное а текстовое
     # добудем из него бинарный поток (аттрибут buffer)
     stream = getattr(args.infile, "buffer", args.infile)
-    rc = main(args.host, args.port, stream)
-    exit(rc)
+    arg_data = stream.read()
+    return main(args.host, args.port, arg_data)
 
+
+if __name__ == "__main__":
+    exit(main_exec())

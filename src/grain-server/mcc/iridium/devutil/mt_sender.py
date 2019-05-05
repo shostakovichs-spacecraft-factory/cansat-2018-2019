@@ -1,15 +1,15 @@
 import sys
-import typing
 import argparse
 import logging
 
-from ..messages.mobile_terminated import MTMessage, MTMessageConfirmation
-from ..messages.mobile_terminated import MTIEHeader
+from ..messages.mobile_terminated import MTMessage
+from ..messages.enum import MTMessagePriority, MTDispositionFlags
 from ..network.mt_client import MTClient
 
 _log = logging.getLogger(__name__)
 
 
+# noinspection PyBroadException
 def main(host: str, port: int, imei: str, data: bytes):
     rc = 0
 
@@ -17,15 +17,15 @@ def main(host: str, port: int, imei: str, data: bytes):
         msg = MTMessage(
             uid=None,
             imei=imei,
-            flags=None,
+            flags=MTDispositionFlags.HIGH_PRIO,
             payload=data,
-            priority=1
+            priority=MTMessagePriority.PRIO_1
         )
 
         _log.info("message prepared")
         hdr = msg.header_ie
         if not hdr:
-            _log.warn("header ie is not present???")
+            _log.warning("header ie is not present???")
         else:
             _log.info(
                 "message header:\n"
@@ -63,13 +63,13 @@ def main(host: str, port: int, imei: str, data: bytes):
         )
 
     except Exception:
-        _log.exception("An error occurred")
         rc = 1
+        _log.exception("An error occurred")
 
     return rc
 
 
-if __name__ == "__main__":
+def main_exec():
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
     parser = argparse.ArgumentParser("devutil MT mesage sender")
@@ -88,5 +88,8 @@ if __name__ == "__main__":
     port = args.port
     imei = args.imei
 
-    rc = main(host, port, imei, data)
-    exit(rc)
+    return main(host, port, imei, data)
+
+
+if __name__ == "__main__":
+    exit(main_exec())

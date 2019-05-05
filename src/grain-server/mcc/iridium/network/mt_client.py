@@ -2,9 +2,9 @@ import socket
 
 from ..messages.mobile_terminated import MTMessage, MTMessageConfirmation
 from ..messages.serialization import MessageSerializer, MessageParser
+from ..messages.enum import MTMessagePriority
 
 from .requisites import DIRECTIP_GATEWAY_ADDRESS
-
 
 
 class MTClient:
@@ -38,9 +38,10 @@ class MTClient:
             sock.shutdown(socket.SHUT_WR)
 
             conf_msg = self._read_confirmation(sock)
-            return conf_msg
         finally:
             sock.close()
+
+        return conf_msg
 
     def _get_socket(self):
         """ Получение объекта сокета как он есть """
