@@ -17,9 +17,9 @@ def main(host: str, port: int, imei: str, data: bytes):
         msg = MTMessage(
             uid=None,
             imei=imei,
-            flags=MTDispositionFlags.HIGH_PRIO,
-            payload=data,
-            priority=MTMessagePriority.PRIO_1
+            flags=MTDispositionFlags.FLUSH_MT_QUEUE,
+            # payload=data,
+            # priority=MTMessagePriority.PRIO_1
         )
 
         _log.info("message prepared")
@@ -58,7 +58,7 @@ def main(host: str, port: int, imei: str, data: bytes):
             "conf:\n"
             f"\t uid: {cie.uid}\n"
             f"\t imei: {cie.imei}\n"
-            f"\t status: {cie.status}\n"
+            f"\t status or queue number: {cie.status_or_queue_number}\n"
             f"\t ref-id: {cie.ref_id}\n"
         )
 

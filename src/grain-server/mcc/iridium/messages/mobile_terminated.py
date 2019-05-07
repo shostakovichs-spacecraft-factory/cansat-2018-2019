@@ -84,13 +84,13 @@ class MTIEConfirmation(InformationElement):
     """ Подтверждение от шлюза о получении нашего сообщения и постановке его в очередь """
 
     IEI = IEI.MT_CONFIRMATION
-    BODY_STRUCT = struct.Struct(">L15sLH")
+    BODY_STRUCT = struct.Struct(">L15sLh")
 
     def __init__(self):
         self.uid: int = None
         self.imei: str = None
         self.ref_id: int = None
-        self.status: typing.Union[int, MTMessageStatus] = None
+        self.status_or_queue_number: typing.Union[int, MTMessageStatus] = None
 
     def _pack_body(self) -> bytes:
         raise NotImplementedError()
@@ -101,7 +101,7 @@ class MTIEConfirmation(InformationElement):
         self.uid = uid
         self.imei = imei
         self.ref_id = ref_id
-        self.status = MTMessageStatus.parse(status)
+        self.status_or_queue_number = MTMessageStatus.parse(status)
 
 
 class MTMessage(Message):

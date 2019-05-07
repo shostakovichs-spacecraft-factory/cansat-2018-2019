@@ -82,7 +82,7 @@ class MTMessageStatus(IntEnum):
     @classmethod
     def parse(cls, value: int):
         """ Специальный метод для парсинга значений с учетом валидных значений от 1 до 50 """
-        if 1 >= value >= 50:
+        if 0 <= value <= 50:
             return value
         else:
             return cls(value)

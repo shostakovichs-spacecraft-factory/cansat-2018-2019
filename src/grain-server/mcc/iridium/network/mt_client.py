@@ -71,5 +71,5 @@ class MTClient:
 
             accum += data
 
-        conf_msg = self.parser.parse(data)  # type: MTMessageConfirmation
+        conf_msg = self.parser.parse(accum)  # type: MTMessageConfirmation
         return conf_msg
