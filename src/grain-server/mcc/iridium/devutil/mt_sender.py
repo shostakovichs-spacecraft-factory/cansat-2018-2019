@@ -18,7 +18,7 @@ def main(host: str, port: int, imei: str, data: bytes):
             uid=None,
             imei=imei,
             flags=MTDispositionFlags.FLUSH_MT_QUEUE,
-            # payload=data,
+            payload=data,
             # priority=MTMessagePriority.PRIO_1
         )
 
