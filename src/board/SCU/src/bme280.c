@@ -40,7 +40,7 @@
 #define BME280_GET_BITS_POS_0(reg_data, bitname)  (reg_data & (bitname##_MSK))
 
 /**\name BME280 chip identifier */
-#define BME280_CHIP_ID  (0x60)
+#define BME280_CHIP_ID  (0x58)
 
 /**\name Register Address */
 #define BME280_CHIP_ID_ADDR                 (0xD0)
@@ -723,7 +723,7 @@ int bme280_config_default(bme280_dev_s * bme280)
 
 	rc |= bme280_push_sensor_mode(bme280, BME280_MODE_NORMAL);
 
-	if(rc != OK)
+	if(rc)
 	{
 		trace_printf("ERROR: Can't config bme280\n");
 	}

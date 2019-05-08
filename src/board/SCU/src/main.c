@@ -198,7 +198,7 @@ int main()
 	struct bme280_dev_s descr_bme280;
 
 	I2C_HandleTypeDef i2c_handler = I2C_init_for_bme280(1);
-	bme280_register_i2c(&descr_bme280, &i2c_handler, BME280_I2C_ADDR_SDO_LOW);
+	bme280_register_i2c(&descr_bme280, &i2c_handler, BME280_I2C_ADDR_SDO_HIGH);
 	bme280_init(&descr_bme280);
 
 	struct bme280_float_data_s data;
