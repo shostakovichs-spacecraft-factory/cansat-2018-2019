@@ -27,6 +27,7 @@ I2C_HandleTypeDef *ads_hi2c;
 /**************************************************************************/
 void ADS1x1x_write_register(uint8_t i2c_address, uint8_t reg, uint16_t value)
 {
+	swap_endian((uint8_t*)&value, 2);
 	int rc = HAL_I2C_Mem_Write(ads_hi2c, (uint16_t)i2c_address, (uint16_t)reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&value, 2, 100);
 	if(rc)
 		trace_printf("ERROR: Can't write ADS1x1x register: %d\n", rc);
@@ -42,6 +43,7 @@ uint16_t ADS1x1x_read_register(uint8_t i2c_address, uint8_t reg)
 
 	uint16_t result = 0;
 	int rc = HAL_I2C_Mem_Read(ads_hi2c, i2c_address, (uint16_t)reg, I2C_MEMADD_SIZE_16BIT, (uint8_t*)&result, 2, 100);
+	swap_endian((uint8_t*)&result, 2);
 	if(rc)
 		trace_printf("ERROR: Can't read ADS1x1x register: %d\n", rc);
 	return result;
@@ -208,3 +210,15 @@ void ADS1x1x_set_comparator_queue(ADS1x1x_config_t *p_config, ADS1x1x_comparator
 
 
 
+void swap_endian(uint8_t* a, int size)
+{
+	uint8_t *b = a + size - 1;
+	while(a < b)
+	{
+		uint8_t t = *a;
+		*a = *b;
+		*b = t;
+		a++;
+		b--;
+	}
+}

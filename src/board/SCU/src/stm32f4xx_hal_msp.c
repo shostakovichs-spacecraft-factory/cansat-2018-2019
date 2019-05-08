@@ -83,12 +83,12 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc);
 void HAL_MspInit(void)
 {
 	//__GPIOA_CLK_ENABLE();
-	__GPIOB_CLK_ENABLE();
+	//__GPIOB_CLK_ENABLE();
 	//__HAL_RCC_GPIOA_CLK_ENABLE();
 	//__HAL_RCC_ADC1_CLK_ENABLE();
 
 	//HAL_UART1_MspInit();
-	HAL_I2C1_MspInit();
+	//HAL_I2C1_MspInit();
 	//HAL_ADC_MspInit(0);
 }
 

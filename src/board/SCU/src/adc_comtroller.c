@@ -7,6 +7,7 @@
 
 #include <stm32f4xx_hal.h>
 #include <stdlib.h>
+#include <diag/Trace.h>
 
 int adc_pin_chk_init(GPIO_TypeDef* GPIOX, uint32_t pin)
 {

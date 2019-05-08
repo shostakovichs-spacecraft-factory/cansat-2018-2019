@@ -10,7 +10,7 @@
 
 #include <stm32f4xx_hal.h>
 #define I2C_BME280_ADDRESS 0b1110110 << 1;
-#define CLOCK_SPEED 100000U //hz
+#define CLOCK_SPEED 50000 //hz
 
 I2C_HandleTypeDef I2C_init_for_bme280(int i2c_number);
 
