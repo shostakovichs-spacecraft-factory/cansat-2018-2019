@@ -265,9 +265,9 @@ int bme280_load_preset_conf(struct bme280_conf_s * conf, bme280_conf_preset_t co
 typedef enum
 {
     // this adress is chosen when SDO pin is high
-    BME280_I2C_ADDR_SDO_HIGH = 0x77 << 1,
+    BME280_I2C_ADDR_SDO_HIGH = 0x77,
     // this adress is chosen when SDO pin is low
-    BME280_I2C_ADDR_SDO_LOW  = 0x76 << 1,
+    BME280_I2C_ADDR_SDO_LOW  = 0x76,
 } bme280_i2c_addr_t;
 
 

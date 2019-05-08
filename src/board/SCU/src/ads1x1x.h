@@ -169,10 +169,11 @@ typedef struct
 }
 ADS1x1x_config_t;
 
-extern I2C_HandleTypeDef *ads_hi2c;
 // Easy usage:
 // Call this at startup:
-uint8_t ADS1x1x_init(ADS1x1x_config_t *p_config, ADS1x1x_chip_t chip, uint8_t i2c_address, ADS1x1x_mux_t input, ADS1x1x_pga_t gain);
+int ADS1x1x_register_i2c(ADS1x1x_config_t *p_config, I2C_HandleTypeDef* hi2c, uint16_t devadd);
+int ADS1x1x_config_default(ADS1x1x_config_t *p_config);
+int ADS1x1x_init(ADS1x1x_config_t *p_config);
 // Then call:
 void ADS1x1x_start_conversion(ADS1x1x_config_t *p_config);
 // ... and wait a bit before calling this:
@@ -192,10 +193,12 @@ void ADS1x1x_set_comparator_latching(ADS1x1x_config_t *p_config, ADS1x1x_compara
 void ADS1x1x_set_comparator_queue(ADS1x1x_config_t *p_config, ADS1x1x_comparator_queue_t value);
 
 // Full control access.
-void ADS1x1x_write_register(uint8_t i2c_address, uint8_t reg, uint16_t value);
-uint16_t ADS1x1x_read_register(uint8_t i2c_address, uint8_t reg);
+void ADS1x1x_write_register(I2C_HandleTypeDef *hi2c, uint8_t i2c_address, uint8_t reg, uint16_t value);
+uint16_t ADS1x1x_read_register(I2C_HandleTypeDef *hi2c, uint8_t i2c_address, uint8_t reg);
 void ADS1x1x_set_config_bitfield(ADS1x1x_config_t *p_config, uint16_t value, uint16_t mask);
 
+//If you want
+int ADS1x1x_deinit(ADS1x1x_config_t *p_config);
 
 #ifdef __cplusplus
 }

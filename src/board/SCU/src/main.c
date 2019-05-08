@@ -13,45 +13,22 @@ void SysTick_Handler(void)
 	HAL_IncTick();
 }
 
-void ads1115_test(I2C_HandleTypeDef * Hi2c)
+void ads1115_test(I2C_HandleTypeDef * hi2c)
 {
 
-	ads_hi2c = Hi2c;
 	ADS1x1x_config_t ads;
-	ads.chip = ADS1115;
-	ads.i2c_address = ADS1x1x_I2C_ADDRESS_ADDR_TO_GND << 1;
-    ADS1x1x_set_os(&ads,OS_SINGLE);
-	ADS1x1x_set_multiplexer(&ads, MUX_DIFF_0_1);
-	ADS1x1x_set_pga(&ads, PGA_256);
-	ADS1x1x_set_mode(&ads, MODE_SINGLE_SHOT);
-	ADS1x1x_set_data_rate(&ads, DATA_RATE_ADS111x_8);
-	ADS1x1x_set_threshold_lo(&ads, 0);
-	ADS1x1x_set_threshold_hi(&ads, 1);
-	ADS1x1x_set_comparator_polarity(&ads, COMPARATOR_POLARITY_ACTIVE_HI);
-	ADS1x1x_set_comparator_queue(&ads, COMPARATOR_QUEUE_1);
+	ADS1x1x_config_default(&ads);
+	ADS1x1x_register_i2c(&ads, hi2c, ADS1x1x_I2C_ADDRESS_ADDR_TO_GND << 1);
+	ADS1x1x_init(&ads);
 
-	//ADS1x1x_init(&ads, ads.chip,ads.i2c_address,,)
-
-	//uint8_t data[10];
-	//int rc = HAL_I2C_Mem_Read(&Hi2c, ADS1x1x_I2C_ADDRESS_ADDR_TO_GND << 1, 0x03, I2C_MEMADD_SIZE_8BIT, data, 2, 100);
-	if(Hi2c->ErrorCode == HAL_I2C_ERROR_AF)
-		trace_printf("ERROR: oh oh\n");
-
-	//trace_printf("hey: %d", rc);
 	while(1)
 	{
 		ADS1x1x_start_conversion(&ads);
 		HAL_Delay(200);
 		uint16_t data = ADS1x1x_read(&ads);
 
-		//swap_endian((uint8_t*)&data, sizeof(data));
-		if(Hi2c->ErrorCode == HAL_I2C_ERROR_AF)
-			trace_printf("ERROR: oh oh\n");
-		else
-		{
-			float result = (int16_t)data / (float)(1 << 15) * 0.256 / 3.3 / 0.004 * 100000;
-			trace_printf("pressure: %8.2f %4X\n", result, data);
-		}
+		float result = (int16_t)data / (float)(1 << 15) * 0.256 / 3.3 / 0.004 * 100000;
+		trace_printf("pressure: %8.2f %4X\n", result, data);
 	}
 
 }
@@ -182,7 +159,7 @@ void bmp_test(I2C_HandleTypeDef * Hi2c)
 	struct bme280_dev_s descr_bme280;
 
 	I2C_HandleTypeDef i2c_handler = *Hi2c;//I2C_init_for_bme280(1);
-	bme280_register_i2c(&descr_bme280, &i2c_handler, BME280_I2C_ADDR_SDO_HIGH);
+	bme280_register_i2c(&descr_bme280, &i2c_handler, BME280_I2C_ADDR_SDO_HIGH << 1);
 	bme280_init(&descr_bme280);
 
 	struct bme280_float_data_s data;

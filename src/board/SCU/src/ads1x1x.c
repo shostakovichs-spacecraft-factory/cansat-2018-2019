@@ -19,16 +19,29 @@
 #include <diag/Trace.h>
 
 
-I2C_HandleTypeDef *ads_hi2c;
+
+
+void swap_endian(uint8_t* a, int size)
+{
+	uint8_t *b = a + size - 1;
+	while(a < b)
+	{
+		uint8_t t = *a;
+		*a = *b;
+		*b = t;
+		a++;
+		b--;
+	}
+}
 /**************************************************************************/
 /*!
     @brief  Writes 16 bits to the specified destination register.
 */
 /**************************************************************************/
-void ADS1x1x_write_register(uint8_t i2c_address, uint8_t reg, uint16_t value)
+void ADS1x1x_write_register(I2C_HandleTypeDef *hi2c, uint8_t i2c_address, uint8_t reg, uint16_t value)
 {
 	swap_endian((uint8_t*)&value, 2);
-	int rc = HAL_I2C_Mem_Write(ads_hi2c, (uint16_t)i2c_address, (uint16_t)reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&value, 2, 100);
+	int rc = HAL_I2C_Mem_Write(hi2c, (uint16_t)i2c_address, (uint16_t)reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&value, 2, 100);
 	if(rc)
 		trace_printf("ERROR: Can't write ADS1x1x register: %d\n", rc);
 }
@@ -38,11 +51,11 @@ void ADS1x1x_write_register(uint8_t i2c_address, uint8_t reg, uint16_t value)
     @brief  Read 16 bits from the specified destination register.
 */
 /**************************************************************************/
-uint16_t ADS1x1x_read_register(uint8_t i2c_address, uint8_t reg)
+uint16_t ADS1x1x_read_register(I2C_HandleTypeDef *hi2c, uint8_t i2c_address, uint8_t reg)
 {
 
 	uint16_t result = 0;
-	int rc = HAL_I2C_Mem_Read(ads_hi2c, i2c_address, (uint16_t)reg, I2C_MEMADD_SIZE_16BIT, (uint8_t*)&result, 2, 100);
+	int rc = HAL_I2C_Mem_Read(hi2c, i2c_address, (uint16_t)reg, I2C_MEMADD_SIZE_16BIT, (uint8_t*)&result, 2, 100);
 	swap_endian((uint8_t*)&result, 2);
 	if(rc)
 		trace_printf("ERROR: Can't read ADS1x1x register: %d\n", rc);
@@ -50,46 +63,41 @@ uint16_t ADS1x1x_read_register(uint8_t i2c_address, uint8_t reg)
 }
 
 
-/**************************************************************************/
-/*!
-    @brief  Initialise a user-provided ADS1X15 configuration structure.
-            The user must provide a valid pointer to an empty
-            ADS1x1x_config_t structure.
-*/
-/**************************************************************************/
-uint8_t ADS1x1x_init(ADS1x1x_config_t *p_config, ADS1x1x_chip_t chip, uint8_t i2c_address, ADS1x1x_mux_t input, ADS1x1x_pga_t gain)
+
+int ADS1x1x_register_i2c(ADS1x1x_config_t *p_config, I2C_HandleTypeDef* hi2c, uint16_t devadd)
 {
-  uint8_t result = 0;
+	p_config->hi2c = hi2c;
+	p_config->i2c_address = devadd;
 
-  if (p_config!=0)
-  {
-    // Set generic parameters.
-    p_config->chip = chip;
-    p_config->i2c_address = i2c_address;
+	return 0;
+}
 
-    // Set configuration bits for default operation.
-    p_config->config = 0;
+int ADS1x1x_config_default(ADS1x1x_config_t *p_config)
+{
+	p_config->chip = ADS1115;
     ADS1x1x_set_os(p_config,OS_SINGLE);
-    ADS1x1x_set_multiplexer(p_config,input);
-    ADS1x1x_set_pga(p_config,gain);
-    ADS1x1x_set_mode(p_config,MODE_SINGLE_SHOT);
-    if (p_config->chip==ADS1013 || p_config->chip==ADS1014 || p_config->chip==ADS1015)
-    {
-      ADS1x1x_set_data_rate(p_config,DATA_RATE_ADS101x_1600);
-    }
-    else
-    {
-      ADS1x1x_set_data_rate(p_config,DATA_RATE_ADS111x_128);
-    }
-    ADS1x1x_set_comparator_mode(p_config,COMPARATOR_MODE_TRADITIONAL);
-    ADS1x1x_set_comparator_polarity(p_config,COMPARATOR_POLARITY_ACTIVE_LO);
-    ADS1x1x_set_comparator_latching(p_config,COMPARATOR_NON_LATCHING);
-    ADS1x1x_set_comparator_queue(p_config,COMPARATOR_QUEUE_NONE);
-    
-    result = 1;
-  }
+	ADS1x1x_set_multiplexer(p_config, MUX_DIFF_0_1);
+	ADS1x1x_set_pga(p_config, PGA_256);
+	ADS1x1x_set_mode(p_config, MODE_SINGLE_SHOT);
+	ADS1x1x_set_data_rate(p_config, DATA_RATE_ADS111x_8);
+	ADS1x1x_set_threshold_lo(p_config, 0);
+	ADS1x1x_set_threshold_hi(p_config, 1);
+	ADS1x1x_set_comparator_polarity(p_config, COMPARATOR_POLARITY_ACTIVE_HI);
+	ADS1x1x_set_comparator_queue(p_config, COMPARATOR_QUEUE_1);
 
-  return result;
+	return 0;
+}
+
+
+
+int ADS1x1x_init(ADS1x1x_config_t *p_config)
+{
+	return 0;
+}
+
+int ADS1x1x_deinit(ADS1x1x_config_t *p_config)
+{
+	return 0;
 }
 
 
@@ -103,7 +111,7 @@ uint8_t ADS1x1x_init(ADS1x1x_config_t *p_config, ADS1x1x_chip_t chip, uint8_t i2
 void ADS1x1x_start_conversion(ADS1x1x_config_t *p_config)
 {
   // Write configuration to the ADC.
-  ADS1x1x_write_register(p_config->i2c_address,ADS1x1x_REG_POINTER_CONFIG,p_config->config);
+  ADS1x1x_write_register(p_config->hi2c, p_config->i2c_address,ADS1x1x_REG_POINTER_CONFIG,p_config->config);
 }
 
 
@@ -117,7 +125,7 @@ void ADS1x1x_start_conversion(ADS1x1x_config_t *p_config)
 int16_t ADS1x1x_read(ADS1x1x_config_t *p_config)
 {
   // Read the conversion result.
-  int16_t result = (int16_t)ADS1x1x_read_register(p_config->i2c_address,ADS1x1x_REG_POINTER_CONVERSION);
+  int16_t result = (int16_t)ADS1x1x_read_register(p_config->hi2c, p_config->i2c_address,ADS1x1x_REG_POINTER_CONVERSION);
   // Adjust for ADC resolution if needed.
   if (p_config->chip==ADS1013 || p_config->chip==ADS1014 || p_config->chip==ADS1015)
   {
@@ -133,7 +141,7 @@ void ADS1x1x_set_threshold_lo(ADS1x1x_config_t *p_config, uint16_t value)
   {
     value <<= 4;
   }
-  ADS1x1x_write_register(p_config->i2c_address,ADS1x1x_REG_POINTER_LO_THRESH,value);
+  ADS1x1x_write_register(p_config->hi2c, p_config->i2c_address,ADS1x1x_REG_POINTER_LO_THRESH,value);
 }
 
 
@@ -143,7 +151,7 @@ void ADS1x1x_set_threshold_hi(ADS1x1x_config_t *p_config, uint16_t value)
   {
     value <<= 4;
   }
-  ADS1x1x_write_register(p_config->i2c_address,ADS1x1x_REG_POINTER_HI_THRESH,value);
+  ADS1x1x_write_register(p_config->hi2c, p_config->i2c_address,ADS1x1x_REG_POINTER_HI_THRESH,value);
 }
 
 
@@ -208,17 +216,3 @@ void ADS1x1x_set_comparator_queue(ADS1x1x_config_t *p_config, ADS1x1x_comparator
 }
 
 
-
-
-void swap_endian(uint8_t* a, int size)
-{
-	uint8_t *b = a + size - 1;
-	while(a < b)
-	{
-		uint8_t t = *a;
-		*a = *b;
-		*b = t;
-		a++;
-		b--;
-	}
-}

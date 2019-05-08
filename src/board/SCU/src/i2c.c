@@ -29,7 +29,6 @@ I2C_HandleTypeDef I2C_init_for_bme280(int i2c_number)
 	default:
 		assert("We haven't this i2c");
 	}
-	hi2c.Instance = I2C1;
 	hi2c.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
 	hi2c.Init.ClockSpeed = CLOCK_SPEED;
 	hi2c.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -54,7 +53,6 @@ int i2c_init(I2C_HandleTypeDef * hi2c)
 
 int i2c_config_default(I2C_HandleTypeDef * hi2c)
 {
-
 	hi2c->Instance = I2C1;
 	hi2c->Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
 	hi2c->Init.ClockSpeed = CLOCK_SPEED;
