@@ -111,6 +111,19 @@ static int _serialize_sbdreg(char * buffer, int buffer_size, const ir9602_cmd_t 
 }
 
 
+static int _serialize_sbdd(char * buffer, int buffer_size, const ir9602_cmd_t * command)
+{
+	// Если это ответ на RA, то нужно дописать A к команде
+	const int rc = snprintf(
+			buffer, buffer_size,
+			"AT+SBDD=%d\r\n",
+			(int)command->arg.sbdd.clear_type
+	);
+	return rc;
+}
+
+
+
 // Стуктура с различными параметрами команды
 typedef struct
 {
@@ -126,6 +139,7 @@ static const ir9602_cmd_def_t _cmd_defs[] = {
 		{ &_serialize_sbdrb  },
 		{ &_serialize_sbdix  },
 		{ &_serialize_sbdreg },
+		{ &_serialize_sbdd   },
 };
 
 

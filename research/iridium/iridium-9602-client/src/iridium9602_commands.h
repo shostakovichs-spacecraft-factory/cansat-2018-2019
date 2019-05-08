@@ -11,6 +11,17 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+//! Аргумент команды на очистку буферов модема
+typedef enum
+{
+	//! Чистить MO буфер
+	IR9202_CMD_SBDD_CLEAR_MO = 0,
+	//! Чистить MT буфер
+	IR9202_CMD_SBDD_CLEAR_MT = 1,
+	//! Чистить оба буфера
+	IR9202_CMD_SBDD_CLEAR_BOTH = 2,
+} ir9602_cmd_sbdd_cltype;
+
 //! Команды для модема 9602
 typedef enum
 {
@@ -55,14 +66,11 @@ typedef enum
 	 * 2: lon - широта модема
 	 */
 	IR9602_CMD_SBDREG,
+
+	//! Очистка буферов сообщений модема
+	IR9602_CMD_SBDD,
 } ir9602_cmd_code_t;
 
-
-//! Аргументы команды AT
-typedef struct
-{
-
-} ir9602_cmd_at_t;
 
 //! Аргументы команды CIER
 typedef struct
@@ -82,12 +90,6 @@ typedef struct
 } ir9602_cmd_sbdwb_t;
 
 
-//! Аргументы команды SBDRB
-typedef struct
-{
-
-} ir9602_cmd_sbdrb_t;
-
 //! Аргументы команды SBDIX
 typedef struct
 {
@@ -106,6 +108,13 @@ typedef struct
 } ir9602_cmd_sbdreg_t;
 
 
+//! Аргументы команды SBDD
+typedef struct
+{
+	//! Что именно чистим
+	ir9602_cmd_sbdd_cltype clear_type;
+} ir9602_cmd_sbdd_t;
+
 //! Обобщенная структура команды для модема
 typedef struct
 {
@@ -115,12 +124,11 @@ typedef struct
 	//! Её аргументы
 	union
 	{
-		ir9602_cmd_at_t at;
 		ir9602_cmd_cier_t cier;
 		ir9602_cmd_sbdwb_t sbdwb;
-		ir9602_cmd_sbdrb_t sbdrb;
 		ir9602_cmd_sbdix_t sbdix;
 		ir9602_cmd_sbdreg_t sbdreg;
+		ir9602_cmd_sbdd_t sbdd;
 	} arg;
 } ir9602_cmd_t;
 

@@ -6,12 +6,20 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "iridium9602_commands.h"
+#include "iridium9602_events.h"
 
 
 int main()
 {
+	const char event[] = "ERRRRRR\r\n";
+	ir9602_evt_t evt;
+	bool rv = ir9602_probe_event(event, sizeof(event)-1, &evt);
+	printf("%d\n", rv);
+
+	return 0;
 
 	ir9602_cmd_t  cmd;
 	cmd.code = IR9602_CMD_SBDREG;
