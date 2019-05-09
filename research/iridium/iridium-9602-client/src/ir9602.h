@@ -5,13 +5,13 @@
  *      Author: snork
  */
 
-#ifndef IRIDIUM9602_H_
-#define IRIDIUM9602_H_
+#ifndef IR9602_H_
+#define IR9602_H_
 
 #include <stdint.h>
 #include <stddef.h>
 
-#include "iridium9602_commands.h"
+#include "ir9602_commands.h"
 
 //! Размер для буфера для сериализации команд
 /*! FIXME: 50 байт хватит ведь? */
@@ -45,11 +45,11 @@ typedef int (*ir9602_uart_write_t)(void * rwarg, const void * buffer, int buffer
 // Состояния драйвера
 typedef enum
 {
-	IR9602_STATE_IDLE,
-	IR9602_STATE_CMD,
-	IR9602_STATE_DATA_WRITE,
-	IR9602_STATE_DATA_READ,
-	IR9602_STATE_AWAIT_RESP,
+	IR9602_STATE_IDLE,			//!< Ничего не делаем
+	IR9602_STATE_WRITE_CMD,		//!< Пишем команду
+	IR9602_STATE_DATA_WRITE,	//!< Пишем данные
+	IR9602_STATE_DATA_READ,		//!< Читаем данные
+	IR9602_STATE_AWAIT_RESP,	//!< Ждем ответа на команду
 } ir9602_state_t;
 
 
@@ -65,8 +65,6 @@ typedef enum
 	//! Модуль ответил чем-то не понятным впринципе
 	IR9602_POLL_RESULT_UNEXPECTED,
 } ir9602_poll_result_t;
-
-
 
 
 //! Дескриптор устройства 9602
@@ -117,8 +115,8 @@ int ir9602_cmd_sbdrb(ir9602_t * device);
 
 int ir9602_get_mt_data(ir9602_t * device, void * buffer, int buffer_size);
 
-//! Пробует получить распарсить одно событие от модема
-int ir9602_poll_one(ir9602_t * device);
+//! Пытаемся отправить данные
+int ir9602_poll_write(ir9602_t * device);
 
 
-#endif /* IRIDIUM9602_H_ */
+#endif /* IR9602_H_ */

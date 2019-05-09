@@ -5,8 +5,8 @@
  *      Author: snork
  */
 
-#ifndef IRIDIUM9602_COMMANDS_H_
-#define IRIDIUM9602_COMMANDS_H_
+#ifndef IR9602_COMMANDS_H_
+#define IR9602_COMMANDS_H_
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -135,4 +135,4 @@ typedef struct
 
 int ir9602_serialize_command(char * buffer, int buffer_size, const ir9602_cmd_t * command);
 
-#endif /* IRIDIUM9602_COMMANDS_H_ */
+#endif /* IR9602_COMMANDS_H_ */

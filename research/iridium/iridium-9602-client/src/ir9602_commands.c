@@ -5,14 +5,13 @@
  *      Author: snork
  */
 
-#include "iridium9602_commands.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include "ir9602_commands.h"
 
 //! Фукция сериализатор для команды
 /*! Возвращает количество символов, которые занимает сериализованная команда

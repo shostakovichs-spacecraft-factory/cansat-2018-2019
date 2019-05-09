@@ -5,7 +5,7 @@
  *      Author: snork
  */
 
-#include "iridium9602.h"
+#include "ir9602.h"
 
 #include <string.h>
 #include <assert.h>
@@ -72,7 +72,7 @@ int ir9602_cmd_at(ir9602_t * device)
 	device->cmd.code = IR9602_CMD_AT;
 	ir9602_serialize_command(device->cmd_buffer, IR9602_CMD_BUFFER_SIZE, &device->cmd);
 
-	device->state = IR9602_STATE_CMD;
+	device->state = IR9602_STATE_WRITE_CMD;
 	return 0;
 }
 
@@ -108,7 +108,7 @@ int ir9602_cmd_sbdwb(ir9602_t * device, const void * buffer, int buffer_size)
 	device->cmd.code = IR9602_CMD_SBDWB;
 	device->cmd.arg.sbdwb.message_length = buffer_size;
 	ir9602_serialize_command(device->cmd_buffer, IR9602_CMD_BUFFER_SIZE, &device->cmd);
-	device->state = IR9602_STATE_CMD;
+	device->state = IR9602_STATE_WRITE_CMD;
 
 	return buffer_size;
 }
@@ -119,7 +119,7 @@ int ir9602_cmd_sbdrb(ir9602_t * device)
 	// Готовим команду к отправке
 	device->cmd.code = IR9602_CMD_SBDRB;
 	ir9602_serialize_command(device->cmd_buffer, IR9602_CMD_BUFFER_SIZE, &device->cmd);
-	device->state = IR9602_STATE_CMD;
+	device->state = IR9602_STATE_WRITE_CMD;
 
 	return 0;
 }
