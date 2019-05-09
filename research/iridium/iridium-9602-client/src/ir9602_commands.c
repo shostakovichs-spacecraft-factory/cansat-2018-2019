@@ -22,20 +22,6 @@ typedef int (*ir9602_cmd_serializer_t)(char *, int, const ir9602_cmd_t*);
 
 // Набор функций сериализаторов для различных команд
 // =================================================
-static int _serialize_at(char * buffer, int buffer_size, const ir9602_cmd_t * command)
-{
-	(void)command;
-
-	const char cmd[] = "AT\r\n";
-	const int cmd_len = sizeof(cmd)-1; // -1 на терминирующий ноль
-	if (cmd_len > buffer_size)
-		return buffer_size;
-
-	memcpy(buffer, cmd, cmd_len);
-	return cmd_len;
-}
-
-
 static int _serialize_cier(char * buffer, int buffer_size, const ir9602_cmd_t * command)
 {
 	const int enable_global =
@@ -72,41 +58,21 @@ static int _serialize_sbdrb(char * buffer, int buffer_size, const ir9602_cmd_t *
 	if (cmd_len > buffer_size)
 		return buffer_size;
 
-	memcpy(buffer, command, cmd_len);
+	memcpy(buffer, cmd, cmd_len);
 	return cmd_len;
 }
 
 
-static int _serialize_sbdix(char * buffer, int buffer_size, const ir9602_cmd_t * command)
+static int _serialize_sbdi(char * buffer, int buffer_size, const ir9602_cmd_t * command)
 {
-	// Если это ответ на RA, то нужно дописать A к команде
-	const int rc = snprintf(
-			buffer, buffer_size,
-			"AT+SBDIX%s\r\n",
-			command->arg.sbdix.response_to_ra ? "a" : ""
-	);
-	return rc;
-}
+	(void)command;
+	const char cmd[] = "AT+SBDI\r\n";
+	const int cmd_len = sizeof(cmd)-1;
+	if (cmd_len > buffer_size)
+		return buffer_size;
 
-
-static int _serialize_sbdreg(char * buffer, int buffer_size, const ir9602_cmd_t * command)
-{
-	const ir9602_cmd_sbdreg_t * arg = &command->arg.sbdreg;
-
-	const int int_lat = (int)arg->lat;
-	const int int_lon = (int)arg->lon;
-
-	const float minutes_lat = fabs((arg->lat - int_lat) * 60.0f);
-	const float minutes_lon = fabs((arg->lon - int_lon) * 60.0f);
-
-	const int rc = snprintf(
-			buffer, buffer_size,
-			"AT+SBDREG=%02d%06.3f,%03d%06.3f\r\n",
-			int_lat, minutes_lat,
-			int_lon, minutes_lon
-	);
-
-	return rc;
+	memcpy(buffer, cmd, cmd_len);
+	return cmd_len;
 }
 
 
@@ -132,14 +98,19 @@ typedef struct
 
 
 static const ir9602_cmd_def_t _cmd_defs[] = {
-		{ &_serialize_at     },
 		{ &_serialize_cier   },
 		{ &_serialize_sbdwb  },
 		{ &_serialize_sbdrb  },
-		{ &_serialize_sbdix  },
-		{ &_serialize_sbdreg },
+		{ &_serialize_sbdi   },
 		{ &_serialize_sbdd   },
 };
+
+
+static const ir9602_cmd_def_t * _get_def(ir9602_cmd_code_t code)
+{
+	assert(code-1 < sizeof(_cmd_defs)/sizeof(*_cmd_defs));
+	return _cmd_defs[code-1];
+}
 
 
 int ir9602_serialize_command(char * buffer, int buffer_size, const ir9602_cmd_t * command)
@@ -147,7 +118,7 @@ int ir9602_serialize_command(char * buffer, int buffer_size, const ir9602_cmd_t 
 	// проверка на валидность кода команды
 	assert(command->code > 0 && command->code < sizeof(_cmd_defs)/sizeof(*_cmd_defs));
 
-	const ir9602_cmd_def_t * const cmd_def = &_cmd_defs[command->code];
+	const ir9602_cmd_def_t * const cmd_def = _get_def(command->code);
 	const ir9602_cmd_serializer_t serializer = cmd_def->serializer;
 
 	int cmdsize = serializer(buffer, buffer_size, command);
