@@ -5,8 +5,10 @@
 #define RXBUFFLEN 1024
 
 #define CSPIN	8
-#define BUSYPIN	90 //FIXME redefine
-#define IRQPIN	91
+#define BUSYPIN	6
+#define IRQPIN	5
+
+void irqcallback(int gpio, int level, uint32_t tick, void * userdata);
 
 int main()
 {
@@ -23,7 +25,7 @@ int main()
 		return 0;
 	}
 
-	int spihandle = spiOpen(0,10000, (1 << 5)); //spi0.0@10kHz, self-controlling CS
+	int spihandle = spiOpen(0,32000, (1 << 5)); //spi0.0@10kHz, self-controlling CS
 
 	gpioSetMode(CSPIN, PI_OUTPUT);
 	gpioWrite(CSPIN, 1);
@@ -39,7 +41,7 @@ int main()
 		.busy_pin = BUSYPIN,
 		.cs_pin = CSPIN
 	};
-	sx1268_struct_init(&radio, rxbuff, RXBUFFLEN, NULL, 0);
+	sx1268_struct_init(&radio, &radio_specific, rxbuff, RXBUFFLEN, NULL, 0);
 
 	sx1268_init(&radio);
 
@@ -47,9 +49,10 @@ int main()
 		if( RXLEN(radio) != 0)
 		{
 			sx1268_receive(&radio, tmpbuff, RXLEN(radio));
+			printf("GOTCHA!\n");
+			printf(tmpbuff);
+			//sleep(1);
 		}
-
-		printf("RUNNING!!!\n");
 	}
 
 
@@ -58,6 +61,6 @@ int main()
 
 void irqcallback(int gpio, int level, uint32_t tick, void * userdata)
 {
-	if(gpio == IRQPIN && level == RISING_EDGE)
-		sx1268_event(userdata);
+	printf("IRQ!\n");
+	sx1268_event(userdata);
 }

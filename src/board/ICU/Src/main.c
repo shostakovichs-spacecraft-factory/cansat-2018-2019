@@ -71,7 +71,7 @@ static void MX_SPI2_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	sx1268_stm32_t radio_specific;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -94,24 +94,28 @@ int main(void)
   MX_GPIO_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
-  	sx1268_struct_init(&radio, radio_rxbuf, 255, radio_txbuf, 255);
-  	radio.platform_specific.bus = &hspi2;
-  	radio.platform_specific.busy_port = RADIO_BUSY_GPIO_Port;
-  	radio.platform_specific.busy_pin = RADIO_BUSY_Pin;
-  	radio.platform_specific.cs_port = RADIO_NSS_GPIO_Port;
-  	radio.platform_specific.cs_pin = RADIO_NSS_Pin;
+  	sx1268_struct_init(&radio, &radio_specific, radio_rxbuf, 255, radio_txbuf, 255);
+  	radio_specific.bus = &hspi2;
+  	radio_specific.busy_port = RADIO_BUSY_GPIO_Port;
+  	radio_specific.busy_pin = RADIO_BUSY_Pin;
+  	radio_specific.cs_port = RADIO_NSS_GPIO_Port;
+  	radio_specific.cs_pin = RADIO_NSS_Pin;
   	sx1268_init(&radio);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  	char string[] = "Hello world! LALALALALALALALALALALALALALALA";
+  	volatile int counter = 0;
+  	char string[] = "Hello world! LALALALALALALALALALALALALALALA ASDAYSASFUHE*YFIUGWTAGFAYGEUDGA(FWIDGAWB*IUFA\n";
   	sx1268_send(&radio, (uint8_t *)string, strlen(string));
+  	counter++;
 
   	while (1)
 	{
 		HAL_Delay(3000);
 	  	sx1268_send(&radio, (uint8_t *)string, strlen(string));
+	  	counter++;
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
