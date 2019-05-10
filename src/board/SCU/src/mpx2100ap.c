@@ -9,6 +9,9 @@
 #include <stdlib.h>
 #include <diag/Trace.h>
 #include "ads1x1x.h"
+
+#include "mpx2100ap.h"
+
 #define MPX_TIMEOUT 10 //ms?
 
 typedef struct {

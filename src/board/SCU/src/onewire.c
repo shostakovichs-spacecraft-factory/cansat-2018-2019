@@ -311,7 +311,7 @@ uint8_t onewire_Search(onewire_t* OneWireStruct, uint8_t command) {
 				} else {
 					/* If this discrepancy is before the Last Discrepancy on a previous next then pick the same as last time */
 					if (id_bit_number < OneWireStruct->LastDiscrepancy) {
-						search_direction = ((OneWireStruct->ROM_NO[rom_byte_number] & rom_byte_mask) > 0);
+						search_direction = ((((uint8_t*)&OneWireStruct->ROM_NO)[rom_byte_number] & rom_byte_mask) > 0);
 					} else {
 						/* If equal to last pick 1, if not then pick 0 */
 						search_direction = (id_bit_number == OneWireStruct->LastDiscrepancy);
@@ -330,9 +330,9 @@ uint8_t onewire_Search(onewire_t* OneWireStruct, uint8_t command) {
 
 				/* Set or clear the bit in the ROM byte rom_byte_number with mask rom_byte_mask */
 				if (search_direction == 1) {
-					OneWireStruct->ROM_NO[rom_byte_number] |= rom_byte_mask;
+					((uint8_t*)&OneWireStruct->ROM_NO)[rom_byte_number] |= rom_byte_mask;
 				} else {
-					OneWireStruct->ROM_NO[rom_byte_number] &= ~rom_byte_mask;
+					((uint8_t*)&OneWireStruct->ROM_NO)[rom_byte_number] &= ~rom_byte_mask;
 				}
 				
 				/* Serial number search direction write bit */
@@ -366,7 +366,7 @@ uint8_t onewire_Search(onewire_t* OneWireStruct, uint8_t command) {
 	}
 
 	/* If no device found then reset counters so next 'search' will be like a first */
-	if (!search_result || !OneWireStruct->ROM_NO[0]) {
+	if (!search_result || !((uint8_t*)&OneWireStruct->ROM_NO)[0]) {
 		OneWireStruct->LastDiscrepancy = 0;
 		OneWireStruct->LastDeviceFlag = 0;
 		OneWireStruct->LastFamilyDiscrepancy = 0;
@@ -377,12 +377,11 @@ uint8_t onewire_Search(onewire_t* OneWireStruct, uint8_t command) {
 }
 
 int onewire_Verify(onewire_t* OneWireStruct) {
-	unsigned char rom_backup[8];
+	uint64_t rom_backup;
 	int i,rslt,ld_backup,ldf_backup,lfd_backup;
 
 	/* Keep a backup copy of the current state */
-	for (i = 0; i < 8; i++)
-	rom_backup[i] = OneWireStruct->ROM_NO[i];
+	rom_backup = OneWireStruct->ROM_NO;
 	ld_backup = OneWireStruct->LastDiscrepancy;
 	ldf_backup = OneWireStruct->LastDeviceFlag;
 	lfd_backup = OneWireStruct->LastFamilyDiscrepancy;
@@ -394,20 +393,16 @@ int onewire_Verify(onewire_t* OneWireStruct) {
 	if (onewire_Search(OneWireStruct, ONEWIRE_CMD_SEARCHROM)) {
 		/* Check if same device found */
 		rslt = 1;
-		for (i = 0; i < 8; i++) {
-			if (rom_backup[i] != OneWireStruct->ROM_NO[i]) {
-				rslt = 1;
-				break;
-			}
-		}
+		if (rom_backup != OneWireStruct->ROM_NO)
+			rslt = 1;
+
 	} else {
 		rslt = 0;
 	}
 
 	/* Restore the search state */
-	for (i = 0; i < 8; i++) {
-		OneWireStruct->ROM_NO[i] = rom_backup[i];
-	}
+	OneWireStruct->ROM_NO = rom_backup;
+
 	OneWireStruct->LastDiscrepancy = ld_backup;
 	OneWireStruct->LastDeviceFlag = ldf_backup;
 	OneWireStruct->LastFamilyDiscrepancy = lfd_backup;
@@ -429,15 +424,15 @@ void onewire_FamilySkipSetup(onewire_t* OneWireStruct) {
 }
 
 uint8_t onewire_GetROM(onewire_t* OneWireStruct, uint8_t index) {
-	return OneWireStruct->ROM_NO[index];
+	return ((uint8_t*)&OneWireStruct->ROM_NO)[index];
 }
 
-void onewire_Select(onewire_t* OneWireStruct, uint8_t* addr) {
+void onewire_Select(onewire_t* OneWireStruct, uint64_t addr) {
 	uint8_t i;
 	onewire_WriteByte(OneWireStruct, ONEWIRE_CMD_MATCHROM);
 	
 	for (i = 0; i < 8; i++) {
-		onewire_WriteByte(OneWireStruct, *(addr + i));
+		onewire_WriteByte(OneWireStruct, *((uint8_t*)&addr + i));
 	}
 }
 /////////////////////////
@@ -452,20 +447,17 @@ void onewire_ReadRom(onewire_t* how, uint64_t *rom) {
 }
 
 //////////////////////////
-void onewire_SelectWithPointer(onewire_t* OneWireStruct, uint8_t *ROM) {
+void onewire_SelectWithPointer(onewire_t* OneWireStruct, uint64_t ROM) {
 	uint8_t i;
 	onewire_WriteByte(OneWireStruct, ONEWIRE_CMD_MATCHROM);
 	
 	for (i = 0; i < 8; i++) {
-		onewire_WriteByte(OneWireStruct, *(ROM + i));
+		onewire_WriteByte(OneWireStruct, *((uint8_t*)&ROM + i));
 	}	
 }
 
-void onewire_GetFullROM(onewire_t* OneWireStruct, uint8_t *firstIndex) {
-	uint8_t i;
-	for (i = 0; i < 8; i++) {
-		*(firstIndex + i) = OneWireStruct->ROM_NO[i];
-	}
+void onewire_GetFullROM(onewire_t* OneWireStruct, uint64_t *firstIndex) {
+	*firstIndex = OneWireStruct->ROM_NO;
 }
 
 uint8_t onewire_CRC8(uint8_t *addr, uint8_t len) {

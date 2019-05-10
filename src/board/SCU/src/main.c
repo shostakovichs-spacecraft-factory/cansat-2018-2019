@@ -11,6 +11,8 @@
 #include "ds18b20.h"
 #include "Time.h"
 
+#include "thread.h"
+
 
 void
 __initialize_hardware(void);
@@ -174,6 +176,21 @@ void bmp_test(I2C_HandleTypeDef * Hi2c)
 	i2c_deinit(&i2c_handler);
 }
 
+typedef struct{
+	float ds_temp;
+	float bme_temp;
+	float bme_pres;
+	float bme_hum;
+	float mpx_pres;
+} data_struct_t;
+
+void CAN_Send(uint8_t *data, size_t count)
+{
+	data_struct_t *d = (data_struct_t*)data;
+	trace_printf("pres bme: %6.0f /tpres mpx: %6.0f /ttemp bme: %3.3f /ttemp ds: %3.3f /thum bme: %3.3f \n",
+			d->bme_pres, d->mpx_pres, d->bme_temp, d->ds_temp, d->bme_hum);
+}
+
 int main()
 {
 
@@ -187,16 +204,90 @@ int main()
 
 	__I2C1_CLK_ENABLE();
 
-	I2C_HandleTypeDef Hi2c;
+	I2C_HandleTypeDef hi2c;
 	i2c_pin_scl_init(GPIOB, GPIO_PIN_6);
 	i2c_pin_sda_init(GPIOB, GPIO_PIN_7);
-	i2c_config_default(&Hi2c);
-	Hi2c.Instance = I2C1;
-	i2c_init(&Hi2c);
+	i2c_config_default(&hi2c);
+	hi2c.Instance = I2C1;
+	i2c_init(&hi2c);
+
+
+	ADS1x1x_config_t ads;
+	ADS1x1x_config_default(&ads);
+	ADS1x1x_register_i2c(&ads, &hi2c, ADS1x1x_I2C_ADDRESS_ADDR_TO_GND << 1);
+	ADS1x1x_init(&ads);
+
+	delay_init();
+	onewire_t how;
+	onewire_Init(&how, GPIOB, GPIO_PIN_3);
+
+	struct bme280_dev_s *hbme;
+	thread_init_bme280(hbme, &hi2c);
+
+	ds18b20_config_t hds;
+	thread_init_ds18b20(&hds, &how);
+
+	thread_init_mpx2100ap(&ads);
+
+	data_struct_t Data;
+	uint8_t isGood[3] = {1,};
+	uint8_t arg[100];
+	while(1)
+	{
+
+		if(isGood[0])
+		{
+			thread_update_bme280(&hbme, arg);
+
+			struct bme280_float_data_s *d = (struct bme280_float_data_s*)(arg + 1);
+
+			Data.bme_pres = d->pressure;
+			Data.bme_hum = d->humidity;
+			Data.bme_temp = d->temperature;
+
+			isGood[0] = !arg[0];
+			arg[0] = 0;
+		}
+		if(isGood[1])
+		{
+			thread_update_ds18b20(&hds, arg);
+
+			float *d = (float*)(arg + 1);
+
+			Data.ds_temp = *d;
+
+			isGood[1] = !arg[0];
+			arg[0] = 0;
+		}
+		if(isGood[2])
+		{
+			thread_update_mpx2100ap(&ads, arg);
+
+			float *d = (float*)(arg + 1);
+
+			Data.mpx_pres = *d;
+
+			isGood[2] = !arg[0];
+			arg[0] = 0;
+		}
+		int test = 0;
+		for(int i = 0; i < 3; i++)
+			if(isGood[i])
+				test = 1;
+
+		if(test)
+		{
+			for(int i = 0; i < 3; i++)
+				isGood[i] = 1;
+			CAN_Send((uint8_t*)&Data, sizeof(Data));
+
+		}
+	}
+
 
 	//bmp_test(&Hi2c);
 	//ads1115_test(&Hi2c);
-
+	/*
 	delay_init();
 	ds18b20_config_t hds;
 	hds.resolution = ds18b20_Resolution_12bits;
@@ -204,17 +295,18 @@ int main()
 	onewire_Init(&how, GPIOB, GPIO_PIN_3);
 	onewire_ReadRom(&how, &hds.rom);
 
-	ds18b20_SetResolution(&how, (uint8_t*)&hds.rom, hds.resolution);
-	float temp = 0;
+	hds.how = &how;
+	ds18b20_SetResolution(&hds, hds.resolution);
+	float temp = 0;*//*
 	while(1)
 	{
 		int a = 0;
-		a = ds18b20_GetResolution(&how, (uint8_t*)&hds.rom);
-		ds18b20_StartAll(&how);
+		a = ds18b20_GetResolution(&hds);
+		ds18b20_StartAll(&hds);
 		HAL_Delay(500);
-		while(!ds18b20_Read(&how, (uint8_t*)&hds.rom, &temp));
+		while(!ds18b20_Read(&hds, &temp));
 		trace_printf("temp: %8.5f %d\n", temp, a);
-	}
+	}*/
 
 /*
 	GPIO_InitTypeDef gp;

@@ -116,8 +116,7 @@ typedef struct {
 	uint8_t LastDiscrepancy;       /*!< Search private */
 	uint8_t LastFamilyDiscrepancy; /*!< Search private */
 	uint8_t LastDeviceFlag;        /*!< Search private */
-	uint8_t ROM_NO[8];             /*!< 8-bytes address of last search device */
-	uint64_t rom;             /*!< 8-bytes address of last search device */
+	uint64_t ROM_NO;             /*!< 8-bytes address of last search device */
 } onewire_t;
 
 /**
@@ -241,7 +240,7 @@ uint8_t onewire_GetROM(onewire_t* OneWireStruct, uint8_t index);
  * @param  *firstIndex: Pointer to first location for first byte, other bytes are automatically incremented
  * @retval None
  */
-void onewire_GetFullROM(onewire_t* OneWireStruct, uint8_t *firstIndex);
+void onewire_GetFullROM(onewire_t* OneWireStruct, uint64_t *firstIndex);
 
 /**
  * @brief  Selects specific slave on bus
@@ -249,7 +248,7 @@ void onewire_GetFullROM(onewire_t* OneWireStruct, uint8_t *firstIndex);
  * @param  *addr: Pointer to first location of 8-bytes long ROM address
  * @retval None
  */
-void onewire_Select(onewire_t* OneWireStruct, uint8_t* addr);
+void onewire_Select(onewire_t* OneWireStruct, uint64_t addr);
 
 /**
  * @brief  Selects specific slave on bus with pointer address
@@ -257,7 +256,7 @@ void onewire_Select(onewire_t* OneWireStruct, uint8_t* addr);
  * @param  *ROM: Pointer to first byte of ROM address
  * @retval None
  */
-void onewire_SelectWithPointer(onewire_t* OneWireStruct, uint8_t* ROM);
+void onewire_SelectWithPointer(onewire_t* OneWireStruct, uint64_t ROM);
 
 /**
  * @brief  Calculates 8-bit CRC for 1-wire devices

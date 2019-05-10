@@ -7,6 +7,8 @@
 
 #include <stm32f4xx_hal.h>
 
+#include "Time.h"
+
 __IO uint32_t uTick;
 
 void delay_us(uint32_t us)

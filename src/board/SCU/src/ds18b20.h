@@ -130,6 +130,7 @@ typedef struct
 {
 	ds18b20_Resolution_t resolution;
 	onewire_t *how;
+	uint64_t rom;
 } ds18b20_config_t;
 
 /**
@@ -144,55 +145,42 @@ typedef struct
 
 /**
  * @brief  Starts temperature conversion for specific DS18B20 on specific onewire channel
- * @param  *OneWireStruct: Pointer to @ref onewire_t working structure (OneWire channel)
- * @param  *ROM: Pointer to first byte of ROM address for desired DS12B80 device.
- *         Entire ROM address is 8-bytes long
  * @retval 1 if device is DS18B20 or 0 if not
  */
-uint8_t ds18b20_Start(onewire_t* OneWireStruct, uint8_t* ROM);
+uint8_t ds18b20_Start(ds18b20_config_t * hds);
 
 /**
  * @brief  Starts temperature conversion for all DS18B20 devices on specific onewire channel
  * @note   This mode will skip ROM addressing
- * @param  *OneWireStruct: Pointer to @ref onewire_t working structure (OneWire channel)
  * @retval None
  */
-void ds18b20_StartAll(onewire_t* OneWireStruct);
+void ds18b20_StartAll(ds18b20_config_t * hds);
 
 /**
  * @brief  Reads temperature from DS18B20
- * @param  *OneWireStruct: Pointer to @ref onewire_t working structure (OneWire channel)
- * @param  *ROM: Pointer to first byte of ROM address for desired DS12B80 device.
- *         Entire ROM address is 8-bytes long
  * @param  *destination: Pointer to float variable to store temperature
  * @retval Temperature status:
  *            - 0: Device is not DS18B20 or conversion is not done yet or CRC failed
  *            - > 0: Temperature is read OK
  */
-uint8_t ds18b20_Read(onewire_t* OneWireStruct, uint8_t* ROM, float* destination);
+uint8_t ds18b20_Read(ds18b20_config_t * hds, float* destination);
 
 /**
- * @brief  Gets resolution for temperature conversion from DS18B20 device
- * @param  *OneWireStruct: Pointer to @ref onewire_t working structure (OneWire channel)
- * @param  *ROM: Pointer to first byte of ROM address for desired DS12B80 device.
- *         Entire ROM address is 8-bytes long
+ * @brief  Gets resolution for temperature conversion from DS18B20 device\
  * @retval Resolution:
  *            - 0: Device is not DS18B20
  *            - 9 - 12: Resolution of DS18B20
  */
-uint8_t ds18b20_GetResolution(onewire_t* OneWireStruct, uint8_t* ROM);
+uint8_t ds18b20_GetResolution(ds18b20_config_t * hds);
 
 /**
  * @brief  Sets resolution for specific DS18B20 device
- * @param  *OneWireStruct: Pointer to @ref onewire_t working structure (OneWire channel)
- * @param  *ROM: Pointer to first byte of ROM address for desired DS12B80 device.
- *         Entire ROM address is 8-bytes long
  * @param  resolution: Resolution for DS18B20 device. This parameter can be a value of @ref ds18b20_Resolution_t enumeration.
  * @retval Success status:
  *            - 0: Device is not DS18B20
  *            - > 0: Resolution set OK
  */
-uint8_t ds18b20_SetResolution(onewire_t* OneWireStruct, uint8_t* ROM, ds18b20_Resolution_t resolution);
+uint8_t ds18b20_SetResolution(ds18b20_config_t * hds, ds18b20_Resolution_t resolution);
 
 /**
  * @brief  Checks if device with specific ROM number is DS18B20
@@ -202,46 +190,38 @@ uint8_t ds18b20_SetResolution(onewire_t* OneWireStruct, uint8_t* ROM, ds18b20_Re
  *            - 0: Device is not DS18B20
  *            - > 0: Device is DS18B20
  */
-uint8_t ds18b20_Is(uint8_t* ROM);
+uint8_t ds18b20_Is(uint64_t ROM);
 
 /**
  * @brief  Sets high alarm temperature to specific DS18B20 sensor
- * @param  *OneWireStruct: Pointer to @ref onewire_t working structure (OneWire channel)
- * @param  *ROM: Pointer to first byte of ROM address for desired DS12B80 device.
- *         Entire ROM address is 8-bytes long
  * @param  temp: integer value for temperature between -55 to 125 degrees
  * @retval Success status:
  *            - 0: Device is not DS18B20
  *            - > 0: High alarm set OK
  */
-uint8_t ds18b20_SetAlarmHighTemperature(onewire_t* OneWireStruct, uint8_t* ROM, int8_t temp);
+uint8_t ds18b20_SetAlarmHighTemperature(ds18b20_config_t * hds, int8_t temp);
 
 /**
  * @brief  Sets low alarm temperature to specific DS18B20 sensor
- * @param  *OneWireStruct: Pointer to @ref onewire_t working structure (OneWire channel)
- * @param  *ROM: Pointer to first byte of ROM address for desired DS12B80 device.
- *         Entire ROM address is 8-bytes long
  * @param  temp: integer value for temperature between -55 to 125 degrees
  * @retval Success status:
  *            - 0: Device is not DS18B20
  *            - > 0: Low alarm set OK
  */
-uint8_t ds18b20_SetAlarmLowTemperature(onewire_t* OneWireStruct, uint8_t* ROM, int8_t temp);
+uint8_t ds18b20_SetAlarmLowTemperature(ds18b20_config_t * hds, int8_t temp);
 
 /**
  * @brief  Disables alarm temperature for specific DS18B20 sensor
- * @param  *OneWireStruct: Pointer to @ref onewire_t working structure (OneWire channel)
  * @param  *ROM: Pointer to first byte of ROM address for desired DS12B80 device.
  *         Entire ROM address is 8-bytes long
  * @retval Success status:
  *            - 0: Device is not DS18B20
  *            - > 0: Alarm disabled OK
  */
-uint8_t ds18b20_DisableAlarmTemperature(onewire_t* OneWireStruct, uint8_t* ROM);
+uint8_t ds18b20_DisableAlarmTemperature(ds18b20_config_t * hds);
 
 /**
  * @brief  Searches for devices with alarm flag set
- * @param  *OneWireStruct: Pointer to @ref onewire_t working structure (OneWire channel)
  * @retval Alarm search status
  *            - 0: No device found with alarm flag set
  *            - > 0: Device is found with alarm flag
@@ -254,16 +234,15 @@ while (ds18b20_AlarmSearch(&OneWireStruct)) {
 \endverbatim 
  * @retval 1 if any device has flag, otherwise 0
  */
-uint8_t ds18b20_AlarmSearch(onewire_t* OneWireStruct);
+uint8_t ds18b20_AlarmSearch(ds18b20_config_t * hds);
 
 /**
  * @brief  Checks if all DS18B20 sensors are done with temperature conversion
- * @param  *OneWireStruct: Pointer to @ref onewire_t working structure (OneWire channel)
  * @retval Conversion status
  *            - 0: Not all devices are done
  *            - > 0: All devices are done with conversion
  */
-uint8_t ds18b20_AllDone(onewire_t* OneWireStruct);
+uint8_t ds18b20_AllDone(ds18b20_config_t * hds);
 
 /**
  * @}
