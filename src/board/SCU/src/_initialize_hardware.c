@@ -90,7 +90,7 @@ __initialize_hardware(void)
 }
 
 // Disable when using RTOSes, since they have their own handler.
-#if 0
+#if 1
 
 // This is a sample SysTick handler, use it if you need HAL timings.
 void __attribute__ ((section(".after_vectors")))

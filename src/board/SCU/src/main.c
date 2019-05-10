@@ -7,11 +7,13 @@
 #include <diag/Trace.h>
 #include "i2c.h"
 #include "ads1x1x.h"
+#include "mpx2100ap.h"
+#include "ds18b20.h"
+#include "Time.h"
 
-void SysTick_Handler(void)
-{
-	HAL_IncTick();
-}
+
+void
+__initialize_hardware(void);
 
 void ads1115_test(I2C_HandleTypeDef * hi2c)
 {
@@ -27,8 +29,8 @@ void ads1115_test(I2C_HandleTypeDef * hi2c)
 		HAL_Delay(200);
 		uint16_t data = ADS1x1x_read(&ads);
 
-		float result = (int16_t)data / (float)(1 << 15) * 0.256 / 3.3 / 0.004 * 100000;
-		trace_printf("pressure: %8.2f %4X\n", result, data);
+		float result = mpx2100ap_compensate_pressure_flt(data);
+		trace_printf("pressure: %3.1f kPa %4X\n", result/1000, data);
 	}
 
 }
@@ -47,7 +49,6 @@ void uart_test()
 
 
 		HAL_UART_Init(&uartHandler);
-		UART_InitTypeDef uartIniter;
 
 		SPI_HandleTypeDef spiHandler;
 		spiHandler.Instance = SPI1;
@@ -66,10 +67,10 @@ void uart_test()
 		HAL_SPI_Init(&spiHandler);
 
 
-		const char data[] = "hello world\n";
+		char data[] = "hello world\n";
 		while(1)
 		{
-			HAL_UART_Transmit(&uartHandler, data, sizeof(data)-1, HAL_MAX_DELAY);
+			HAL_UART_Transmit(&uartHandler, (uint8_t*)data, sizeof(data)-1, HAL_MAX_DELAY);
 		}
 }
 
@@ -109,7 +110,7 @@ void adc_iternal()
 
 	int pa = 0;
 	int pb = 0;
-	float pressure = 0;
+	//float pressure = 0;
 	int sum = 0;
 	int k = 0;
 	while(1)
@@ -159,7 +160,7 @@ void bmp_test(I2C_HandleTypeDef * Hi2c)
 	struct bme280_dev_s descr_bme280;
 
 	I2C_HandleTypeDef i2c_handler = *Hi2c;//I2C_init_for_bme280(1);
-	bme280_register_i2c(&descr_bme280, &i2c_handler, BME280_I2C_ADDR_SDO_HIGH << 1);
+	bme280_register_i2c(&descr_bme280, &i2c_handler, BME280_I2C_ADDR_SDO_LOW << 1);
 	bme280_init(&descr_bme280);
 
 	struct bme280_float_data_s data;
@@ -170,15 +171,14 @@ void bmp_test(I2C_HandleTypeDef * Hi2c)
 	}
 
 	bme280_deinit(&descr_bme280);
-	I2C_deinit(&i2c_handler);
+	i2c_deinit(&i2c_handler);
 }
 
 int main()
 {
-	HAL_Init();
 
-	// Enable HSE Oscillator and activate PLL with HSE as source
-	SystemClock_Config();
+	__initialize_hardware();
+
 
 	// Call the CSMSIS system clock routine to store the clock frequency
 	// in the SystemCoreClock global RAM location.
@@ -191,12 +191,52 @@ int main()
 	i2c_pin_scl_init(GPIOB, GPIO_PIN_6);
 	i2c_pin_sda_init(GPIOB, GPIO_PIN_7);
 	i2c_config_default(&Hi2c);
+	Hi2c.Instance = I2C1;
 	i2c_init(&Hi2c);
 
 	//bmp_test(&Hi2c);
-	ads1115_test(&Hi2c);
+	//ads1115_test(&Hi2c);
 
+	delay_init();
+	ds18b20_config_t hds;
+	hds.resolution = ds18b20_Resolution_12bits;
+	onewire_t how;
+	onewire_Init(&how, GPIOB, GPIO_PIN_3);
+	onewire_ReadRom(&how, &hds.rom);
+
+	ds18b20_SetResolution(&how, (uint8_t*)&hds.rom, hds.resolution);
+	float temp = 0;
+	while(1)
+	{
+		int a = 0;
+		a = ds18b20_GetResolution(&how, (uint8_t*)&hds.rom);
+		ds18b20_StartAll(&how);
+		HAL_Delay(500);
+		while(!ds18b20_Read(&how, (uint8_t*)&hds.rom, &temp));
+		trace_printf("temp: %8.5f %d\n", temp, a);
+	}
+
+/*
+	GPIO_InitTypeDef gp;
+	gp.Mode = GPIO_MODE_INPUT;
+	gp.Pin = GPIO_PIN_3;
+	gp.Pull = GPIO_PULLUP;
+	gp.Speed = GPIO_SPEED_FAST;
+
+	HAL_GPIO_Init(GPIOB, &gp);
+
+	while(1)
+	{
+		int i = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_3);
+		trace_printf("%d\n", i);
+		HAL_Delay(200);
+	}*/
 
 	return 0;
 }
+
+//void HAL_TIM_Base_MspInit()
+
+
+
 
