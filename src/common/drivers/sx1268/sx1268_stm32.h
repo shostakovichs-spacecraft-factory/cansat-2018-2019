@@ -72,4 +72,23 @@ inline uint8_t _readbusypin(sx1268_t * self)
 				( (sx1268_stm32_t *) self->platform_specific )->busy_pin);
 }
 
+inline sx1268_status_t _critical_init(sx1268_t * self)
+{
+	return SX1268_OK;
+}
+
+inline sx1268_status_t _critical_enter(sx1268_t * self)
+{
+	return SX1268_OK;
+	__disable_irq();
+	return SX1268_OK;
+}
+
+inline sx1268_status_t _critical_exit(sx1268_t * self)
+{
+	return SX1268_OK;
+	__enable_irq();
+	return SX1268_OK;
+}
+
 #endif /* DRIVERS_SX1268_SX1268_STM32_H_ */

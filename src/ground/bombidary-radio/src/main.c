@@ -46,13 +46,15 @@ int main()
 	sx1268_init(&radio);
 
 	while(1) {
+		//printf("%d\n", RXLEN(radio));
 		if( RXLEN(radio) != 0)
 		{
 			sx1268_receive(&radio, tmpbuff, RXLEN(radio));
-			printf("GOTCHA!\n");
+			printf("\n\n\nGOTCHA!\n");
 			printf(tmpbuff);
-			//sleep(1);
+			sleep(1);
 		}
+		sleep(1);
 	}
 
 

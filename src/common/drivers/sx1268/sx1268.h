@@ -17,8 +17,9 @@
 
 typedef struct
 {
+	volatile bool locked;
 	uint8_t * mem;
-	int length, head, tail;
+	unsigned int length, head, tail;
 	bool empty;
 } sx1268_fifo_t;
 
@@ -34,6 +35,7 @@ typedef enum
 	SX1268_TIMEOUT,
 	SX1268_BUSY,
 	SX1268_ERR_BUFSIZE,
+	SX1268_ERROR, //general/other error
 } sx1268_status_t;
 
 #ifdef SX1268_STM32

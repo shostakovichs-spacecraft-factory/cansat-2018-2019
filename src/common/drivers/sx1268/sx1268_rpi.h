@@ -15,6 +15,7 @@ typedef struct
 	unsigned bus_handle;
 	unsigned cs_pin;
 	unsigned busy_pin;
+	pthread_mutex_t mutex;
 }	sx1268_rpi_t;
 
 inline sx1268_status_t _cmd(sx1268_t * self, uint8_t opcode, uint8_t * buff, uint8_t arglength)
@@ -66,6 +67,36 @@ inline sx1268_status_t _cmd_ReadBuffer(sx1268_t * self,	uint8_t addr, uint8_t * 
 inline uint8_t _readbusypin(sx1268_t * self)
 {
 	return gpioRead( ((sx1268_rpi_t *) self->platform_specific)->busy_pin );
+}
+
+inline sx1268_status_t _critical_init(sx1268_t * self)
+{
+	sx1268_rpi_t * self_specific = (sx1268_rpi_t *) self->platform_specific;
+
+	if( pthread_mutex_init(&self_specific->mutex, NULL) != 0)
+		return SX1268_ERROR;
+
+	return SX1268_OK;
+}
+
+inline sx1268_status_t _critical_enter(sx1268_t * self)
+{
+	sx1268_rpi_t * self_specific = (sx1268_rpi_t *) self->platform_specific;
+
+	if( pthread_mutex_lock(&self_specific->mutex) != 0)
+		return SX1268_ERROR;
+
+	return SX1268_OK;
+}
+
+inline sx1268_status_t _critical_exit(sx1268_t * self)
+{
+	sx1268_rpi_t * self_specific = (sx1268_rpi_t *) self->platform_specific;
+
+	if( pthread_mutex_unlock(&self_specific->mutex) != 0)
+		return SX1268_ERROR;
+
+	return SX1268_OK;
 }
 
 #endif /* DRIVERS_SX1268_SX1268_STM32_H_ */

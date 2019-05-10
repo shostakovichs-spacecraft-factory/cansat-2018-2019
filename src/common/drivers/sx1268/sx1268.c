@@ -392,13 +392,17 @@ static inline sx1268_status_t _cmd_GetRxBufferStatus(sx1268_t * self, uint8_t * 
 }
 
 
-#define FIFO_FREESPACE(FIFO) ((FIFO->tail - FIFO->head) % FIFO->length)
+#define FIFO_FREESPACE(FIFO) ((FIFO->tail - FIFO->head) % (FIFO->length))
 #define FIFO_USEDSPACE(FIFO) ((FIFO->head - FIFO->tail) % (FIFO->length))
 
 static sx1268_status_t _fifo_write(sx1268_fifo_t * fifo, uint8_t * data, int len)
 {
-	if(FIFO_FREESPACE(fifo) < len & !fifo->empty)
+	//printf("\n%d %d %d %d %d %d\n", fifo->head, fifo->tail, fifo->length, fifo->empty, FIFO_FREESPACE(fifo), FIFO_USEDSPACE(fifo));
+	if((FIFO_FREESPACE(fifo) < len) && !fifo->empty)
+	{
+		printf("errbuffsize\n");
 		return SX1268_ERR_BUFSIZE;
+	}
 
 	int copylen = MIN(fifo->length - fifo->head, len);
 	memcpy(fifo->mem + fifo->head, data, copylen);
@@ -408,17 +412,14 @@ static sx1268_status_t _fifo_write(sx1268_fifo_t * fifo, uint8_t * data, int len
 	fifo->head += (len - copylen) % fifo->length;
 
 	fifo->empty = false;
+
+	//printf("%d %d %d %d %d %d %d\n", copylen, fifo->head, fifo->tail, fifo->length, fifo->empty, FIFO_FREESPACE(fifo), FIFO_USEDSPACE(fifo));
 	return SX1268_OK;
 }
 
 static sx1268_status_t _fifo_read(sx1268_fifo_t * fifo, uint8_t * data, int len)
 {
-	if(!fifo->empty)
-	{
-		if(fifo->length < len)
-			return SX1268_ERR_BUFSIZE;
-	}
-	else if(FIFO_USEDSPACE(fifo) < len)
+	if(FIFO_USEDSPACE(fifo) < len || fifo->empty)
 		return SX1268_ERR_BUFSIZE;
 
 	int copylen = MIN(fifo->length - fifo->tail, len);
@@ -428,7 +429,9 @@ static sx1268_status_t _fifo_read(sx1268_fifo_t * fifo, uint8_t * data, int len)
 	memcpy(data + copylen, fifo->mem + fifo->tail, len - copylen);
 	fifo->tail += (len - copylen) % fifo->length;
 
-	fifo->empty = false;
+	if(FIFO_USEDSPACE(fifo) == 0)
+		fifo->empty = true;
+
 	return SX1268_OK;
 }
 
@@ -488,12 +491,14 @@ void sx1268_struct_init(sx1268_t * self, void * platform_specific, uint8_t * rxb
 	self->fifo_rx.head = 0;
 	self->fifo_rx.tail = 0;
 	self->fifo_rx.empty = true;
+	self->fifo_rx.locked = false;
 
 	self->fifo_tx.mem = txbuff;
 	self->fifo_tx.length = txbufflen;
 	self->fifo_tx.head = 0;
 	self->fifo_tx.tail = 0;
 	self->fifo_tx.empty = true;
+	self->fifo_tx.locked = false;
 
 	self->platform_specific = platform_specific;
 }
@@ -583,14 +588,20 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
 
+	_critical_init(self);
+
 	return SX1268_OK; //TODO
 }
 
 sx1268_status_t sx1268_send(sx1268_t * self, uint8_t * data, int len)
 {
+	_critical_enter(self);
+
 	if( _readbusypin(self) )
 	{
-		return _fifo_write(&self->fifo_tx, data, len);
+		sx1268_status_t retval = _fifo_write(&self->fifo_tx, data, len);
+		_critical_exit(self);
+		return retval;
 	}
 
 	uint8_t status;
@@ -607,15 +618,24 @@ sx1268_status_t sx1268_send(sx1268_t * self, uint8_t * data, int len)
 		_fifo_write(&self->fifo_tx, data + 255, len - 255);
 	}
 
+	_critical_exit(self);
+
 	return SX1268_OK;
 }
 
 sx1268_status_t sx1268_receive(sx1268_t * self, uint8_t * data, int len)
 {
-	if(FIFO_USEDSPACE((&self->fifo_rx)) < len)
-		return SX1268_ERR_BUFSIZE;
+	sx1268_status_t retval;
 
-	return _fifo_read(&self->fifo_rx, data, len);
+	_critical_enter(self);
+
+	if(FIFO_USEDSPACE((&self->fifo_rx)) < len)
+		retval = SX1268_ERR_BUFSIZE;
+	else
+		retval = _fifo_read(&self->fifo_rx, data, len);
+
+	_critical_exit(self);
+	return retval;
 }
 
 void sx1268_event(sx1268_t * self)
@@ -624,10 +644,12 @@ void sx1268_event(sx1268_t * self)
 	volatile uint8_t status;
 	uint8_t buff[256];
 
+	_critical_enter(self);
+
 	_waitbusy(self, TIMEOUT);
 	_cmd_GetIrqStatus(self, &status, &irqstatus);
 
-	printf("%d %d\n", status, irqstatus);
+	//printf("%d %d\n", status, irqstatus);
 
 	_waitbusy(self, TIMEOUT);
 	_cmd_ClearIrqStatus(self, irqstatus);
@@ -639,12 +661,12 @@ void sx1268_event(sx1268_t * self)
 		_waitbusy(self, TIMEOUT);
 		_cmd_GetRxBufferStatus(self, &status, &len, &start);
 
-		printf("%d %d\n", start, len);
+		//printf("%d %d\n", start, len);
 
 		_waitbusy(self, TIMEOUT);
 		_cmd_ReadBuffer(self, start, buff, len);
 
-		printf(buff);
+		//printf(buff);
 
 		_fifo_write(&self->fifo_rx, buff, len);
 
@@ -665,4 +687,6 @@ void sx1268_event(sx1268_t * self)
 	else
 		_waitbusy(self, TIMEOUT);
 		_cmd_SetRX(self, 0);
+
+	_critical_exit(self);
 }
