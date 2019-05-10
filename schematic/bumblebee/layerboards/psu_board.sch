@@ -307,36 +307,30 @@ Source: http://www.irf.com/product-info/datasheets/data/irf9530.pdf</description
 <packages>
 <package name="BLUEPIL">
 <description>Microcontroller from st micro on board</description>
-<pad name="GND0" x="-24.13" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="GND1" x="-21.59" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<wire x1="26.5" y1="11.5" x2="-26.5" y2="11.5" width="0.127" layer="21"/>
+<wire x1="-26.5" y1="11.5" x2="-26.5" y2="-11.5" width="0.127" layer="21"/>
+<wire x1="26.5" y1="11.5" x2="26.5" y2="-11.5" width="0.127" layer="21"/>
+<wire x1="-26.5" y1="-11.5" x2="26.5" y2="-11.5" width="0.127" layer="21"/>
 <pad name="3V3_0" x="-19.05" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="RESET" x="-16.51" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B11" x="-13.97" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B10" x="-11.43" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B1" x="-8.89" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B0" x="-6.35" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A7" x="-3.81" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A6" x="-1.27" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A5" x="1.27" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A4" x="3.81" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A3" x="6.35" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A2" x="8.89" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A1" x="11.43" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="3V3_1" x="24.13" y="-7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="3V3_2" x="21.59" y="-3.81" drill="0.8" shape="long" rot="R180"/>
+<pad name="5V" x="19.05" y="-7.62" drill="0.8" shape="long" rot="R90"/>
 <pad name="A0" x="13.97" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="C15" x="16.51" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="C14" x="19.05" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="C13" x="21.59" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="VB" x="24.13" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B12" x="-24.13" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B13" x="-21.59" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B14" x="-19.05" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B15" x="-16.51" y="-7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="A1" x="11.43" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="A2" x="8.89" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="A3" x="6.35" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="A4" x="3.81" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="A5" x="1.27" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="A6" x="-1.27" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="A7" x="-3.81" y="7.62" drill="0.8" shape="long" rot="R90"/>
 <pad name="A8" x="-13.97" y="-7.62" drill="0.8" shape="long" rot="R90"/>
 <pad name="A9" x="-11.43" y="-7.62" drill="0.8" shape="long" rot="R90"/>
 <pad name="A10" x="-8.89" y="-7.62" drill="0.8" shape="long" rot="R90"/>
 <pad name="A11" x="-6.35" y="-7.62" drill="0.8" shape="long" rot="R90"/>
 <pad name="A12" x="-3.81" y="-7.62" drill="0.8" shape="long" rot="R90"/>
 <pad name="A15" x="-1.27" y="-7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="B0" x="-6.35" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="B1" x="-8.89" y="7.62" drill="0.8" shape="long" rot="R90"/>
 <pad name="B3" x="1.27" y="-7.62" drill="0.8" shape="long" rot="R90"/>
 <pad name="B4" x="3.81" y="-7.62" drill="0.8" shape="long" rot="R90"/>
 <pad name="B5" x="6.35" y="-7.62" drill="0.8" shape="long" rot="R90"/>
@@ -344,41 +338,48 @@ Source: http://www.irf.com/product-info/datasheets/data/irf9530.pdf</description
 <pad name="B7" x="11.43" y="-7.62" drill="0.8" shape="long" rot="R90"/>
 <pad name="B8" x="13.97" y="-7.62" drill="0.8" shape="long" rot="R90"/>
 <pad name="B9" x="16.51" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="5V" x="19.05" y="-7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="B10" x="-11.43" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="B11" x="-13.97" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="B12" x="-24.13" y="-7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="B13" x="-21.59" y="-7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="B14" x="-19.05" y="-7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="B15" x="-16.51" y="-7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="C13" x="21.59" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="C14" x="19.05" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="C15" x="16.51" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="GND0" x="-24.13" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="GND1" x="-21.59" y="7.62" drill="0.8" shape="long" rot="R90"/>
 <pad name="GND2" x="21.59" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="3V3_1" x="24.13" y="-7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="GND3" x="21.59" y="3.81" drill="0.8" shape="long" rot="R180"/>
+<pad name="RESET" x="-16.51" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="SWCLK" x="21.59" y="1.27" drill="0.8" shape="long" rot="R180"/>
+<pad name="SWDIO" x="21.59" y="-1.27" drill="0.8" shape="long" rot="R180"/>
+<pad name="VB" x="24.13" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<text x="-26.67" y="12.7" size="1.27" layer="25">&gt;NAME</text>
+<text x="-26.67" y="-13.97" size="1.27" layer="27">&gt;VALUE</text>
 <polygon width="0.127" layer="21">
 <vertex x="26.5" y="-11.5"/>
 <vertex x="26.5" y="-11"/>
 <vertex x="26.5" y="11.5"/>
 </polygon>
-<wire x1="26.5" y1="11.5" x2="-26.5" y2="11.5" width="0.127" layer="21"/>
-<wire x1="-26.5" y1="11.5" x2="-26.5" y2="-11.5" width="0.127" layer="21"/>
-<wire x1="26.5" y1="11.5" x2="26.5" y2="-11.5" width="0.127" layer="21"/>
-<wire x1="-26.5" y1="-11.5" x2="26.5" y2="-11.5" width="0.127" layer="21"/>
-<text x="-26.67" y="12.7" size="1.27" layer="25">&gt;NAME</text>
-<text x="-26.67" y="-13.97" size="1.27" layer="27">&gt;VALUE</text>
-<pad name="GND3" x="21.59" y="3.81" drill="0.8" shape="long" rot="R180"/>
-<pad name="SWCLK" x="21.59" y="1.27" drill="0.8" shape="long" rot="R180"/>
-<pad name="SWDIO" x="21.59" y="-1.27" drill="0.8" shape="long" rot="R180"/>
-<pad name="3V3_2" x="21.59" y="-3.81" drill="0.8" shape="long" rot="R180"/>
 </package>
 <package name="INA">
-<rectangle x1="-12.5" y1="-11.2" x2="12.5" y2="11.2" layer="21"/>
+<pad name="GND" x="-4.15" y="-8.7" drill="0.8" shape="square"/>
+<pad name="SCL" x="-1.61" y="-8.7" drill="0.8" shape="square"/>
+<pad name="SDA" x="0.93" y="-8.7" drill="0.8" shape="square" rot="R180"/>
+<pad name="VCC" x="-6.72" y="-8.7" drill="0.8" shape="square"/>
+<pad name="VIN+_0" x="6.04" y="-8.7" drill="0.8" shape="square"/>
+<pad name="VIN+_1" x="1.27" y="7.7" drill="0.8" shape="square"/>
+<pad name="VIN-_0" x="3.47" y="-8.7" drill="0.8" shape="square"/>
+<pad name="VIN-_1" x="-1.27" y="7.7" drill="0.8" shape="square" rot="R90"/>
 <hole x="-10.5" y="9.2" drill="3"/>
 <hole x="10.5" y="9.2" drill="3"/>
 <hole x="10.5" y="-9.2" drill="3"/>
 <hole x="-10.5" y="-9.2" drill="3"/>
-<pad name="SDA" x="0.93" y="-8.7" drill="0.8" shape="square" rot="R180"/>
-<pad name="SCL" x="-1.61" y="-8.7" drill="0.8" shape="square"/>
-<pad name="GND" x="-4.15" y="-8.7" drill="0.8" shape="square"/>
-<pad name="VCC" x="-6.72" y="-8.7" drill="0.8" shape="square"/>
-<pad name="VIN-_0" x="3.47" y="-8.7" drill="0.8" shape="square"/>
-<pad name="VIN+_0" x="6.04" y="-8.7" drill="0.8" shape="square"/>
-<pad name="VIN+_1" x="1.27" y="7.7" drill="0.8" shape="square"/>
-<pad name="VIN-_1" x="-1.27" y="7.7" drill="0.8" shape="square" rot="R90"/>
-<dimension x1="-12.5" y1="11.2" x2="12.5" y2="11.2" x3="0" y3="19.85" textsize="1.27" layer="17"/>
-<dimension x1="-12.5" y1="-11.2" x2="-12.5" y2="11.2" x3="-25.44" y3="0" textsize="1.27" layer="17"/>
+<wire x1="-12.5" y1="11.2" x2="-12.5" y2="-11.2" width="0.127" layer="21"/>
+<wire x1="-12.5" y1="11.2" x2="12.5" y2="11.2" width="0.127" layer="21"/>
+<wire x1="12.5" y1="11.2" x2="12.5" y2="-11.2" width="0.127" layer="21"/>
+<wire x1="12.5" y1="-11.2" x2="-12.5" y2="-11.2" width="0.127" layer="21"/>
 </package>
 <package name="CAN">
 <text x="-7.25" y="9.74" size="1.27" layer="25">&gt;NAME</text>
@@ -415,7 +416,27 @@ Source: http://www.irf.com/product-info/datasheets/data/irf9530.pdf</description
 <symbols>
 <symbol name="BLUEPILL">
 <description>bluepill board</description>
+<wire x1="-15.24" y1="45.72" x2="-15.24" y2="-55.88" width="0.254" layer="94"/>
+<wire x1="-15.24" y1="-55.88" x2="15.24" y2="-55.88" width="0.254" layer="94"/>
+<wire x1="15.24" y1="-55.88" x2="15.24" y2="45.72" width="0.254" layer="94"/>
+<wire x1="15.24" y1="45.72" x2="-15.24" y2="45.72" width="0.254" layer="94"/>
+<pin name="3V3" x="20.32" y="38.1" length="middle" rot="R180"/>
+<pin name="5V" x="20.32" y="33.02" length="middle" rot="R180"/>
 <pin name="GND" x="20.32" y="43.18" length="middle" rot="R180"/>
+<pin name="PA0" x="20.32" y="27.94" length="middle" rot="R180"/>
+<pin name="PA1" x="20.32" y="22.86" length="middle" rot="R180"/>
+<pin name="PA2" x="20.32" y="17.78" length="middle" rot="R180"/>
+<pin name="PA3" x="20.32" y="12.7" length="middle" rot="R180"/>
+<pin name="PA4" x="20.32" y="7.62" length="middle" rot="R180"/>
+<pin name="PA5" x="20.32" y="2.54" length="middle" rot="R180"/>
+<pin name="PA6" x="20.32" y="-2.54" length="middle" rot="R180"/>
+<pin name="PA7" x="20.32" y="-7.62" length="middle" rot="R180"/>
+<pin name="PA8" x="20.32" y="-12.7" length="middle" rot="R180"/>
+<pin name="PA9" x="20.32" y="-17.78" length="middle" rot="R180"/>
+<pin name="PA10" x="20.32" y="-22.86" length="middle" rot="R180"/>
+<pin name="PA11" x="20.32" y="-27.94" length="middle" rot="R180"/>
+<pin name="PA12" x="20.32" y="-33.02" length="middle" rot="R180"/>
+<pin name="PA15" x="20.32" y="-38.1" length="middle" rot="R180"/>
 <pin name="PB0" x="-20.32" y="33.02" length="middle"/>
 <pin name="PB1" x="-20.32" y="27.94" length="middle"/>
 <pin name="PB3" x="-20.32" y="22.86" length="middle"/>
@@ -431,47 +452,27 @@ Source: http://www.irf.com/product-info/datasheets/data/irf9530.pdf</description
 <pin name="PB13" x="-20.32" y="-27.94" length="middle"/>
 <pin name="PB14" x="-20.32" y="-33.02" length="middle"/>
 <pin name="PB15" x="-20.32" y="-38.1" length="middle"/>
-<pin name="RESET" x="-20.32" y="43.18" length="middle"/>
-<pin name="5V" x="20.32" y="33.02" length="middle" rot="R180"/>
-<pin name="3V3" x="20.32" y="38.1" length="middle" rot="R180"/>
-<pin name="VBAT" x="-20.32" y="38.1" length="middle"/>
-<pin name="PA0" x="20.32" y="27.94" length="middle" rot="R180"/>
-<pin name="PA1" x="20.32" y="22.86" length="middle" rot="R180"/>
-<pin name="PA2" x="20.32" y="17.78" length="middle" rot="R180"/>
-<pin name="PA3" x="20.32" y="12.7" length="middle" rot="R180"/>
-<pin name="PA4" x="20.32" y="7.62" length="middle" rot="R180"/>
-<pin name="PA5" x="20.32" y="2.54" length="middle" rot="R180"/>
-<pin name="PA6" x="20.32" y="-2.54" length="middle" rot="R180"/>
-<pin name="PA7" x="20.32" y="-7.62" length="middle" rot="R180"/>
-<pin name="PA8" x="20.32" y="-12.7" length="middle" rot="R180"/>
-<pin name="PA9" x="20.32" y="-17.78" length="middle" rot="R180"/>
-<pin name="PA10" x="20.32" y="-22.86" length="middle" rot="R180"/>
-<pin name="PA11" x="20.32" y="-27.94" length="middle" rot="R180"/>
-<pin name="PA12" x="20.32" y="-33.02" length="middle" rot="R180"/>
-<pin name="PA15" x="20.32" y="-38.1" length="middle" rot="R180"/>
 <pin name="PC13" x="-20.32" y="-43.18" length="middle"/>
 <pin name="PC14" x="-20.32" y="-48.26" length="middle"/>
 <pin name="PC15" x="-20.32" y="-53.34" length="middle"/>
-<wire x1="-15.24" y1="45.72" x2="-15.24" y2="-55.88" width="0.254" layer="94"/>
-<wire x1="-15.24" y1="-55.88" x2="15.24" y2="-55.88" width="0.254" layer="94"/>
-<wire x1="15.24" y1="-55.88" x2="15.24" y2="45.72" width="0.254" layer="94"/>
-<wire x1="15.24" y1="45.72" x2="-15.24" y2="45.72" width="0.254" layer="94"/>
+<pin name="RESET" x="-20.32" y="43.18" length="middle"/>
+<pin name="SWCLK" x="2.54" y="50.8" length="middle" rot="R270"/>
+<pin name="SWDIO" x="-2.54" y="50.8" length="middle" rot="R270"/>
+<pin name="VBAT" x="-20.32" y="38.1" length="middle"/>
 <text x="10.16" y="50.8" size="1.27" layer="95">&gt;NAME</text>
 <text x="10.16" y="48.26" size="1.27" layer="96">&gt;VALUE</text>
-<pin name="SWDIO" x="-2.54" y="50.8" length="middle" rot="R270"/>
-<pin name="SWCLK" x="2.54" y="50.8" length="middle" rot="R270"/>
 </symbol>
 <symbol name="INA">
-<pin name="VIN-" x="12.7" y="5.08" length="middle" rot="R180"/>
-<pin name="VIN+" x="-12.7" y="5.08" length="middle"/>
-<pin name="SDA" x="12.7" y="-5.08" length="middle" rot="R180"/>
-<pin name="SCL" x="12.7" y="0" length="middle" rot="R180"/>
-<pin name="GND" x="-12.7" y="0" length="middle"/>
-<pin name="VCC" x="-12.7" y="-5.08" length="middle"/>
 <wire x1="7.62" y1="7.62" x2="-7.62" y2="7.62" width="0.254" layer="94"/>
 <wire x1="-7.62" y1="7.62" x2="-7.62" y2="-7.62" width="0.254" layer="94"/>
 <wire x1="-7.62" y1="-7.62" x2="7.62" y2="-7.62" width="0.254" layer="94"/>
 <wire x1="7.62" y1="7.62" x2="7.62" y2="-7.62" width="0.254" layer="94"/>
+<pin name="GND" x="-12.7" y="0" length="middle"/>
+<pin name="SCL" x="12.7" y="0" length="middle" rot="R180"/>
+<pin name="SDA" x="12.7" y="-5.08" length="middle" rot="R180"/>
+<pin name="VCC" x="-12.7" y="-5.08" length="middle"/>
+<pin name="VIN+" x="-12.7" y="5.08" length="middle"/>
+<pin name="VIN-" x="12.7" y="5.08" length="middle" rot="R180"/>
 </symbol>
 <symbol name="CAN">
 <wire x1="15.24" y1="12.7" x2="15.24" y2="-12.7" width="0.254" layer="94"/>
@@ -3323,11 +3324,11 @@ TrenchMOS technology.
 <part name="R8" library="SparkFun-Resistors" deviceset="RESISTOR" device="AXIAL-0.3" value="10k"/>
 <part name="R12" library="SparkFun-Resistors" deviceset="RESISTOR" device="AXIAL-0.3" value="10k"/>
 <part name="R13" library="SparkFun-Resistors" deviceset="RESISTOR" device="AXIAL-0.3" value="10k"/>
-<part name="R14" library="SparkFun-Resistors" deviceset="RESISTOR" device="AXIAL-0.3" value="10k"/>
-<part name="R15" library="SparkFun-Resistors" deviceset="RESISTOR" device="AXIAL-0.3" value="10k"/>
-<part name="R16" library="SparkFun-Resistors" deviceset="RESISTOR" device="AXIAL-0.3" value="10k"/>
-<part name="R17" library="SparkFun-Resistors" deviceset="RESISTOR" device="AXIAL-0.3" value="10k"/>
-<part name="R18" library="SparkFun-Resistors" deviceset="RESISTOR" device="AXIAL-0.3" value="10k"/>
+<part name="R14" library="SparkFun-Resistors" deviceset="RESISTOR" device="AXIAL-0.3" value="10"/>
+<part name="R15" library="SparkFun-Resistors" deviceset="RESISTOR" device="AXIAL-0.3" value="10"/>
+<part name="R16" library="SparkFun-Resistors" deviceset="RESISTOR" device="AXIAL-0.3" value="10"/>
+<part name="R17" library="SparkFun-Resistors" deviceset="RESISTOR" device="AXIAL-0.3" value="10"/>
+<part name="R18" library="SparkFun-Resistors" deviceset="RESISTOR" device="AXIAL-0.3" value="10"/>
 <part name="HEATER_7.4V" library="pinhead" library_urn="urn:adsk.eagle:library:325" deviceset="PINHD-1X1" device="" package3d_urn="urn:adsk.eagle:package:22485/2"/>
 <part name="HEATER_GND" library="pinhead" library_urn="urn:adsk.eagle:library:325" deviceset="PINHD-1X1" device="" package3d_urn="urn:adsk.eagle:package:22485/2"/>
 <part name="GND15" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
