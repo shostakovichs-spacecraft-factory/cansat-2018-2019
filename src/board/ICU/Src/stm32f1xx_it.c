@@ -23,7 +23,11 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stm32f1xx_hal_can.h>
+
 #include "sx1268.h"
+#include <mavlink/zikush/mavlink.h>
+#include <canmavlink_hal.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,7 +61,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-
+extern CAN_HandleTypeDef hcan;
 /* USER CODE BEGIN EV */
 extern sx1268_t radio;
 /* USER CODE END EV */
@@ -197,6 +201,32 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32f1xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles USB low priority or CAN RX0 interrupts.
+  */
+void USB_LP_CAN1_RX0_IRQHandler(void)
+{
+  /* USER CODE BEGIN USB_LP_CAN1_RX0_IRQn 0 */
+	volatile canmavlink_RX_frame_t frame;
+	static volatile mavlink_message_t msg;
+	static volatile mavlink_status_t status;
+	volatile mavlink_heartbeat_t heartbeat;
+
+	HAL_CAN_GetRxMessage(&hcan, 0, &( frame.Header ), frame.Data);
+
+	volatile uint8_t result = canmavlink_parse_frame(&frame, &msg, &status);
+
+	if(result == MAVLINK_FRAMING_OK)
+		mavlink_msg_heartbeat_decode(&msg, &heartbeat);
+
+	return;
+  /* USER CODE END USB_LP_CAN1_RX0_IRQn 0 */
+  HAL_CAN_IRQHandler(&hcan);
+  /* USER CODE BEGIN USB_LP_CAN1_RX0_IRQn 1 */
+
+  /* USER CODE END USB_LP_CAN1_RX0_IRQn 1 */
+}
 
 /**
   * @brief This function handles EXTI line[15:10] interrupts.

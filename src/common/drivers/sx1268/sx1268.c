@@ -506,6 +506,9 @@ void sx1268_struct_init(sx1268_t * self, void * platform_specific, uint8_t * rxb
 sx1268_status_t sx1268_init(sx1268_t * self)
 {
 	volatile uint8_t status;
+
+	_nrst_reset(self);
+
 	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
 

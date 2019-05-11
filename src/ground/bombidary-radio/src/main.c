@@ -7,6 +7,7 @@
 #define CSPIN	8
 #define BUSYPIN	6
 #define IRQPIN	5
+#define NRSTPIN	13
 
 void irqcallback(int gpio, int level, uint32_t tick, void * userdata);
 
@@ -35,11 +36,15 @@ int main()
 	gpioSetMode(IRQPIN, PI_INPUT);
 	gpioSetISRFuncEx(IRQPIN, RISING_EDGE, 0, irqcallback, &radio);
 
+	gpioSetMode(NRSTPIN, PI_OUTPUT);
+	gpioWrite(NRSTPIN, PI_HIGH);
+
 	sx1268_rpi_t radio_specific =
 	{
 		.bus_handle = spihandle,
 		.busy_pin = BUSYPIN,
-		.cs_pin = CSPIN
+		.cs_pin = CSPIN,
+		.nrst_pin = NRSTPIN,
 	};
 	sx1268_struct_init(&radio, &radio_specific, rxbuff, RXBUFFLEN, NULL, 0);
 

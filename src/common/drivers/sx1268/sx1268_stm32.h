@@ -14,10 +14,15 @@
 typedef struct
 {
 	SPI_HandleTypeDef * bus;
+
 	GPIO_TypeDef * cs_port;
-	uint16_t cs_pin;
+	uint16_t cs_pin;	//Push-Pull
+
 	GPIO_TypeDef * busy_port;
-	uint16_t busy_pin;
+	uint16_t busy_pin;	//Push-Pull
+
+	GPIO_TypeDef * nrst_port;
+	uint16_t nrst_pin;	//Open Drain
 }	sx1268_stm32_t;
 
 inline sx1268_status_t _cmd(sx1268_t * self, uint8_t opcode, uint8_t * buff, uint8_t arglength)
@@ -70,6 +75,14 @@ inline uint8_t _readbusypin(sx1268_t * self)
 {
 	return HAL_GPIO_ReadPin( ( (sx1268_stm32_t *) self->platform_specific )->busy_port, \
 				( (sx1268_stm32_t *) self->platform_specific )->busy_pin);
+}
+
+inline void _nrst_reset(sx1268_t * self)
+{
+	sx1268_stm32_t * self_specific = (sx1268_stm32_t *) self->platform_specific;
+	HAL_GPIO_WritePin(self_specific->nrst_port, self_specific->nrst_pin, GPIO_PIN_RESET);
+	HAL_Delay(500);
+	HAL_GPIO_WritePin(self_specific->nrst_port, self_specific->nrst_pin, GPIO_PIN_SET);
 }
 
 inline sx1268_status_t _critical_init(sx1268_t * self)
