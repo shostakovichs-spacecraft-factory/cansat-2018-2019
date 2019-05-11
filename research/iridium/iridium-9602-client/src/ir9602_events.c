@@ -27,38 +27,10 @@ typedef union
 	{
 		const char * fmt;
 	} simple;
-	struct
-	{
-		// Хитрая штука - оффсет до нужного инта относительно начала структуры evt_t
-		// считаем в байтах
-		size_t offset;
-	} numeric;
 } ir9602_probe_args_t;
 
 //! Функция пробящая определенное событие
 typedef bool (*ir9602_evt_probe_t)(const char *, const ir9602_probe_args_t *, ir9602_evt_t *);
-
-
-//! Простая проверка на совпадение
-static bool _probe_simple(const char * buffer, const ir9602_probe_args_t * arg, ir9602_evt_t * evt)
-{
-	const int cmpres = strncmp(arg->simple.fmt, buffer, strlen(arg->simple.fmt));
-	return 0 == cmpres;
-}
-
-//! Парсинг простого числа
-static bool _probe_numeric(const char * buffer, const ir9602_probe_args_t * arg, ir9602_evt_t * evt)
-{
-	int value;
-	const int rc = sscanf(buffer, "%d\r\n", &value);
-	if (1 != rc)
-		return false;
-	// Вычисляем адрес нужного инта
-	uint8_t * const first_int_ptr = (uint8_t*)evt;
-	uint8_t * target_ptr = first_int_ptr + arg->numeric.offset;
-	*((int*)target_ptr) = value;
-	return true;
-}
 
 
 static bool _probe_hardfault(const char * buffer, const ir9602_probe_args_t * arg, ir9602_evt_t * evt)
@@ -76,6 +48,26 @@ static bool _probe_ciev(const char * buffer, const ir9602_probe_args_t * arg, ir
 		return false;
 
 	evt->arg.ciev.type = type;
+	return true;
+}
+
+
+//! Простая проверка на совпадение
+static bool _probe_simple(const char * buffer, const ir9602_probe_args_t * arg, ir9602_evt_t * evt)
+{
+	const int cmpres = strncmp(arg->simple.fmt, buffer, strlen(arg->simple.fmt));
+	return 0 == cmpres;
+}
+
+
+static bool _probe_errcode(const char * buffer, const ir9602_probe_args_t * arg, ir9602_evt_t * evt)
+{
+	int value;
+	const int rc = sscanf(buffer, "%d\r\n", &value);
+	if (1 != rc)
+		return false;
+
+	evt->arg.errcode = value;
 	return true;
 }
 
@@ -104,7 +96,6 @@ static bool _probe_sbdi(const char * buffer, const ir9602_probe_args_t * arg, ir
 	return true;
 }
 
-
 //! Структура определяющая то или иное событие
 typedef struct
 {
@@ -115,14 +106,13 @@ typedef struct
 
 static ir9602_evt_def_t _evt_defs[] = {
 		// Тут важно помнить, что массив идет от нуля, а коды событий от 1
-		{ _probe_hardfault, {} },
-		{ _probe_simple,  { .simple ={ .fmt="OK"} } },
-		{ _probe_simple,  { .simple ={ .fmt="ERROR"} } },
-		{ _probe_simple,  { .simple ={ .fmt="READY"} } },
-		{ _probe_ciev,    {} },
-		{ _probe_numeric, { .numeric={ .offset=offsetof(ir9602_evt_t, arg.sbdwb.error) } } },
-		{ _probe_numeric, { .numeric={ .offset=offsetof(ir9602_evt_t, arg.sbdd.error)  } } },
-		{ _probe_sbdi,    {} },
+		{ _probe_hardfault,	{} },
+		{ _probe_ciev,		{} },
+		{ _probe_simple,	{ .simple ={ .fmt="OK"} } },
+		{ _probe_simple,	{ .simple ={ .fmt="ERROR"} } },
+		{ _probe_simple,	{ .simple ={ .fmt="READY"} } },
+		{ _probe_errcode,	{} },
+		{ _probe_sbdi,		{} },
 };
 
 
@@ -134,15 +124,16 @@ static const ir9602_evt_def_t *_get_evt_def(ir9602_evt_code_t code)
 }
 
 
-bool ir9602_probe_events(ir9602_evt_code_t * expected_evt_list, const char * buffer, ir9602_evt_t * evt)
+bool ir9602_probe_events(const char * buffer, ir9602_evt_t * evt)
 {
-	for ( ; *expected_evt_list != 0; expected_evt_list++)
+	int i;
+	for (i = IR9602_EVT_HARDWARE_FAILURE; i <= IR9602_EVT_SBDI; i++)
 	{
-		const ir9602_evt_def_t * def = _get_evt_def(*expected_evt_list);
+		const ir9602_evt_def_t * def = _get_evt_def(i);
 		bool result = def->probe(buffer, &def->args, evt);
 		if (result)
 		{
-			evt->code = *expected_evt_list;
+			evt->code = i;
 			return true;
 		}
 	}
