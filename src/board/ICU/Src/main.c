@@ -134,7 +134,7 @@ int main(void)
 	{
 		volatile uint8_t framecount = canmavlink_msg_to_frames(canmavlink_frames, &msg);
 
-		for(int i = 0; i < framecount; i++)
+		/*for(int i = 0; i < framecount; i++)
 		{
 			uint32_t mb;
 			HAL_CAN_AddTxMessage(&hcan, &( canmavlink_frames[i].Header ), canmavlink_frames[i].Data, &mb);
@@ -143,7 +143,7 @@ int main(void)
 			do {
 				pending = HAL_CAN_IsTxMessagePending(&hcan, mb);
 			} while(pending);
-		}
+		}*/
 
 		HAL_Delay(1000);
 
@@ -210,10 +210,10 @@ static void MX_CAN_Init(void)
   /* USER CODE END CAN_Init 1 */
   hcan.Instance = CAN1;
   hcan.Init.Prescaler = 400;
-  hcan.Init.Mode = CAN_MODE_LOOPBACK;
+  hcan.Init.Mode = CAN_MODE_NORMAL;
   hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan.Init.TimeSeg1 = CAN_BS1_4TQ;
-  hcan.Init.TimeSeg2 = CAN_BS2_4TQ;
+  hcan.Init.TimeSeg1 = CAN_BS1_5TQ;
+  hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
   hcan.Init.TimeTriggeredMode = DISABLE;
   hcan.Init.AutoBusOff = DISABLE;
   hcan.Init.AutoWakeUp = DISABLE;
@@ -231,12 +231,16 @@ static void MX_CAN_Init(void)
   		.FilterMaskIdHigh = 0,
 		.FilterMaskIdHigh = 0,
 		.FilterMode = CAN_FILTERMODE_IDMASK,
-		.FilterActivation = ENABLE,
+		.FilterActivation = CAN_FILTER_ENABLE,
 		.FilterFIFOAssignment = CAN_FILTER_FIFO0,
+		.FilterScale = CAN_FILTERSCALE_16BIT,
 		.FilterBank = 0,
+		.SlaveStartFilterBank = 14,
   	};
 
   	HAL_CAN_ConfigFilter(&hcan, &filter);
+
+  	hcan.Instance->IER |= CAN_IER_FMPIE0;
   /* USER CODE END CAN_Init 2 */
 
 }

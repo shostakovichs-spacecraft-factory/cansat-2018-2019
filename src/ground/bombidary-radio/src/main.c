@@ -1,4 +1,9 @@
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <stdio.h>
+#include <unistd.h>
+
 #include <pigpio.h>
 #include <sx1268.h>
 
@@ -11,7 +16,9 @@
 
 void irqcallback(int gpio, int level, uint32_t tick, void * userdata);
 
-int main()
+#define INADDR(A,B,C,D) ((A << 24) | (B << 16) | (C << 8) | D)
+
+int main(int argc, char ** argv)
 {
 	int  err;
 	sx1268_t radio;
@@ -50,16 +57,23 @@ int main()
 
 	sx1268_init(&radio);
 
+	int sock = socket(PF_INET, SOCK_DGRAM, 0);
+
+	struct sockaddr_in addr =
+	{
+		.sin_family = AF_INET,
+		.sin_addr = INADDR(127,0,0,1),
+		.sin_port = 3000,
+	};
+
 	while(1) {
-		//printf("%d\n", RXLEN(radio));
 		if( RXLEN(radio) != 0)
 		{
-			sx1268_receive(&radio, tmpbuff, RXLEN(radio));
-			printf("\n\n\nGOTCHA!\n");
-			printf(tmpbuff);
-			sleep(1);
+			int rxlen = RXLEN(radio);
+			sx1268_receive(&radio, tmpbuff, rxlen);
+			sendto(sock, tmpbuff, rxlen, 0, (struct sockaddr *)&addr, sizeof(addr));
 		}
-		sleep(1);
+		usleep(10000);
 	}
 
 

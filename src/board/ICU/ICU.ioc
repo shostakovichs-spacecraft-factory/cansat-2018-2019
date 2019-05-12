@@ -1,10 +1,10 @@
 #MicroXplorer Configuration settings - do not modify
-CAN.BS1=CAN_BS1_4TQ
-CAN.BS2=CAN_BS2_4TQ
-CAN.CalculateTimeBit=100000
+CAN.BS1=CAN_BS1_5TQ
+CAN.BS2=CAN_BS2_2TQ
+CAN.CalculateTimeBit=88888
 CAN.CalculateTimeQuantum=11111.111111111111
 CAN.IPParameters=CalculateTimeQuantum,CalculateTimeBit,Mode,NART,BS1,BS2,Prescaler
-CAN.Mode=CAN_MODE_LOOPBACK
+CAN.Mode=CAN_MODE_NORMAL
 CAN.NART=ENABLE
 CAN.Prescaler=400
 File.Version=6

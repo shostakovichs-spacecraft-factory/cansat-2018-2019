@@ -26,8 +26,11 @@
 #include <stm32f1xx_hal_can.h>
 
 #include "sx1268.h"
+
 #include <mavlink/zikush/mavlink.h>
 #include <canmavlink_hal.h>
+
+#include <router.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -211,14 +214,13 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 	volatile canmavlink_RX_frame_t frame;
 	static volatile mavlink_message_t msg;
 	static volatile mavlink_status_t status;
-	volatile mavlink_heartbeat_t heartbeat;
 
 	HAL_CAN_GetRxMessage(&hcan, 0, &( frame.Header ), frame.Data);
 
 	volatile uint8_t result = canmavlink_parse_frame(&frame, &msg, &status);
 
 	if(result == MAVLINK_FRAMING_OK)
-		mavlink_msg_heartbeat_decode(&msg, &heartbeat);
+		router_route(&msg);
 
 	return;
   /* USER CODE END USB_LP_CAN1_RX0_IRQn 0 */
