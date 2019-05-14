@@ -311,50 +311,50 @@ Source: http://www.irf.com/product-info/datasheets/data/irf9530.pdf</description
 <wire x1="-26.5" y1="11.5" x2="-26.5" y2="-11.5" width="0.127" layer="21"/>
 <wire x1="26.5" y1="11.5" x2="26.5" y2="-11.5" width="0.127" layer="21"/>
 <wire x1="-26.5" y1="-11.5" x2="26.5" y2="-11.5" width="0.127" layer="21"/>
-<pad name="3V3_0" x="-19.05" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="3V3_1" x="24.13" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="3V3_2" x="21.59" y="-3.81" drill="0.8" shape="long" rot="R180"/>
-<pad name="5V" x="19.05" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A0" x="13.97" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A1" x="11.43" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A2" x="8.89" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A3" x="6.35" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A4" x="3.81" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A5" x="1.27" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A6" x="-1.27" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A7" x="-3.81" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A8" x="-13.97" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A9" x="-11.43" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A10" x="-8.89" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A11" x="-6.35" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A12" x="-3.81" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="A15" x="-1.27" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B0" x="-6.35" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B1" x="-8.89" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B3" x="1.27" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B4" x="3.81" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B5" x="6.35" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B6" x="8.89" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B7" x="11.43" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B8" x="13.97" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B9" x="16.51" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B10" x="-11.43" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B11" x="-13.97" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B12" x="-24.13" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B13" x="-21.59" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B14" x="-19.05" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="B15" x="-16.51" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="C13" x="21.59" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="C14" x="19.05" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="C15" x="16.51" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="GND0" x="-24.13" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="GND1" x="-21.59" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="GND2" x="21.59" y="-7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="GND3" x="21.59" y="3.81" drill="0.8" shape="long" rot="R180"/>
-<pad name="RESET" x="-16.51" y="7.62" drill="0.8" shape="long" rot="R90"/>
-<pad name="SWCLK" x="21.59" y="1.27" drill="0.8" shape="long" rot="R180"/>
-<pad name="SWDIO" x="21.59" y="-1.27" drill="0.8" shape="long" rot="R180"/>
-<pad name="VB" x="24.13" y="7.62" drill="0.8" shape="long" rot="R90"/>
+<pad name="3V3_0" x="-19.05" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="3V3_1" x="24.13" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="3V3_2" x="21.59" y="-3.81" drill="0.9" shape="long" rot="R180"/>
+<pad name="5V" x="19.05" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="A0" x="13.97" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="A1" x="11.43" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="A2" x="8.89" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="A3" x="6.35" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="A4" x="3.81" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="A5" x="1.27" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="A6" x="-1.27" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="A7" x="-3.81" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="A8" x="-13.97" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="A9" x="-11.43" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="A10" x="-8.89" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="A11" x="-6.35" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="A12" x="-3.81" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="A15" x="-1.27" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="B0" x="-6.35" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="B1" x="-8.89" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="B3" x="1.27" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="B4" x="3.81" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="B5" x="6.35" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="B6" x="8.89" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="B7" x="11.43" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="B8" x="13.97" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="B9" x="16.51" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="B10" x="-11.43" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="B11" x="-13.97" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="B12" x="-24.13" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="B13" x="-21.59" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="B14" x="-19.05" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="B15" x="-16.51" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="C13" x="21.59" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="C14" x="19.05" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="C15" x="16.51" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="GND0" x="-24.13" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="GND1" x="-21.59" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="GND2" x="21.59" y="-7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="GND3" x="21.59" y="3.81" drill="0.9" shape="long" rot="R180"/>
+<pad name="RESET" x="-16.51" y="7.62" drill="0.9" shape="long" rot="R90"/>
+<pad name="SWCLK" x="21.59" y="1.27" drill="0.9" shape="long" rot="R180"/>
+<pad name="SWDIO" x="21.59" y="-1.27" drill="0.9" shape="long" rot="R180"/>
+<pad name="VB" x="24.13" y="7.62" drill="0.9" shape="long" rot="R90"/>
 <text x="-26.67" y="12.7" size="1.27" layer="25">&gt;NAME</text>
 <text x="-26.67" y="-13.97" size="1.27" layer="27">&gt;VALUE</text>
 <polygon width="0.127" layer="21">
@@ -364,18 +364,14 @@ Source: http://www.irf.com/product-info/datasheets/data/irf9530.pdf</description
 </polygon>
 </package>
 <package name="INA">
-<pad name="GND" x="-4.15" y="-8.7" drill="0.8" shape="square"/>
-<pad name="SCL" x="-1.61" y="-8.7" drill="0.8" shape="square"/>
-<pad name="SDA" x="0.93" y="-8.7" drill="0.8" shape="square" rot="R180"/>
-<pad name="VCC" x="-6.72" y="-8.7" drill="0.8" shape="square"/>
-<pad name="VIN+_0" x="6.04" y="-8.7" drill="0.8" shape="square"/>
-<pad name="VIN+_1" x="1.27" y="7.7" drill="0.8" shape="square"/>
-<pad name="VIN-_0" x="3.47" y="-8.7" drill="0.8" shape="square"/>
-<pad name="VIN-_1" x="-1.27" y="7.7" drill="0.8" shape="square" rot="R90"/>
-<hole x="-10.5" y="9.2" drill="3"/>
-<hole x="10.5" y="9.2" drill="3"/>
-<hole x="10.5" y="-9.2" drill="3"/>
-<hole x="-10.5" y="-9.2" drill="3"/>
+<pad name="GND" x="-4.15" y="-8.7" drill="0.9" shape="square"/>
+<pad name="SCL" x="-1.61" y="-8.7" drill="0.9" shape="square"/>
+<pad name="SDA" x="0.93" y="-8.7" drill="0.9" shape="square" rot="R180"/>
+<pad name="VCC" x="-6.69" y="-8.7" drill="0.9" shape="square"/>
+<pad name="VIN+_0" x="6.01" y="-8.7" drill="0.9" shape="square"/>
+<pad name="VIN+_1" x="1.27" y="7.7" drill="0.9" shape="square"/>
+<pad name="VIN-_0" x="3.47" y="-8.7" drill="0.9" shape="square"/>
+<pad name="VIN-_1" x="-1.27" y="7.7" drill="0.9" shape="square" rot="R90"/>
 <wire x1="-12.5" y1="11.2" x2="-12.5" y2="-11.2" width="0.127" layer="21"/>
 <wire x1="-12.5" y1="11.2" x2="12.5" y2="11.2" width="0.127" layer="21"/>
 <wire x1="12.5" y1="11.2" x2="12.5" y2="-11.2" width="0.127" layer="21"/>
@@ -384,14 +380,12 @@ Source: http://www.irf.com/product-info/datasheets/data/irf9530.pdf</description
 <package name="CAN">
 <text x="-7.25" y="9.74" size="1.27" layer="25">&gt;NAME</text>
 <text x="-7.01" y="-10.62" size="1.27" layer="27">&gt;VALUE</text>
-<hole x="5.25" y="6" drill="3"/>
-<hole x="5.25" y="-6" drill="3"/>
-<pad name="CTX" x="-5.75" y="1.27" drill="0.8" shape="square"/>
-<pad name="CRX" x="-5.75" y="-1.27" drill="0.8" shape="square"/>
-<pad name="CANH" x="-5.75" y="-3.81" drill="0.8" shape="square"/>
-<pad name="CANL" x="-5.75" y="-6.35" drill="0.8" shape="square"/>
-<pad name="GND" x="-5.75" y="3.81" drill="0.8" shape="square"/>
-<pad name="3V3" x="-5.75" y="6.35" drill="0.8" shape="square"/>
+<pad name="CTX" x="-5.75" y="1.27" drill="0.9" shape="square"/>
+<pad name="CRX" x="-5.75" y="-1.27" drill="0.9" shape="square"/>
+<pad name="CANH" x="-5.75" y="-3.81" drill="0.9" shape="square"/>
+<pad name="CANL" x="-5.75" y="-6.35" drill="0.9" shape="square"/>
+<pad name="GND" x="-5.75" y="3.81" drill="0.9" shape="square"/>
+<pad name="3V3" x="-5.75" y="6.35" drill="0.9" shape="square"/>
 <wire x1="-7.25" y1="8" x2="7.25" y2="8" width="0.127" layer="21"/>
 <wire x1="7.25" y1="8" x2="7.25" y2="-8" width="0.127" layer="21"/>
 <wire x1="7.25" y1="-8" x2="-7.25" y2="-8" width="0.127" layer="21"/>

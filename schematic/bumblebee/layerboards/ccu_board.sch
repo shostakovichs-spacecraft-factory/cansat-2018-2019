@@ -95,7 +95,10 @@
 <layer number="114" name="Badge_Outline" color="7" fill="1" visible="no" active="no"/>
 <layer number="115" name="ReferenceISLANDS" color="7" fill="1" visible="no" active="no"/>
 <layer number="116" name="Patch_BOT" color="9" fill="4" visible="no" active="no"/>
+<layer number="117" name="BACKMAAT1" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="118" name="Rect_Pads" color="7" fill="1" visible="no" active="no"/>
+<layer number="119" name="KAP_TEKEN" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="120" name="KAP_MAAT1" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="121" name="_tsilk" color="7" fill="1" visible="no" active="no"/>
 <layer number="122" name="_bsilk" color="7" fill="1" visible="no" active="no"/>
 <layer number="123" name="tTestmark" color="7" fill="1" visible="no" active="no"/>
@@ -105,6 +108,7 @@
 <layer number="127" name="_tValues" color="7" fill="1" visible="no" active="no"/>
 <layer number="128" name="_bValues" color="7" fill="1" visible="no" active="no"/>
 <layer number="129" name="Mask" color="7" fill="1" visible="no" active="no"/>
+<layer number="130" name="SMDSTROOK" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="131" name="tAdjust" color="7" fill="1" visible="no" active="no"/>
 <layer number="132" name="bAdjust" color="7" fill="1" visible="no" active="no"/>
 <layer number="144" name="Drill_legend" color="7" fill="1" visible="no" active="no"/>
@@ -163,32 +167,28 @@
 <package name="CAN">
 <text x="-7.25" y="9.74" size="1.27" layer="25">&gt;NAME</text>
 <text x="-7.01" y="-10.62" size="1.27" layer="27">&gt;VALUE</text>
-<hole x="5.25" y="6" drill="3"/>
-<hole x="5.25" y="-6" drill="3"/>
-<pad name="CTX" x="-5.75" y="1.27" drill="0.8" shape="square"/>
-<pad name="CRX" x="-5.75" y="-1.27" drill="0.8" shape="square"/>
-<pad name="CANH" x="-5.75" y="-3.81" drill="0.8" shape="square"/>
-<pad name="CANL" x="-5.75" y="-6.35" drill="0.8" shape="square"/>
-<pad name="GND" x="-5.75" y="3.81" drill="0.8" shape="square"/>
-<pad name="3V3" x="-5.75" y="6.35" drill="0.8" shape="square"/>
+<pad name="CTX" x="-5.75" y="1.27" drill="0.9" shape="square"/>
+<pad name="CRX" x="-5.75" y="-1.27" drill="0.9" shape="square"/>
+<pad name="CANH" x="-5.75" y="-3.81" drill="0.9" shape="square"/>
+<pad name="CANL" x="-5.75" y="-6.35" drill="0.9" shape="square"/>
+<pad name="GND" x="-5.75" y="3.81" drill="0.9" shape="square"/>
+<pad name="3V3" x="-5.75" y="6.35" drill="0.9" shape="square"/>
 <wire x1="-7.25" y1="8" x2="7.25" y2="8" width="0.127" layer="21"/>
 <wire x1="7.25" y1="8" x2="7.25" y2="-8" width="0.127" layer="21"/>
 <wire x1="7.25" y1="-8" x2="-7.25" y2="-8" width="0.127" layer="21"/>
 <wire x1="-7.25" y1="-8" x2="-7.25" y2="8" width="0.127" layer="21"/>
 </package>
 <package name="ADS">
-<pad name="ALERT" x="-3.5" y="-1.27" drill="0.8" shape="square"/>
-<pad name="ADDR" x="-3.5" y="1.27" drill="0.8" shape="square"/>
-<pad name="SDA" x="-3.5" y="3.81" drill="0.8" shape="square"/>
-<pad name="SCL" x="-3.5" y="6.35" drill="0.8" shape="square"/>
-<pad name="G" x="-3.5" y="8.89" drill="0.8" shape="square"/>
-<pad name="V" x="-3.5" y="11.43" drill="0.8" shape="square"/>
-<pad name="A0" x="-3.5" y="-3.81" drill="0.8" shape="square"/>
-<pad name="A1" x="-3.5" y="-6.35" drill="0.8" shape="square"/>
-<pad name="A2" x="-3.5" y="-8.89" drill="0.8" shape="square"/>
-<pad name="A3" x="-3.5" y="-11.43" drill="0.8" shape="square"/>
-<hole x="1.5" y="10" drill="3"/>
-<hole x="1.5" y="-10" drill="3"/>
+<pad name="ALERT" x="-3.5" y="-1.27" drill="0.9" shape="square"/>
+<pad name="ADDR" x="-3.5" y="1.27" drill="0.9" shape="square"/>
+<pad name="SDA" x="-3.5" y="3.81" drill="0.9" shape="square"/>
+<pad name="SCL" x="-3.5" y="6.35" drill="0.9" shape="square"/>
+<pad name="G" x="-3.5" y="8.89" drill="0.9" shape="square"/>
+<pad name="V" x="-3.5" y="11.43" drill="0.9" shape="square"/>
+<pad name="A0" x="-3.5" y="-3.81" drill="0.9" shape="square"/>
+<pad name="A1" x="-3.5" y="-6.35" drill="0.9" shape="square"/>
+<pad name="A2" x="-3.5" y="-8.89" drill="0.9" shape="square"/>
+<pad name="A3" x="-3.5" y="-11.43" drill="0.9" shape="square"/>
 <text x="-3.81" y="15.24" size="1.27" layer="25">&gt;NAME</text>
 <text x="-3.81" y="-16.51" size="1.27" layer="27">&gt;VALUE</text>
 <wire x1="-4.5" y1="13" x2="4.5" y2="13" width="0.127" layer="21"/>

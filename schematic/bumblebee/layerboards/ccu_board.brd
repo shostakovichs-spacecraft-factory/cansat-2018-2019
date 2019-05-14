@@ -95,7 +95,10 @@
 <layer number="114" name="Badge_Outline" color="7" fill="1" visible="no" active="no"/>
 <layer number="115" name="ReferenceISLANDS" color="7" fill="1" visible="no" active="no"/>
 <layer number="116" name="Patch_BOT" color="9" fill="4" visible="no" active="no"/>
+<layer number="117" name="BACKMAAT1" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="118" name="Rect_Pads" color="7" fill="1" visible="no" active="no"/>
+<layer number="119" name="KAP_TEKEN" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="120" name="KAP_MAAT1" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="121" name="_tsilk" color="7" fill="1" visible="no" active="no"/>
 <layer number="122" name="_bsilk" color="7" fill="1" visible="no" active="no"/>
 <layer number="123" name="tTestmark" color="7" fill="1" visible="no" active="no"/>
@@ -105,6 +108,7 @@
 <layer number="127" name="_tValues" color="7" fill="1" visible="no" active="no"/>
 <layer number="128" name="_bValues" color="7" fill="1" visible="no" active="no"/>
 <layer number="129" name="Mask" color="7" fill="1" visible="no" active="no"/>
+<layer number="130" name="SMDSTROOK" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="131" name="tAdjust" color="7" fill="1" visible="no" active="no"/>
 <layer number="132" name="bAdjust" color="7" fill="1" visible="no" active="no"/>
 <layer number="144" name="Drill_legend" color="7" fill="1" visible="no" active="no"/>
@@ -203,8 +207,11 @@
 <text x="5" y="4.5" size="0.6" layer="21">CANL</text>
 <text x="66" y="4" size="0.6" layer="21">GND</text>
 <text x="3.5" y="29.5" size="1" layer="21">Спутникостроительный завод
-2018-2019</text>
+2018-2019
+CCU BOARD</text>
 <text x="40.5" y="29.5" size="0.6" layer="21" rot="R90">ADC</text>
+<text x="43.5" y="23.5" size="0.6" layer="21" rot="R90">VCC</text>
+<text x="46" y="23.5" size="0.6" layer="21" rot="R90">GND</text>
 </plain>
 <libraries>
 <library name="burr-brown" urn="urn:adsk.eagle:library:111">
@@ -364,32 +371,28 @@ USE AT YOUR OWN RISK!&lt;p&gt;
 <package name="CAN">
 <text x="-7.25" y="9.74" size="1.27" layer="25">&gt;NAME</text>
 <text x="-7.01" y="-10.62" size="1.27" layer="27">&gt;VALUE</text>
-<hole x="5.25" y="6" drill="3"/>
-<hole x="5.25" y="-6" drill="3"/>
-<pad name="CTX" x="-5.75" y="1.27" drill="0.8" shape="square"/>
-<pad name="CRX" x="-5.75" y="-1.27" drill="0.8" shape="square"/>
-<pad name="CANH" x="-5.75" y="-3.81" drill="0.8" shape="square"/>
-<pad name="CANL" x="-5.75" y="-6.35" drill="0.8" shape="square"/>
-<pad name="GND" x="-5.75" y="3.81" drill="0.8" shape="square"/>
-<pad name="3V3" x="-5.75" y="6.35" drill="0.8" shape="square"/>
+<pad name="CTX" x="-5.75" y="1.27" drill="0.9" shape="square"/>
+<pad name="CRX" x="-5.75" y="-1.27" drill="0.9" shape="square"/>
+<pad name="CANH" x="-5.75" y="-3.81" drill="0.9" shape="square"/>
+<pad name="CANL" x="-5.75" y="-6.35" drill="0.9" shape="square"/>
+<pad name="GND" x="-5.75" y="3.81" drill="0.9" shape="square"/>
+<pad name="3V3" x="-5.75" y="6.35" drill="0.9" shape="square"/>
 <wire x1="-7.25" y1="8" x2="7.25" y2="8" width="0.127" layer="21"/>
 <wire x1="7.25" y1="8" x2="7.25" y2="-8" width="0.127" layer="21"/>
 <wire x1="7.25" y1="-8" x2="-7.25" y2="-8" width="0.127" layer="21"/>
 <wire x1="-7.25" y1="-8" x2="-7.25" y2="8" width="0.127" layer="21"/>
 </package>
 <package name="ADS">
-<pad name="ALERT" x="-3.5" y="-1.27" drill="0.8" shape="square"/>
-<pad name="ADDR" x="-3.5" y="1.27" drill="0.8" shape="square"/>
-<pad name="SDA" x="-3.5" y="3.81" drill="0.8" shape="square"/>
-<pad name="SCL" x="-3.5" y="6.35" drill="0.8" shape="square"/>
-<pad name="G" x="-3.5" y="8.89" drill="0.8" shape="square"/>
-<pad name="V" x="-3.5" y="11.43" drill="0.8" shape="square"/>
-<pad name="A0" x="-3.5" y="-3.81" drill="0.8" shape="square"/>
-<pad name="A1" x="-3.5" y="-6.35" drill="0.8" shape="square"/>
-<pad name="A2" x="-3.5" y="-8.89" drill="0.8" shape="square"/>
-<pad name="A3" x="-3.5" y="-11.43" drill="0.8" shape="square"/>
-<hole x="1.5" y="10" drill="3"/>
-<hole x="1.5" y="-10" drill="3"/>
+<pad name="ALERT" x="-3.5" y="-1.27" drill="0.9" shape="square"/>
+<pad name="ADDR" x="-3.5" y="1.27" drill="0.9" shape="square"/>
+<pad name="SDA" x="-3.5" y="3.81" drill="0.9" shape="square"/>
+<pad name="SCL" x="-3.5" y="6.35" drill="0.9" shape="square"/>
+<pad name="G" x="-3.5" y="8.89" drill="0.9" shape="square"/>
+<pad name="V" x="-3.5" y="11.43" drill="0.9" shape="square"/>
+<pad name="A0" x="-3.5" y="-3.81" drill="0.9" shape="square"/>
+<pad name="A1" x="-3.5" y="-6.35" drill="0.9" shape="square"/>
+<pad name="A2" x="-3.5" y="-8.89" drill="0.9" shape="square"/>
+<pad name="A3" x="-3.5" y="-11.43" drill="0.9" shape="square"/>
 <text x="-3.81" y="15.24" size="1.27" layer="25">&gt;NAME</text>
 <text x="-3.81" y="-16.51" size="1.27" layer="27">&gt;VALUE</text>
 <wire x1="-4.5" y1="13" x2="4.5" y2="13" width="0.127" layer="21"/>
@@ -700,7 +703,7 @@ design rules under a new name.</description>
 <attribute name="VALUE" x="12.307" y="11.093" size="1.016" layer="27" ratio="10" rot="R180"/>
 </element>
 <element name="CAN" library="bluepill" package="CAN" value="CAN" x="44.28" y="10.32" smashed="yes" rot="R90">
-<attribute name="NAME" x="46.43" y="11.04" size="1.27" layer="25" rot="R180"/>
+<attribute name="NAME" x="45.93" y="19.04" size="1.27" layer="25" rot="R180"/>
 <attribute name="VALUE" x="54.9" y="3.31" size="1.27" layer="27" rot="R90"/>
 </element>
 <element name="C1" library="SparkFun-Capacitors" package="0805" value="22uF" x="62.54" y="5.11" smashed="yes" rot="MR270">
@@ -727,7 +730,7 @@ design rules under a new name.</description>
 <attribute name="VALUE" x="1.713" y="11.567" size="1.016" layer="27" ratio="10"/>
 </element>
 <element name="PX4_FLOW" library="con-jst-eh" package="B10B-EH-A" value="B10B-EH-A" x="24.5" y="21.5" smashed="yes" rot="R180">
-<attribute name="NAME" x="44.827" y="21.841" size="1.016" layer="25" ratio="18" rot="R180"/>
+<attribute name="NAME" x="27.327" y="25.341" size="1.016" layer="25" ratio="18" rot="R180"/>
 <attribute name="VALUE" x="37.327" y="25.183" size="1.016" layer="27" ratio="10" rot="R180"/>
 </element>
 <element name="CAM_UP" library="con-jst-eh" package="B4B-EH-A" value="B4B-EH-A" x="19.5" y="11.5" smashed="yes" rot="R90">
@@ -824,11 +827,10 @@ design rules under a new name.</description>
 <signal name="N$8">
 <contactref element="CAN" pad="CANH"/>
 <contactref element="FROM_ICU" pad="2"/>
-<wire x1="47.25" y1="4.725" x2="47.925" y2="4.725" width="0.2" layer="16"/>
-<wire x1="45.9" y1="6.075" x2="47.25" y2="4.725" width="0.2" layer="16"/>
-<wire x1="9.45" y1="6.075" x2="45.9" y2="6.075" width="0.2" layer="16"/>
+<wire x1="48.09" y1="4.57" x2="48.09" y2="4.885" width="0.2" layer="16"/>
+<wire x1="48.09" y1="4.885" x2="46.9" y2="6.075" width="0.2" layer="16"/>
+<wire x1="9.45" y1="6.075" x2="46.9" y2="6.075" width="0.2" layer="16"/>
 <wire x1="8.325" y1="7.2" x2="9.45" y2="6.075" width="0.2" layer="16"/>
-<wire x1="47.925" y1="4.725" x2="48.09" y2="4.57" width="0.2" layer="16"/>
 <wire x1="8.325" y1="7.2" x2="8.35" y2="7.41" width="0.2" layer="16"/>
 </signal>
 <signal name="3V3">
@@ -959,18 +961,18 @@ design rules under a new name.</description>
 <contactref element="TO_OUT" pad="5"/>
 <contactref element="U$1" pad="A1"/>
 <wire x1="71.5" y1="19.75" x2="70.25" y2="19.75" width="0.2" layer="1"/>
-<wire x1="61.85" y1="25.5" x2="60.85" y2="26.5" width="0.2" layer="1"/>
-<wire x1="70.25" y1="19.75" x2="64.5" y2="25.5" width="0.2" layer="1"/>
-<wire x1="64.5" y1="25.5" x2="61.85" y2="25.5" width="0.2" layer="1"/>
+<wire x1="62.35" y1="25" x2="60.85" y2="26.5" width="0.2" layer="1"/>
+<wire x1="70.25" y1="19.75" x2="65" y2="25" width="0.2" layer="1"/>
+<wire x1="65" y1="25" x2="62.35" y2="25" width="0.2" layer="1"/>
 </signal>
 <signal name="N$13">
 <contactref element="TO_OUT" pad="4"/>
 <contactref element="U$1" pad="A0"/>
 <wire x1="71.5" y1="22.25" x2="67.5" y2="26.25" width="0.2" layer="1"/>
 <wire x1="67.5" y1="26.25" x2="67.5" y2="27" width="0.2" layer="1"/>
-<wire x1="67.5" y1="27" x2="67" y2="27.5" width="0.2" layer="1"/>
-<wire x1="59.31" y1="27.5" x2="58.31" y2="26.5" width="0.2" layer="1"/>
-<wire x1="67" y1="27.5" x2="59.31" y2="27.5" width="0.2" layer="1"/>
+<wire x1="67.5" y1="27" x2="66.5" y2="28" width="0.2" layer="1"/>
+<wire x1="59.81" y1="28" x2="58.31" y2="26.5" width="0.2" layer="1"/>
+<wire x1="66.5" y1="28" x2="59.81" y2="28" width="0.2" layer="1"/>
 </signal>
 </signals>
 <mfgpreviewcolors>
