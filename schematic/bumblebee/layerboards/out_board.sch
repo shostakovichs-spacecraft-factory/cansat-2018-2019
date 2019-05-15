@@ -95,7 +95,10 @@
 <layer number="114" name="Badge_Outline" color="7" fill="1" visible="no" active="no"/>
 <layer number="115" name="ReferenceISLANDS" color="7" fill="1" visible="no" active="no"/>
 <layer number="116" name="Patch_BOT" color="9" fill="4" visible="no" active="no"/>
+<layer number="117" name="BACKMAAT1" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="118" name="Rect_Pads" color="7" fill="1" visible="no" active="no"/>
+<layer number="119" name="KAP_TEKEN" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="120" name="KAP_MAAT1" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="121" name="_tsilk" color="7" fill="1" visible="no" active="no"/>
 <layer number="122" name="_bsilk" color="7" fill="1" visible="no" active="no"/>
 <layer number="123" name="tTestmark" color="7" fill="1" visible="no" active="no"/>
@@ -105,6 +108,7 @@
 <layer number="127" name="_tValues" color="7" fill="1" visible="no" active="no"/>
 <layer number="128" name="_bValues" color="7" fill="1" visible="no" active="no"/>
 <layer number="129" name="Mask" color="7" fill="1" visible="no" active="no"/>
+<layer number="130" name="SMDSTROOK" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="131" name="tAdjust" color="7" fill="1" visible="no" active="no"/>
 <layer number="132" name="bAdjust" color="7" fill="1" visible="no" active="no"/>
 <layer number="144" name="Drill_legend" color="7" fill="1" visible="no" active="no"/>
@@ -204,23 +208,14 @@
 </package>
 <package name="MPX">
 <circle x="0" y="0" radius="9" width="0.2" layer="21"/>
-<circle x="0" y="14.5" radius="3" width="0.127" layer="21"/>
-<circle x="0" y="-14.5" radius="3" width="0.127" layer="21"/>
-<circle x="0" y="14.5" radius="2" width="0.127" layer="21"/>
-<circle x="0" y="-14.5" radius="2" width="0.127" layer="21"/>
-<wire x1="3.1" y1="15" x2="8.2" y2="3.8" width="0.127" layer="21"/>
 <wire x1="8.2" y1="3.8" x2="8.4" y2="3.4" width="0.127" layer="21"/>
-<wire x1="-8.1" y1="-3.9" x2="-2.9" y2="-15" width="0.127" layer="21"/>
-<wire x1="-0.1" y1="-11.5" x2="-1.3" y2="-9" width="0.127" layer="21"/>
-<wire x1="0.5" y1="11.5" x2="1.6" y2="8.8" width="0.127" layer="21"/>
-<wire x1="-5.9" y1="6.7" x2="-21.5" y2="6.7" width="0.127" layer="21"/>
-<wire x1="-21.5" y1="6.7" x2="-21.5" y2="3.5" width="0.127" layer="21"/>
-<wire x1="-21.5" y1="3.5" x2="-8.2" y2="3.5" width="0.127" layer="21"/>
+<wire x1="-5.9" y1="6.7" x2="-9" y2="6.7" width="0.127" layer="21"/>
+<wire x1="-9" y1="3.5" x2="-8.2" y2="3.5" width="0.127" layer="21"/>
 <pad name="V1" x="14" y="-1.27" drill="0.8" shape="square" rot="R90"/>
 <pad name="GND" x="14" y="-3.81" drill="0.8" shape="square" rot="R90"/>
 <pad name="V2" x="14" y="3.81" drill="0.8" shape="square" rot="R90"/>
-<text x="-7" y="21" size="1.27" layer="25">&gt;NAME</text>
-<text x="-7" y="-22" size="1.27" layer="27">&gt;VALUE</text>
+<text x="-3.3" y="15" size="1.27" layer="25">&gt;NAME</text>
+<text x="0.9" y="-15.8" size="1.27" layer="27">&gt;VALUE</text>
 <wire x1="13.462" y1="4.318" x2="8.001" y2="4.318" width="0.127" layer="21"/>
 <wire x1="13.462" y1="3.175" x2="8.382" y2="3.175" width="0.127" layer="21"/>
 <wire x1="13.462" y1="1.778" x2="8.763" y2="1.778" width="0.127" layer="21"/>
@@ -230,24 +225,33 @@
 <wire x1="13.462" y1="-3.175" x2="8.382" y2="-3.175" width="0.127" layer="21"/>
 <wire x1="13.462" y1="-4.318" x2="7.747" y2="-4.318" width="0.127" layer="21"/>
 <pad name="VCC" x="14" y="1.27" drill="0.8" shape="square"/>
+<hole x="-2" y="11.5" drill="4"/>
+<hole x="2" y="-11.5" drill="4"/>
+<wire x1="-9" y1="3.5" x2="-9" y2="6.7" width="0.127" layer="21"/>
+<circle x="-2" y="11.5" radius="2.236065625" width="0.127" layer="21"/>
+<circle x="2" y="-11.5" radius="2.236065625" width="0.127" layer="21"/>
+<wire x1="3.6" y1="-9.9" x2="2.4" y2="-8.7" width="0.127" layer="21"/>
+<wire x1="-7.8" y1="-4.6" x2="0.3" y2="-13.1" width="0.127" layer="21"/>
+<wire x1="6.1" y1="6.6" x2="-0.5" y2="13.2" width="0.127" layer="21"/>
+<wire x1="-3.6" y1="9.9" x2="-2" y2="8.8" width="0.127" layer="21"/>
 </package>
 <package name="LSM303C">
 <wire x1="-6.5" y1="9" x2="6.5" y2="9" width="0.127" layer="21"/>
 <wire x1="6.5" y1="9" x2="6.5" y2="-9" width="0.127" layer="21"/>
 <wire x1="6.5" y1="-9" x2="-6.5" y2="-9" width="0.127" layer="21"/>
 <wire x1="-6.5" y1="-9" x2="-6.5" y2="9" width="0.127" layer="21"/>
-<hole x="4" y="6.5" drill="3"/>
-<hole x="4" y="-6.5" drill="3"/>
-<pad name="5V" x="-4.9" y="8" drill="0.6"/>
-<pad name="3V3" x="-4.9" y="5.46" drill="0.6"/>
-<pad name="GND" x="-4.9" y="2.9" drill="0.6"/>
-<pad name="SCL" x="-4.9" y="0.38" drill="0.6"/>
-<pad name="SDA" x="-4.9" y="-2.16" drill="0.6"/>
-<pad name="CSA" x="-4.9" y="-4.7" drill="0.6"/>
-<pad name="CSM" x="-4.9" y="-7.24" drill="0.6"/>
-<pad name="INTA" x="4.9" y="2.92" drill="0.6"/>
-<pad name="DRYM" x="4.9" y="0.38" drill="0.6"/>
-<pad name="INTM" x="4.9" y="-2.16" drill="0.6"/>
+<pad name="3V3" x="-5" y="5.08" drill="0.9" shape="square"/>
+<pad name="CSA" x="-5" y="-5.08" drill="0.9" shape="square"/>
+<pad name="GND" x="-5" y="2.54" drill="0.9" shape="square"/>
+<pad name="DRYM" x="4.9" y="0" drill="0.9" shape="square"/>
+<pad name="INTA" x="4.9" y="2.54" drill="0.9" shape="square"/>
+<pad name="CSM" x="-5" y="-7.62" drill="0.9" shape="square"/>
+<pad name="SCL" x="-5" y="0" drill="0.9" shape="square"/>
+<pad name="INTM" x="4.9" y="-2.54" drill="0.9" shape="square"/>
+<pad name="SDA" x="-5" y="-2.54" drill="0.9" shape="square"/>
+<pad name="5V" x="-5" y="7.62" drill="0.9" shape="square"/>
+<text x="-5.08" y="10.16" size="1.27" layer="25">&gt;NAME</text>
+<text x="-5.08" y="-11.43" size="1.27" layer="27">&gt;VALUE</text>
 </package>
 </packages>
 <symbols>
