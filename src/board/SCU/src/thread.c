@@ -29,7 +29,7 @@ void thread_init_bme280(bme280_dev_s *hbme, I2C_HandleTypeDef* i2c_handler)
 void thread_update_bme280(bme280_dev_s *hbme, uint8_t *arg)
 {
 	arg[0] = 1;
-	bme280_read(hbme, (char*)(arg + 1), sizeof(struct bme280_float_data_s));
+	bme280_read(hbme, (char*)(arg + 4), sizeof(struct bme280_float_data_s));
 }
 ///////////////////
 void thread_init_ds18b20(ds18b20_config_t *hds, onewire_t * how)

@@ -123,7 +123,7 @@
 /** @addtogroup CAN_Private_Constants
   * @{
   */
-#define CAN_TIMEOUT_VALUE  10U
+#define CAN_TIMEOUT_VALUE  1000U
 /**
   * @}
   */

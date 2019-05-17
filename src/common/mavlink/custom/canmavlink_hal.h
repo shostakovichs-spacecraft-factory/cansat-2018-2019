@@ -13,22 +13,22 @@
 #define DATA(FRAMEP)	FRAMEP->Data
 #define HEADER(FRAMEP)	(*FRAMEP)
 
-#else if defined STM32F103xx
+#elif defined STM32F103xE
 #include <stm32f1xx_hal.h>
 #include "stm32f1xx_hal_can.h"
 
 typedef struct {
 	CAN_TxHeaderTypeDef Header;
 	uint8_t Data[8];
-} canmavlink_CANMAVLINK_TX_FRAME_T;
+} canmavlink_TX_frame_t;
 
 typedef struct {
 	CAN_RxHeaderTypeDef Header;
 	uint8_t Data[8];
-} canmavlink_CANMAVLINK_RX_FRAME_T;
+} canmavlink_RX_frame_t;
 
-#define CANMAVLINK_TX_FRAME_T		canmavlink_CANMAVLINK_TX_FRAME_T
-#define CANMAVLINK_RX_FRAME_T		canmavlink_CANMAVLINK_RX_FRAME_T
+#define CANMAVLINK_TX_FRAME_T		canmavlink_TX_frame_t
+#define CANMAVLINK_RX_FRAME_T		canmavlink_RX_frame_t
 #define DATA(FRAMEP)	FRAMEP->Data
 #define HEADER(FRAMEP)	FRAMEP->Header
 

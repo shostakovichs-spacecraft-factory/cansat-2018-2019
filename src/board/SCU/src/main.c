@@ -253,7 +253,7 @@ int main()
 
 	// Call the CSMSIS system clock routine to store the clock frequency
 	// in the SystemCoreClock global RAM location.
-	//SystemCoreClockUpdate();
+	SystemCoreClockUpdate();
 	__GPIOB_CLK_ENABLE();
 	__GPIOA_CLK_ENABLE();
 
@@ -274,13 +274,20 @@ int main()
 		.Alternate = GPIO_AF9_CAN1,
 		.Pull = GPIO_NOPULL,
 		.Speed = GPIO_SPEED_FREQ_VERY_HIGH,
-		.Pin = GPIO_PIN_11 | GPIO_PIN_12
+		.Pin = GPIO_PIN_12
 	};
 	HAL_GPIO_Init(GPIOA, &gpio_init);
+	gpio_init.Mode = GPIO_MODE_INPUT;
+	gpio_init.Pin = GPIO_PIN_11;
+	HAL_GPIO_Init(GPIOA, &gpio_init);
+
+	GPIOA->AFR[1] &= ~(0x0F << 12);
+	GPIOA->AFR[1] |= GPIO_AF9_CAN1 << 12;
+
 
 	hcan.Instance = CAN1;
-	hcan.Init.Prescaler = 400;
-	hcan.Init.Mode = CAN_MODE_NORMAL;
+	hcan.Init.Prescaler = 533;
+	hcan.Init.Mode = CAN_MODE_LOOPBACK;
 	hcan.Init.SJW = CAN_SJW_1TQ;
 	hcan.Init.BS1 = CAN_BS1_5TQ;
 	hcan.Init.BS2 = CAN_BS2_2TQ;
@@ -292,6 +299,9 @@ int main()
 	hcan.Init.TXFP = DISABLE;
 	HAL_CAN_Init(&hcan);
 
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
+
 	ADS1x1x_config_t ads;
 	ADS1x1x_config_default(&ads);
 	ADS1x1x_register_i2c(&ads, &hi2c, ADS1x1x_I2C_ADDRESS_ADDR_TO_GND << 1);
@@ -301,8 +311,8 @@ int main()
 	onewire_t how;
 	onewire_Init(&how, GPIOB, GPIO_PIN_3);
 
-	struct bme280_dev_s *hbme;
-	thread_init_bme280(hbme, &hi2c);
+	struct bme280_dev_s hbme;
+	thread_init_bme280(&hbme, &hi2c);
 
 	ds18b20_config_t hds;
 	thread_init_ds18b20(&hds, &how);
@@ -317,7 +327,7 @@ int main()
 		{
 			thread_update_bme280(&hbme, arg);
 
-			struct bme280_float_data_s *d = (struct bme280_float_data_s*)(arg + 1);
+			struct bme280_float_data_s *d = (struct bme280_float_data_s*)(arg + 4);
 
 			Data.bme_pres = d->pressure;
 			Data.bme_hum = d->humidity;

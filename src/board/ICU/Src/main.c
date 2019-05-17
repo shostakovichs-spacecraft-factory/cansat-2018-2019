@@ -134,7 +134,7 @@ int main(void)
 	{
 		volatile uint8_t framecount = canmavlink_msg_to_frames(canmavlink_frames, &msg);
 
-		/*for(int i = 0; i < framecount; i++)
+		for(int i = 0; i < framecount; i++)
 		{
 			uint32_t mb;
 			HAL_CAN_AddTxMessage(&hcan, &( canmavlink_frames[i].Header ), canmavlink_frames[i].Data, &mb);
@@ -143,7 +143,7 @@ int main(void)
 			do {
 				pending = HAL_CAN_IsTxMessagePending(&hcan, mb);
 			} while(pending);
-		}*/
+		}
 
 		HAL_Delay(1000);
 
@@ -217,7 +217,7 @@ static void MX_CAN_Init(void)
   hcan.Init.TimeTriggeredMode = DISABLE;
   hcan.Init.AutoBusOff = DISABLE;
   hcan.Init.AutoWakeUp = DISABLE;
-  hcan.Init.AutoRetransmission = ENABLE;
+  hcan.Init.AutoRetransmission = DISABLE;
   hcan.Init.ReceiveFifoLocked = DISABLE;
   hcan.Init.TransmitFifoPriority = DISABLE;
   if (HAL_CAN_Init(&hcan) != HAL_OK)
