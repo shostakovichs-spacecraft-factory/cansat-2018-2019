@@ -25,7 +25,8 @@
 /* USER CODE BEGIN Includes */
 #include <string.h>
 
-#include <sx1268.h>
+//#include <sx1268.h>
+#include <nRF24L01P.h>
 
 #include <mavlink/zikush/mavlink.h>
 #include <canmavlink_hal.h>
@@ -44,7 +45,9 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+uint8_t NRF_RXADDR[5] = {0xE7, 0xE7, 0xE7, 0xE7, 0xE7};
+uint8_t NRF_TXADDR[5] = {0xE7, 0xE7, 0xE7, 0xE7, 0xE7};
+#define NRF_RXBUFFSIZE	256
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -53,8 +56,10 @@ CAN_HandleTypeDef hcan;
 SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
-sx1268_t radio;
+//sx1268_t radio;
 uint8_t radio_rxbuf[255], radio_txbuf[255];
+nRF24L01P nrf;
+uint8_t nrf_rxbuff[NRF_RXBUFFSIZE];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -78,7 +83,7 @@ static void MX_CAN_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	sx1268_stm32_t radio_specific;
+	//sx1268_stm32_t radio_specific;
 
 	canmavlink_TX_frame_t canmavlink_frames[34];
 	mavlink_message_t msg;
@@ -110,9 +115,9 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_SPI2_Init();
-  MX_CAN_Init();
+  //MX_CAN_Init();
   /* USER CODE BEGIN 2 */
-  	sx1268_struct_init(&radio, &radio_specific, radio_rxbuf, 255, radio_txbuf, 255);
+  	/*sx1268_struct_init(&radio, &radio_specific, radio_rxbuf, 255, radio_txbuf, 255);
   	radio_specific.bus = &hspi2;
   	radio_specific.busy_port = RADIO_BUSY_GPIO_Port;
   	radio_specific.busy_pin = RADIO_BUSY_Pin;
@@ -120,19 +125,45 @@ int main(void)
   	radio_specific.cs_pin = RADIO_NSS_Pin;
   	radio_specific.nrst_port = RADIO_NRST_GPIO_Port;
   	radio_specific.nrst_pin = RADIO_NRST_Pin;
-  	sx1268_init(&radio);
+  	sx1268_init(&radio);*/
+
+  nrf.hspi = &hspi2;
+  nrf.CRC_Width = nRF_CRC_WIDTH_BYTE;
+  nrf.ADDR_Width = nRF_ADDR_WIDTH_5;
+  nrf.Data_Rate = nRF_DATA_RATE_1MBPS;
+  nrf.TX_Power = nRF_TX_PWR_0dBm;
+  nrf.State = nRF_STATE_TX;
+
+  nrf.RF_Channel = 70;
+  nrf.PayloadWidth = nRF_RXPW_32BYTES;
+  nrf.RetransmitCount = nRF_RETX_COUNT_15;
+
+  nrf.RetransmitDelay = nRF_RETX_DELAY_1000uS;
+
+  nrf.RX_Address = (uint8_t *)NRF_RXADDR;
+  nrf.TX_Address = (uint8_t *)NRF_TXADDR;
+
+  nrf.RX_Buffer = nrf_rxbuff;
+
+  nrf.nRF_nSS_GPIO_PORT = RADIO_NSS_GPIO_Port;
+  nrf.nRF_nSS_GPIO_PIN = RADIO_NSS_Pin;
+  nrf.nRF_CE_GPIO_PORT = NRF_CE_GPIO_Port;
+  nrf.nRF_CE_GPIO_PIN = NRF_CE_Pin;
+
+  /*trace_printf("nRF: %d\n", */HAL_nRF24L01P_Init(&nrf)/*)*/;
 
 
-	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
+	//mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	mavlink_msg_heartbeat_encode(0, ZIKUSH_ICU, &msg, &heartbeat);
+	//mavlink_msg_heartbeat_encode(0, ZIKUSH_ICU, &msg, &heartbeat);
 
 	while(1)
 	{
-		volatile uint8_t framecount = canmavlink_msg_to_frames(canmavlink_frames, &msg);
+		/*volatile uint8_t framecount = canmavlink_msg_to_frames(canmavlink_frames, &msg);
 
 		for(int i = 0; i < framecount; i++)
 		{
@@ -143,7 +174,11 @@ int main(void)
 			do {
 				pending = HAL_CAN_IsTxMessagePending(&hcan, mb);
 			} while(pending);
-		}
+		}*/
+
+		uint8_t sending[] = "alalaIDIOTalalala!\n";
+		nrf.PayloadWidth = strlen((char *)sending);
+		HAL_nRF24L01P_TransmitPacketNonExt(&nrf, sending);
 
 		HAL_Delay(1000);
 
@@ -299,6 +334,9 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(NRF_CE_GPIO_Port, NRF_CE_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(RADIO_NRST_GPIO_Port, RADIO_NRST_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
@@ -312,6 +350,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(RADIO_BUSY_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : NRF_CE_Pin */
+  GPIO_InitStruct.Pin = NRF_CE_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(NRF_CE_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : RADIO_NRST_Pin */
   GPIO_InitStruct.Pin = RADIO_NRST_Pin;

@@ -220,14 +220,14 @@ void CAN_Send(data_struct_t * data)
 
 
 	mavlink_msg_heartbeat_encode(0, ZIKUSH_SCU, &mavlink_msg, &heartbeat);
-	uint8_t framecount = canmavlink_msg_to_frames(frames, &mavlink_msg);
+	volatile uint8_t framecount = canmavlink_msg_to_frames(frames, &mavlink_msg);
 	for(int i = 0; i < framecount; i++) //FIXME rewrite with IRQs
 	{
 		hcan.pTxMsg = frames + i; //DELICIOUS!!
 		HAL_CAN_Transmit(&hcan, 1000);
 	}
 
-	mavlink_msg_scaled_pressure_encode(0, ZIKUSH_SCU, &mavlink_msg, &pressuretemp_internal);
+	/*mavlink_msg_scaled_pressure_encode(0, ZIKUSH_SCU, &mavlink_msg, &pressuretemp_internal);
 	framecount = canmavlink_msg_to_frames(frames, &mavlink_msg);
 	for(int i = 0; i < framecount; i++) //FIXME rewrite with IRQs
 	{
@@ -241,7 +241,7 @@ void CAN_Send(data_struct_t * data)
 	{
 		hcan.pTxMsg = frames + i; //DELICIOUS!!
 		HAL_CAN_Transmit(&hcan, 1000);
-	}
+	}*/
 
 }
 

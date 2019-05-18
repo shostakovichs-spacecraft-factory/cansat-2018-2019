@@ -153,7 +153,7 @@ MAVLINK_HELPER uint8_t canmavlink_parse_frame(CANMAVLINK_RX_FRAME_T * frame, mav
 		msgbuf->compat_flags = 0;
 		msgstat->parse_state = MAVLINK_PARSE_STATE_GOT_MSGID3;
 
-		r_mavlink_status->msg_received = MAVLINK_FRAMING_INCOMPLETE;
+		msgstat->msg_received = MAVLINK_FRAMING_INCOMPLETE;
 
 	} else	// If it's a consecutive frame, just copy
 	{

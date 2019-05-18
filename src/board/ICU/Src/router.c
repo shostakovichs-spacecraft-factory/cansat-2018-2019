@@ -10,11 +10,13 @@
 #include <mavlink/zikush/mavlink.h>
 #include <canmavlink_hal.h>
 
-#include <sx1268.h>
+//#include <sx1268.h>
+#include <nRF24L01P.h>
 #include <router.h>
 
 extern CAN_HandleTypeDef hcan;
-extern sx1268_t radio;
+//extern sx1268_t radio;
+extern nRF24L01P nrf;
 
 router_status_t router_send_CAN(mavlink_message_t * msg)
 {
@@ -39,7 +41,7 @@ router_status_t router_send_radio(mavlink_message_t * msg)
 {
 	uint8_t framebuff[256];
 	uint16_t len = mavlink_msg_to_send_buffer(framebuff, msg);
-	sx1268_status_t status = sx1268_send(&radio, framebuff, len);
+	/*sx1268_status_t status = sx1268_send(&radio, framebuff, len);
 
 	if(status == SX1268_OK)
 		return ROUTER_OK;
@@ -50,7 +52,15 @@ router_status_t router_send_radio(mavlink_message_t * msg)
 	if(status == SX1268_BUSY || status == SX1268_ERROR)
 		return ROUTER_MALFUNCTION;
 
-	return ROUTER_MALFUNCTION;
+	return ROUTER_MALFUNCTION;*/
+
+	size_t pos = 0;
+
+	while(pos < len) {
+		nrf.PayloadWidth = (len - pos) > 32 ? 32 : len - pos;
+		HAL_nRF24L01P_TransmitPacketNonExt(&nrf, framebuff + pos);
+		pos += 32;
+	}
 }
 
 router_status_t router_send_IRIDIUM(mavlink_message_t * msg)
