@@ -137,7 +137,7 @@ int main(void)
 		for(int i = 0; i < framecount; i++)
 		{
 			uint32_t mb;
-			HAL_CAN_AddTxMessage(&hcan, &( canmavlink_frames[i].Header ), canmavlink_frames[i].Data, &mb);
+			//HAL_CAN_AddTxMessage(&hcan, &( canmavlink_frames[i].Header ), canmavlink_frames[i].Data, &mb);
 
 			bool pending;
 			do {

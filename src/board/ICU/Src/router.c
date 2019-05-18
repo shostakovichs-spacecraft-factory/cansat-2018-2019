@@ -81,15 +81,15 @@ static bool _table_ICU(mavlink_message_t * msg)
 
 router_status_t router_route(mavlink_message_t * msg)
 {
-	if(_table_ICU(msg))
+	/*if(_table_ICU(msg))
 		//TODO some internal func
 		return ROUTER_MALFUNCTION;
 
 	if(_table_CAN(msg))
 		router_send_CAN(msg);
 
-	if(_table_ground(msg))
-		//router_send_radio(msg); //FIXME add IRIDIUM changeover
+	if(_table_ground(msg))*/
+		router_send_radio(msg); //FIXME add IRIDIUM changeover
 
 	return ROUTER_OK;
 }

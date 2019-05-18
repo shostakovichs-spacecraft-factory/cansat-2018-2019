@@ -248,17 +248,18 @@ void CAN_Send(data_struct_t * data)
 int main()
 {
 
-	__initialize_hardware();
+	//__initialize_hardware();
 
 
 	// Call the CSMSIS system clock routine to store the clock frequency
 	// in the SystemCoreClock global RAM location.
-	SystemCoreClockUpdate();
+	//SystemCoreClockUpdate();
 	__GPIOB_CLK_ENABLE();
 	__GPIOA_CLK_ENABLE();
 
 	__I2C1_CLK_ENABLE();
 	__CAN1_CLK_ENABLE();
+	//__CAN2_CLK_ENABLE();
 
 	I2C_HandleTypeDef hi2c;
 	i2c_pin_scl_init(GPIOB, GPIO_PIN_6);
@@ -273,10 +274,11 @@ int main()
 		.Mode = GPIO_MODE_AF_PP,
 		.Alternate = GPIO_AF9_CAN1,
 		.Pull = GPIO_NOPULL,
-		.Speed = GPIO_SPEED_FREQ_VERY_HIGH,
+		.Speed = GPIO_SPEED_LOW,
 		.Pin = GPIO_PIN_12
 	};
 	HAL_GPIO_Init(GPIOA, &gpio_init);
+
 	gpio_init.Mode = GPIO_MODE_INPUT;
 	gpio_init.Pin = GPIO_PIN_11;
 	HAL_GPIO_Init(GPIOA, &gpio_init);
@@ -284,10 +286,12 @@ int main()
 	GPIOA->AFR[1] &= ~(0x0F << 12);
 	GPIOA->AFR[1] |= GPIO_AF9_CAN1 << 12;
 
+	GPIOA->MODER &= ~GPIO_MODER_MODER11;
+	GPIOA->MODER |= GPIO_MODER_MODER11_1;
 
 	hcan.Instance = CAN1;
-	hcan.Init.Prescaler = 533;
-	hcan.Init.Mode = CAN_MODE_LOOPBACK;
+	hcan.Init.Prescaler = 466;
+	hcan.Init.Mode = CAN_MODE_NORMAL;
 	hcan.Init.SJW = CAN_SJW_1TQ;
 	hcan.Init.BS1 = CAN_BS1_5TQ;
 	hcan.Init.BS2 = CAN_BS2_2TQ;
