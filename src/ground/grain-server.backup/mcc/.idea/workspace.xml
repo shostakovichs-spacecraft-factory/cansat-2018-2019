@@ -1,0 +1,590 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="a5b016cc-0d37-40b0-9017-d62877a30050" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../../../research/iridium/iridium-9602-client/src/iridium9602.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../../research/iridium/iridium-9602-client/src/iridium9602.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../research/iridium/iridium-9602-client/src/iridium9602.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../../research/iridium/iridium-9602-client/src/iridium9602.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../common/mavlink/pymavlink" beforeDir="false" afterPath="$PROJECT_DIR$/../../common/mavlink/pymavlink" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/iridium/devutil/mt_sender.py" beforeDir="false" afterPath="$PROJECT_DIR$/iridium/devutil/mt_sender.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/iridium/messages/enum.py" beforeDir="false" afterPath="$PROJECT_DIR$/iridium/messages/enum.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/iridium/messages/mobile_terminated.py" beforeDir="false" afterPath="$PROJECT_DIR$/iridium/messages/mobile_terminated.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/iridium/network/mt_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/iridium/network/mt_client.py" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/iridium/network/requisites.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="66">
+              <caret line="3" selection-start-line="3" selection-end-line="3" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/iridium/devutil/mo_receiver.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1364">
+              <caret line="69" selection-start-line="69" selection-end-line="69" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/iridium/devutil/mo_sender.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1474">
+              <caret line="73" selection-start-line="73" selection-end-line="73" />
+              <folding>
+                <element signature="e#0#15#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/iridium/devutil/mt_sender.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="365">
+              <caret line="20" column="14" selection-start-line="20" selection-start-column="14" selection-end-line="20" selection-end-column="14" />
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/iridium/network/mt_client.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="211">
+              <caret line="53" selection-start-line="53" selection-end-line="53" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/iridium/messages/mobile_terminated.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="189">
+              <caret line="92" column="15" selection-start-line="92" selection-start-column="15" selection-end-line="92" selection-end-column="15" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/iridium/messages/basic.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="286">
+              <caret line="14" selection-start-line="14" selection-end-line="14" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/iridium/messages/serialization.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="167">
+              <caret line="43" selection-start-line="43" selection-end-line="43" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/iridium/messages/enum.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="255">
+              <caret line="85" selection-start-line="85" selection-end-line="85" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/iridium/messages/mobile_originated.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3410">
+              <caret line="160" column="29" lean-forward="true" selection-start-line="160" selection-start-column="29" selection-end-line="160" selection-end-column="29" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>IEI_CLASSES</find>
+      <find>ie</find>
+      <find>got sb</find>
+      <find>struct</find>
+      <find>exce</find>
+      <find>message_header.</find>
+    </findStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/iridium/sbd/defs.py" />
+        <option value="$PROJECT_DIR$/iridium/sbd/enum.py" />
+        <option value="$PROJECT_DIR$/iridium/sbd/ie/basic.py" />
+        <option value="$PROJECT_DIR$/iridium/sbd/ie/mobile_originated.py" />
+        <option value="$PROJECT_DIR$/iridium/sbd/ie.py" />
+        <option value="$PROJECT_DIR$/iridium/sbd/basic_defs.py" />
+        <option value="$PROJECT_DIR$/iridium/sbd/messsage.py" />
+        <option value="$PROJECT_DIR$/iridium/sbd/message_parser.py" />
+        <option value="$PROJECT_DIR$/iridium/sbd/information_element.py" />
+        <option value="$PROJECT_DIR$/iridium/sbd/message.py" />
+        <option value="$PROJECT_DIR$/iridium/sbd_service_server.py" />
+        <option value="$PROJECT_DIR$/iridium/__init__.py" />
+        <option value="$PROJECT_DIR$/iridium/sbd_server.py" />
+        <option value="$PROJECT_DIR$/iridium/network.py" />
+        <option value="$PROJECT_DIR$/iridium/ /sbd_server.py" />
+        <option value="$PROJECT_DIR$/iridium/fake/fake_mo.py" />
+        <option value="$PROJECT_DIR$/iridium/sbd/serialization.py" />
+        <option value="$PROJECT_DIR$/iridium/sbd/basic.py" />
+        <option value="$PROJECT_DIR$/iridium/fake/send_fake_mo.py" />
+        <option value="$PROJECT_DIR$/iridium/fake/fake_mo_sender.py" />
+        <option value="$PROJECT_DIR$/iridium/fake/mo_sender.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/iridium/__main__.py" />
+        <option value="$PROJECT_DIR$/iridium/network/sbd_server.py" />
+        <option value="$PROJECT_DIR$/iridium/sbd/mobile_originated.py" />
+        <option value="$PROJECT_DIR$/iridium/network/requisites.py" />
+        <option value="$PROJECT_DIR$/iridium/messages/mobile_originated.py" />
+        <option value="$PROJECT_DIR$/iridium/messages/basic.py" />
+        <option value="$PROJECT_DIR$/iridium/messages/serialization.py" />
+        <option value="$PROJECT_DIR$/iridium/devutil/mo_sender.py" />
+        <option value="$PROJECT_DIR$/iridium/devutil/mo_receiver.py" />
+        <option value="$PROJECT_DIR$/iridium/network/mo_server.py" />
+        <option value="$PROJECT_DIR$/iridium/network/mt_client.py" />
+        <option value="$PROJECT_DIR$/iridium/messages/enum.py" />
+        <option value="$PROJECT_DIR$/iridium/messages/mobile_terminated.py" />
+        <option value="$PROJECT_DIR$/iridium/devutil/mt_sender.py" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="50" />
+    <option name="width" value="1871" />
+    <option name="height" value="1085" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="mcc" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mcc" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mcc" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mcc" type="462c0819:PsiDirectoryNode" />
+              <item name="iridium" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mcc" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mcc" type="462c0819:PsiDirectoryNode" />
+              <item name="iridium" type="462c0819:PsiDirectoryNode" />
+              <item name="devutil" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mcc" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mcc" type="462c0819:PsiDirectoryNode" />
+              <item name="iridium" type="462c0819:PsiDirectoryNode" />
+              <item name="messages" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mcc" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mcc" type="462c0819:PsiDirectoryNode" />
+              <item name="iridium" type="462c0819:PsiDirectoryNode" />
+              <item name="network" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="last_opened_file_path" value="$USER_HOME$/hello.txt" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.appearance" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/sbd-dumps" />
+      <recent name="$PROJECT_DIR$/iridium/network" />
+      <recent name="$PROJECT_DIR$/iridium/ " />
+      <recent name="$PROJECT_DIR$/iridium/sbd" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Python.dev mt sender">
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <module name="mcc" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="iridium" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="true" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="dev mo receiver" type="PythonConfigurationType" factoryName="Python">
+      <module name="mcc" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="iridium.devutil.mo_receiver" />
+      <option name="PARAMETERS" value="--port 1221 --blog-file=dump.bin" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="true" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="dev mo sender" type="PythonConfigurationType" factoryName="Python">
+      <module name="mcc" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="iridium.fake.mo_sender" />
+      <option name="PARAMETERS" value="$PROJECT_DIR$/../sbd-example-data/mo-sample-this-is-g-control.bin" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="true" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="dev mt sender" type="PythonConfigurationType" factoryName="Python">
+      <module name="mcc" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="iridium.devutil.mt_sender" />
+      <option name="PARAMETERS" value="--host localhost --port 10800 --imei 300234069005850" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="true" />
+      <option name="REDIRECT_INPUT" value="true" />
+      <option name="INPUT_FILE" value="$USER_HOME$/hello.txt" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.dev mt sender" />
+      <item itemvalue="Python.dev mo receiver" />
+      <item itemvalue="Python.dev mo sender" />
+    </list>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a5b016cc-0d37-40b0-9017-d62877a30050" name="Default Changelist" comment="" />
+      <created>1556659034573</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1556659034573</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="50" y="0" width="1871" height="1085" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49840763" visible="true" weight="0.18512486" />
+      <window_info id="Structure" order="1" sideWeight="0.50159234" side_tool="true" weight="0.24972856" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32905984" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32905984" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39957264" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Version Control" order="7" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.31517094" />
+      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
+      <window_info anchor="bottom" id="Python Console" order="10" weight="0.32905984" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+    </layout>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/iridium/messages/enum.py</url>
+          <line>84</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/iridium/sbd/defs.py" />
+    <entry file="file://$PROJECT_DIR$/iridium/sbd/ie.py" />
+    <entry file="file://$PROJECT_DIR$/iridium/sbd/ie/__init__.py" />
+    <entry file="file://$PROJECT_DIR$/iridium/sbd/information_element.py" />
+    <entry file="file://$PROJECT_DIR$/iridium/sbd/message.py" />
+    <entry file="file:///usr/lib/python3.7/typing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="37">
+          <caret line="1249" selection-start-line="1249" selection-end-line="1249" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/network.py" />
+    <entry file="file:///usr/lib/python3.7/socketserver.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="459">
+          <caret line="483" lean-forward="true" selection-start-line="476" selection-end-line="483" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/lib/python3.7/argparse.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="1193" column="34" lean-forward="true" selection-start-line="1193" selection-start-column="34" selection-end-line="1193" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/lib/python3.7/logging/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-792">
+          <caret line="1831" column="4" selection-start-line="1831" selection-start-column="4" selection-end-line="1831" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="22">
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/devutil/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file:///usr/lib/python3.7/datetime.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="594">
+          <caret line="1633" column="28" lean-forward="true" selection-start-line="1633" selection-start-column="28" selection-end-line="1633" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/messages/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/typeshed/stdlib/2and3/socket.pyi">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="232">
+          <caret line="557" column="8" selection-start-line="557" selection-start-column="8" selection-end-line="557" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/__main__.py" />
+    <entry file="file://$PROJECT_DIR$/iridium/network/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/network/mo_server.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2750">
+          <caret line="132" column="37" selection-start-line="132" selection-start-column="37" selection-end-line="132" selection-end-column="37" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/network/requisites.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="66">
+          <caret line="3" selection-start-line="3" selection-end-line="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/devutil/mo_receiver.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1364">
+          <caret line="69" selection-start-line="69" selection-end-line="69" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/devutil/mo_sender.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1474">
+          <caret line="73" selection-start-line="73" selection-end-line="73" />
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/messages/mobile_originated.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3410">
+          <caret line="160" column="29" lean-forward="true" selection-start-line="160" selection-start-column="29" selection-end-line="160" selection-end-column="29" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/network/mt_client.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="211">
+          <caret line="53" selection-start-line="53" selection-end-line="53" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/messages/basic.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="286">
+          <caret line="14" selection-start-line="14" selection-end-line="14" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/messages/serialization.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="167">
+          <caret line="43" selection-start-line="43" selection-end-line="43" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/messages/enum.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="85" selection-start-line="85" selection-end-line="85" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/messages/mobile_terminated.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="92" column="15" selection-start-line="92" selection-start-column="15" selection-end-line="92" selection-end-column="15" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/iridium/devutil/mt_sender.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="365">
+          <caret line="20" column="14" selection-start-line="20" selection-start-column="14" selection-end-line="20" selection-end-column="14" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

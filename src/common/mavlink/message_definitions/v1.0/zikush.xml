@@ -64,5 +64,11 @@
 			<field type="int16_t" name="y">X component of the unit vector</field>
 			<field type="int16_t" name="z">X component of the unit vector</field>
 		</message>
+
+		<message id="153" name="ZIKUSH_HUMIDITY">
+			<description></description>
+			<field type="uint32_t" name="time_boot_ms">Timestamp (time since system boot)</field>
+			<field type="float" name="humidity" units="%">Measured relative humidity</field>
+		</message>
     </messages>
 </mavlink>

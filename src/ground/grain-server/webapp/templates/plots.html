@@ -1,0 +1,243 @@
+{% extends "basic.html" %}
+
+{% block styles %}
+{{ super() }}
+
+{% assets "openlayers_css" %}
+<link rel="stylesheet" href="{{ ASSET_URL }}"/>
+{% endassets %}
+
+<style>
+
+    .three-js-scene {
+        min-height: 70vh;
+        height: 70vh;
+    }
+
+</style>
+
+{% endblock %}
+
+
+
+{% block content %}
+    <div class="row h-100 center-block">
+        <div class="col-xl-12 text-center" id="header">
+            <h1>PLOTS</h1>
+        </div>
+    </div>
+
+    <div class="row h-100 center-block margin-bottom">
+        <div class="col-xl-6 text-center">
+            <canvas id="acc-plot-canvas"></canvas>
+        </div>
+
+        <div class="col-xl-6 text-center">
+            <canvas id="gyro-plot-canvas"></canvas>
+        </div>
+
+        <div class="col-xl-6 text-center">
+            <canvas id="temperature-bmp-plot-canvas"></canvas>
+        </div>
+
+        <div class="col-xl-6 text-center">
+            <canvas id="temperature-am-plot-canvas"></canvas>
+        </div>
+
+        <div class="col-xl-6 text-center">
+            <canvas id="pressure-plot-canvas"></canvas>
+        </div>
+
+        <div class="col-xl-6 text-center">
+            <canvas id="distance-plot-canvas"></canvas>
+        </div>
+
+        <div class="col-xl-6 text-center">
+            <canvas id="humidity-plot-canvas"></canvas>
+        </div>
+
+        <div class="col-xl-6 text-center">
+            <canvas id="luminosity-plot-canvas"></canvas>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+
+{% block js %}
+
+{{ super() }}
+
+{% assets "chart_js" %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+{% assets "mcc_charts" %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+<script type="text/javascript">
+
+
+$(document).ready(function(){
+    var charts = [{
+        name: "acc",
+        datasets:
+        [
+            {
+                "label": "Ускорения по X (g)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#f44242",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+            {
+                "label": "Ускорения по Y (g)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#15ff00",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+            {
+                "label": "Ускорения по Z (g)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#001dff",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+        ]
+    },{
+        name: "gyro",
+        datasets:
+        [
+            {
+                "label": "Угловая скорость по X (deg/s)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#f44242",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+            {
+                "label": "Угловая скорость по Y (deg/s)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#15ff00",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+            {
+                "label": "Угловая скорость по Z (deg/s)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#001dff",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+
+        ]
+    },{
+        name: "temperature-bmp",
+        datasets:
+        [
+            {
+                "label": "Температура по датчику BMP280 (degC)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#f44242",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+        ]
+    },{
+        name: "temperature-am",
+        datasets:
+        [
+            {
+                "label": "Температура по датчику AM2320 (degC)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#15ff00",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+        ]
+    },{
+        name: "pressure",
+        datasets:
+        [
+            {
+                "label": "Давление по датчику BMP280 (hPa)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#15ff00",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+        ]
+    },{
+        name: "distance",
+        datasets:
+        [
+            {
+                "label": "Дистанция до поверхности (cm)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#15ff00",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+        ]
+    },{
+        name: "humidity",
+        datasets:
+        [
+            {
+                "label": "Относительная влажность воздуха (%)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#15ff00",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+        ]
+    },{
+        name: "luminosity",
+        datasets:
+        [
+            {
+                "label": "Освещённость",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#15ff00",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+        ]
+    }];
+
+    updatePeriodMs = {{ config["PLOT_DATA_UPDATE_PERIOD_MS"] }}
+
+    plotDataUrl = "{{ url_for("data.plot_data") }}"
+
+    mccChartsMain(charts, updatePeriodMs, plotDataUrl );
+})
+
+</script>
+{% endblock %}
