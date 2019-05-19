@@ -73,8 +73,9 @@ static sx1268_status_t _cmd_ReadBuffer(sx1268_t * self,	uint8_t addr, uint8_t * 
 
 static uint8_t _readbusypin(sx1268_t * self)
 {
-	return HAL_GPIO_ReadPin( ( (sx1268_stm32_t *) self->platform_specific )->busy_port, \
-				( (sx1268_stm32_t *) self->platform_specific )->busy_pin);
+	/*return HAL_GPIO_ReadPin( ( (sx1268_stm32_t *) self->platform_specific )->busy_port, \
+				( (sx1268_stm32_t *) self->platform_specific )->busy_pin);*/
+	return 1;
 }
 
 static void _nrst_reset(sx1268_t * self)

@@ -236,11 +236,11 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
-	/*if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_15) != RESET)
+	if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_15) != RESET)
 	{
 		__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_15);
 		sx1268_event(&radio);
-	}*/
+	}
 
 	return;
   /* USER CODE END EXTI15_10_IRQn 0 */

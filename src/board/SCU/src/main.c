@@ -191,7 +191,8 @@ CAN_HandleTypeDef hcan;
 
 void CAN_Send(data_struct_t * data)
 {
-	mavlink_message_t mavlink_msg;
+	trace_printf("%f %f %f\n", data->ds_temp, data->bme_temp, data->bme_hum);
+	/*mavlink_message_t mavlink_msg;
 	CANMAVLINK_TX_FRAME_T frames[34];
 
 	mavlink_heartbeat_t heartbeat =
@@ -227,7 +228,7 @@ void CAN_Send(data_struct_t * data)
 		HAL_CAN_Transmit(&hcan, 1000);
 	}
 
-	/*mavlink_msg_scaled_pressure_encode(0, ZIKUSH_SCU, &mavlink_msg, &pressuretemp_internal);
+	mavlink_msg_scaled_pressure_encode(0, ZIKUSH_SCU, &mavlink_msg, &pressuretemp_internal);
 	framecount = canmavlink_msg_to_frames(frames, &mavlink_msg);
 	for(int i = 0; i < framecount; i++) //FIXME rewrite with IRQs
 	{
@@ -356,7 +357,7 @@ int main()
 
 		CAN_Send(&Data);
 
-		HAL_Delay(900); //Stupid but simple
+		HAL_Delay(1000); //Stupid but simple
 	}
 
 	return 0;

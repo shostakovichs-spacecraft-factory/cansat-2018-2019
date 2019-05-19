@@ -40,7 +40,7 @@
 #define BME280_GET_BITS_POS_0(reg_data, bitname)  (reg_data & (bitname##_MSK))
 
 /**\name BME280 chip identifier */
-#define BME280_CHIP_ID  (0x58)
+#define BME280_CHIP_ID  (0x60)
 
 /**\name Register Address */
 #define BME280_CHIP_ID_ADDR                 (0xD0)

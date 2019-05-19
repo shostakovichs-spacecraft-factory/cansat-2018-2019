@@ -25,7 +25,7 @@
 /* USER CODE BEGIN Includes */
 #include <string.h>
 
-//#include <sx1268.h>
+#include <sx1268.h>
 #include <nRF24L01P.h>
 
 #include <mavlink/zikush/mavlink.h>
@@ -56,7 +56,7 @@ CAN_HandleTypeDef hcan;
 SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
-//sx1268_t radio;
+sx1268_t radio;
 uint8_t radio_rxbuf[255], radio_txbuf[255];
 nRF24L01P nrf;
 uint8_t nrf_rxbuff[NRF_RXBUFFSIZE];
@@ -83,7 +83,7 @@ static void MX_CAN_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	//sx1268_stm32_t radio_specific;
+	sx1268_stm32_t radio_specific;
 
 	canmavlink_TX_frame_t canmavlink_frames[34];
 	mavlink_message_t msg;
@@ -117,7 +117,7 @@ int main(void)
   MX_SPI2_Init();
   //MX_CAN_Init();
   /* USER CODE BEGIN 2 */
-  	/*sx1268_struct_init(&radio, &radio_specific, radio_rxbuf, 255, radio_txbuf, 255);
+  	sx1268_struct_init(&radio, &radio_specific, radio_rxbuf, 255, radio_txbuf, 255);
   	radio_specific.bus = &hspi2;
   	radio_specific.busy_port = RADIO_BUSY_GPIO_Port;
   	radio_specific.busy_pin = RADIO_BUSY_Pin;
@@ -125,7 +125,7 @@ int main(void)
   	radio_specific.cs_pin = RADIO_NSS_Pin;
   	radio_specific.nrst_port = RADIO_NRST_GPIO_Port;
   	radio_specific.nrst_pin = RADIO_NRST_Pin;
-  	sx1268_init(&radio);*/
+  	sx1268_init(&radio);
 
   nrf.hspi = &hspi2;
   nrf.CRC_Width = nRF_CRC_WIDTH_BYTE;
@@ -163,7 +163,7 @@ int main(void)
 
 	while(1)
 	{
-		/*volatile uint8_t framecount = canmavlink_msg_to_frames(canmavlink_frames, &msg);
+		volatile uint8_t framecount = canmavlink_msg_to_frames(canmavlink_frames, &msg);
 
 		for(int i = 0; i < framecount; i++)
 		{
@@ -174,7 +174,7 @@ int main(void)
 			do {
 				pending = HAL_CAN_IsTxMessagePending(&hcan, mb);
 			} while(pending);
-		}*/
+		}
 
 		uint8_t sending[] = "alalaIDIOTalalala!\n";
 		nrf.PayloadWidth = strlen((char *)sending);
