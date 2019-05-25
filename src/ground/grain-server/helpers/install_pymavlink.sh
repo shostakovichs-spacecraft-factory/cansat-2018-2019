@@ -2,7 +2,7 @@
 
 SCRIPT=$(readlink -f "$0")
 BASEDIR=$(dirname "$SCRIPT")
-MAVLINKDIR=$BASEDIR/../../common/mavlink
+MAVLINKDIR=$BASEDIR/../../../common/mavlink
 
 echo $BASEDIR
 export MDEF=$MAVLINKDIR/message_definitions

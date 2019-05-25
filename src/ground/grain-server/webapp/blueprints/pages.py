@@ -20,6 +20,14 @@ def overview():
         abort(404)
 
 
+@pages.route("overview_old/")
+def overview_old():
+    try:
+        return render_template('overview_old.html')
+    except TemplateNotFound:
+        abort(404)
+
+
 @pages.route("plots/")
 def plots():
     try:

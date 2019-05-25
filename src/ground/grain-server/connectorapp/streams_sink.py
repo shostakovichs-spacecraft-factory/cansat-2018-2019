@@ -2,6 +2,7 @@ import csv
 import os
 
 from pymavlink import mavutil
+from pymavlink.dialects.v20.zikush import ZIKUSH_CAM_SPECTRUM, ZIKUSH_CAM_NADIR, ZIKUSH_CAM_ZENITH
 
 
 class PictureAcceptor:
@@ -112,17 +113,32 @@ class SpectrumListener:
             self.state = "IDLE"
 
 
-class SpectrumAggregator:
+class StreamAggregator:
 
-    def __init__(self, spectrum_acceptor=SpectrumSaver, picture_acceptor=PictureSaver):
-        self.picture_listener = PictureListener(acceptor=picture_acceptor)
+    def __init__(self, spectrum_acceptor=SpectrumSaver(), picture_acceptor_spectrum=PictureSaver(), \
+                 picture_acceptor_nadir=PictureSaver(filename_template='photo/nadir_%d.csv'), \
+                 picture_acceptor_zenith=PictureSaver(filename_template='photo/zenith_%d.csv')):
+
+        self.picture_listener_spectrum = PictureListener(acceptor=picture_acceptor_spectrum)
+        self.picture_listener_nadir = PictureListener(acceptor=picture_acceptor_nadir)
+        self.picture_listener_zenith = PictureListener(acceptor=picture_acceptor_zenith)
+
+        self.picture_listener = None
         self.spectrum_listener = SpectrumListener(acceptor=spectrum_acceptor)
         self.picture_index_we_wait_for = 0
         self.spectrum_index_we_wait_for = 0
 
     def accept_message(self, msg):
         if self.picture_listener.state == "IDLE":  # ждем заголовка
-            if msg.get_type() == "PICTURE_HEADER":  # получили заголовок картинки
+            if msg.get_type() == "ZIKUSH_PICTURE_HEADER":  # получили заголовок картинки
+
+                if msg.camid == ZIKUSH_CAM_SPECTRUM:
+                    self.picture_listener = self.picture_listener_spectrum
+                elif msg.camid == ZIKUSH_CAM_NADIR:
+                    self.picture_listener = self.picture_listener_nadir
+                elif msg.camid == ZIKUSH_CAM_ZENITH:
+                    self.picture_listener = self.picture_listener_zenith
+
                 self.picture_listener.WHOLE_DATA = []
                 self.picture_index_we_wait_for = 0
                 self.picture_listener.DATA_PACKETS_COUNT = msg.packets
@@ -141,7 +157,7 @@ class SpectrumAggregator:
                     self.picture_index_we_wait_for += 1
 
         if self.spectrum_listener.state == "IDLE":  # ждем заголовка
-            if msg.get_type() == "INTENSITY_HEADER":  # получили заголовок спектра
+            if msg.get_type() == "ZIKUSH_SPECTRUM_INTENSITY_HEADER":  # получили заголовок спектра
                 self.spectrum_listener.WHOLE_DATA = []
                 self.spectrum_index_we_wait_for = 0
                 self.spectrum_listener.DATA_PACKETS_COUNT = msg.packets
@@ -149,7 +165,7 @@ class SpectrumAggregator:
                 self.spectrum_listener.state = "ACCUM"
 
         elif self.spectrum_listener.state == "ACCUM":  # ждем данных
-            if msg.get_type() == "INTENSITY_ENCAPSULATED_DATA":
+            if msg.get_type() == "ZIKUSH_SPECTRUM_INTENSITY_ENCAPSULATED_DATA":
                 seqnr = msg.seqnr
                 if seqnr < self.spectrum_index_we_wait_for:
                     pass
@@ -162,7 +178,7 @@ class SpectrumAggregator:
 
 def main():
     connection = mavutil.mavlink_connection("udpin:0.0.0.0:11000")
-    spectrumAggregator = SpectrumAggregator()
+    spectrumAggregator = StreamAggregator()
 
     while True:
         msg = connection.recv_match(blocking=True)

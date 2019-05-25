@@ -7,16 +7,20 @@ from datetime import datetime
 
 from pymavlink import mavutil
 from pymavlink.dialects.v20.zikush import MAVLink_heartbeat_message, MAVLink_scaled_pressure_message, \
-    MAVLink_scaled_pressure2_message, MAVLink_zikush_humidity_message
+    MAVLink_scaled_pressure2_message, MAVLink_encapsulated_data_message,\
+    MAVLink_zikush_state_message, MAVLink_zikush_power_state_message, MAVLink_zikush_sunsensor_message, \
+    MAVLink_zikush_humidity_message, MAVLink_zikush_picture_header_message, MAVLink_zikush_spectrum_intensity_header_message, \
+    MAVLink_zikush_spectrum_intensity_encapsulated_data_message
 
-from common.definitions import ZSET_NAME_SCALED_PRESSURE
 from .redis_store import redis_store
 
 from ..common.config import get_config
-from ..common.definitions import ZSET_NAME_SCALED_PRESSURE, ZSET_NAME_SCALED_PRESSURE2, ZSET_NAME_SPECTRUM
+from ..common.definitions import ZSET_NAME_SCALED_PRESSURE, ZSET_NAME_SCALED_PRESSURE2, ZSET_NAME_SPECTRUM, ZSET_NAME_MAP, \
+    ZSET_NAME_ATTITUDE, ZSET_NAME_SPECTRUM, ZSET_NAME_SUNSENSOR, ZSET_NAME_HUMIDITY, ZSET_NAME_POWER_STATE, ZSET_NAME_STATE\
 
 
-from .spectrum import SpectrumAggregator, SpectrumAcceptor, PictureSaver
+
+from .streams_sink import StreamAggregator, SpectrumAcceptor, PictureSaver
 
 _log = logging.getLogger(__name__)
 _config = get_config()
@@ -56,6 +60,10 @@ class SpectrumRedisSaver(SpectrumAcceptor):
         update_zset(ZSET_NAME_SPECTRUM, Dummy())
 
 
+def HeartbeatHandler(msg):
+    pass
+
+
 def main(argv):
     logging.basicConfig(stream=sys.stdout, level=_config["MAV_LOG_LEVEL"])
 
@@ -72,14 +80,17 @@ def main(argv):
     grain_path = os.path.dirname(connectorapp_path)
     filename_template = grain_path + '/webapp/tmp/img/%d.png'
 
-    spectrum_aggregator = SpectrumAggregator(spectrum_acceptor=SpectrumRedisSaver(),
-                                            picture_acceptor=PictureSaver(filename_template=filename_template))
+    stream_aggregator = StreamAggregator(spectrum_acceptor=SpectrumRedisSaver(),
+                                           picture_acceptor=PictureSaver(filename_template=filename_template))
 
     while True:
         msg = mav.recv_match(blocking=True)
         _log.debug("got message %s", msg)
 
-        if isinstance(msg, MAVLink_scaled_pressure_message):
+        if isinstance(msg, MAVLink_heartbeat_message):
+            HeartbeatHandler(msg)
+
+        elif isinstance(msg, MAVLink_scaled_pressure_message):
             """ Temperature and pressure from BME280 """
             update_zset(ZSET_NAME_SCALED_PRESSURE, msg)
 
@@ -88,15 +99,27 @@ def main(argv):
             update_zset(ZSET_NAME_SCALED_PRESSURE2, msg)
 
         elif isinstance(msg, MAVLink_zikush_humidity_message):
-            """ External temperature and pressure """
-            update_zset(ZSET_NAME_SCALED_PRESSURE2, msg)
+            """ Humidity """
+            update_zset(ZSET_NAME_HUMIDITY, msg)
 
-        '''elif isinstance(msg, MAVLink_picture_header_message) \
-            or isinstance(msg, MAVLink_intensity_header_message) \
+        elif isinstance(msg, MAVLink_zikush_state_message):
+            """ Probe state """
+            update_zset(ZSET_NAME_STATE, msg)
+
+        elif isinstance(msg, MAVLink_zikush_sunsensor_message):
+            """ Sunsensor """
+            update_zset(ZSET_NAME_SUNSENSOR, msg)
+
+        elif isinstance(msg, MAVLink_zikush_power_state_message):
+            """ Power buses state """
+            update_zset(ZSET_NAME_POWER_STATE, msg)
+
+        elif isinstance(msg, MAVLink_zikush_picture_header_message) \
+            or isinstance(msg, MAVLink_zikush_spectrum_intensity_header_message) \
             or isinstance(msg, MAVLink_encapsulated_data_message) \
-            or isinstance(msg, MAVLink_intensity_encapsulated_data_message):
-            """ Сообщения, относящиеся к спектру """
-            spectrum_aggregator.accept_message(msg)'''
+            or isinstance(msg, MAVLink_zikush_spectrum_intensity_encapsulated_data_message):
+            """ Handling multiframe transfers """
+            stream_aggregator.accept_message(msg)
 
 
 if __name__ == "__main__":
