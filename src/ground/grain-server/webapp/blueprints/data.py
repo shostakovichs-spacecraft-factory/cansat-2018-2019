@@ -3,8 +3,7 @@ import json
 import os
 import random
 
-from flask import Blueprint, render_template, abort, jsonify, request, current_app, send_file
-from jinja2 import TemplateNotFound
+from flask import Blueprint, jsonify, request, current_app, send_file
 
 from ...common import definitions as common_definitions
 from ..redis_store import redis_store
@@ -29,18 +28,10 @@ def plot_data():
         return _get_acc_data()
     elif chart_name == "gyro":
         return _get_gyro_data()
-    elif chart_name == "temperature-bmp":
-        return _get_temperature_bmp_data()
-    elif chart_name == "temperature-am":
-        return _get_temperature_am_data()
+    elif chart_name == "temperature":
+        return _get_temperature_data()
     elif chart_name == "pressure":
         return _get_pressure_data()
-    elif chart_name == "distance":
-        return _get_distance_data()
-    elif chart_name == "luminosity":
-        return _get_luminosity_data()
-    elif chart_name == "humidity":
-        return _get_humidity_data()
 
 
 
@@ -85,6 +76,12 @@ def gl_data():
             'servertime': score
         })
 
+    if not data:
+        data.append({
+            'data': [1, 0, 0, 0],
+            'servertime': -1
+        })
+
     return jsonify(data)
 
 
@@ -92,19 +89,23 @@ def gl_data():
 def spectrum_data():
     # Достаем последний элемент
     zsetname = common_definitions.ZSET_NAME_SPECTRUM
-    spectrum, score = redis_store.zrange(zsetname, -1, -1, withscores=True, score_cast_func=int) [0]
 
-    spectrum = json.loads(spectrum.decode("utf-8"))
+    try:
+        spectrum, score = redis_store.zrange(zsetname, -1, -1, withscores=True, score_cast_func=int) [0]
+        spectrum = json.loads(spectrum.decode("utf-8"))
 
-    data = {'data': [], 'identifier': spectrum['identifier']}
+        data = {'data': [], 'identifier': spectrum['identifier']}
 
-    for i, dot in enumerate(spectrum['data']):
-        data['data'].append({
-            'x': i,
-            'y': dot
-        })
+        for i, dot in enumerate(spectrum['data']):
+            data['data'].append({
+                'x': i,
+                'y': dot
+            })
 
-    data['timestamp'] = score
+        data['timestamp'] = score
+
+    except IndexError:
+        data = {'data': [], 'identifier': -1}
 
     return jsonify(data)
 
@@ -112,6 +113,9 @@ def spectrum_data():
 @data.route("/spectrum_img")
 def spectrum_img():
     identifier = int(request.args.get("identifier"))
+
+    if identifier == -1:
+        return send_file('static/staytuned.jpg')
 
     return send_file('tmp/img/%d.png' % identifier)
 
@@ -125,14 +129,17 @@ def background_img():
     responce.headers._list[3] = ('Cache-Control','no-cache')
     return responce
 
-
 @data.route("/status")
 def status():
     # Достаем последний элемент
-    zsetname = common_definitions.ZSET_NAME_STATUS
-    status, score = redis_store.zrange(zsetname, -1, -1, withscores=True, score_cast_func=int) [0]
+    zsetname = common_definitions.ZSET_NAME_STATE
 
-    status = json.loads(status.decode("utf-8"))
+    try:
+        status, score = redis_store.zrange(zsetname, -1, -1, withscores=True, score_cast_func=int) [0]
+        status = json.loads(status.decode("utf-8"))
+
+    except IndexError:
+        status = {"status": -1}
 
     return jsonify(status)
 
@@ -207,111 +214,40 @@ def _get_gyro_data():
     return jsonify(data)
 
 
-def _get_temperature_bmp_data():
+def _get_temperature_data():
     time = now()
-    temperature_bmp = _get_data_abstract("PRESSURE", "temperature", time)
-
+    temperature_int = _get_data_abstract("PRESSTEMP_INTERNAL", "temperature", time)
+    temperature_ext = _get_data_abstract("PRESSTEMP_EXTERNAL", "temperature", time)
 
     latestUpdateTime = request.args.get("latestUpdateTime")
-    if len(temperature_bmp) > 0:
-        latestUpdateTime = temperature_bmp[-1]["servertime"]
+    if len(temperature_int) > 0:
+        latestUpdateTime = temperature_int[-1]["servertime"]
 
 
-    for record in temperature_bmp:
+    for record in temperature_int:
         record["y"] /= 100.0
 
     data = {
-        "datas": [temperature_bmp],
+        "datas": [temperature_int, temperature_ext],
         "latestUpdateTime": latestUpdateTime,
-        "viewlimit": viewlimit("PRESSURE", time)
-    }
-
-    return jsonify(data)
-
-def _get_temperature_am_data():
-    time = now()
-    temperature_am = _get_data_abstract("HUMIDITY", "temperature", time)
-
-
-    latestUpdateTime = request.args.get("latestUpdateTime")
-    if len(temperature_am) > 0:
-        latestUpdateTime = temperature_am[-1]["servertime"]
-
-
-    for record in temperature_am:
-        record["y"] /= 10.0
-
-    data = {
-        "datas": [temperature_am],
-        "latestUpdateTime": latestUpdateTime,
-        "viewlimit": viewlimit("HUMIDITY", time)
+        "viewlimit": viewlimit("PRESSTEMP", time)
     }
 
     return jsonify(data)
 
 def _get_pressure_data():
     time = now()
-    pressure = _get_data_abstract("PRESSURE", "press_abs", time)
+    pressure_int = _get_data_abstract("PRESSTEMP_INTERNAL", "press_abs", time)
+    pressure_ext = _get_data_abstract("PRESSTEMP_EXTERNAL", "press_abs", time)
 
     latestUpdateTime = request.args.get("latestUpdateTime")
-    if len(pressure) > 0:
-        latestUpdateTime = pressure[-1]["servertime"]
+    if len(pressure_int) > 0:
+        latestUpdateTime = pressure_int[-1]["servertime"]
 
     data = {
-        "datas": [pressure],
+        "datas": [pressure_int, pressure_ext],
         "latestUpdateTime": latestUpdateTime,
-        "viewlimit": viewlimit("PRESSURE", time)
-    }
-
-    return jsonify(data)
-
-def _get_distance_data():
-    time = now()
-    distance = _get_data_abstract("DISTANCE", "distance", time)
-
-    latestUpdateTime = request.args.get("latestUpdateTime")
-    if len(distance) > 0:
-        latestUpdateTime = distance[-1]["servertime"]
-
-    data = {
-        "datas": [distance],
-        "latestUpdateTime": latestUpdateTime,
-        "viewlimit": viewlimit("DISTANCE", time)
-    }
-
-    return jsonify(data)
-
-def _get_luminosity_data():
-    time = now()
-    luminosity = _get_data_abstract("LUMINOSITY", "luminosity", time)
-
-    latestUpdateTime = request.args.get("latestUpdateTime")
-    if len(luminosity) > 0:
-        latestUpdateTime = luminosity[-1]["servertime"]
-
-    data = {
-        "datas": [luminosity],
-        "latestUpdateTime": latestUpdateTime,
-        "viewlimit": viewlimit("LUMINOSITY", time)
-    }
-
-    return jsonify(data)
-
-def _get_humidity_data():
-    time = now()
-    humidity = _get_data_abstract("HUMIDITY", "humidity", time)
-
-    latestUpdateTime = request.args.get("latestUpdateTime")
-    if len(humidity) > 0:
-        latestUpdateTime = humidity[-1]["servertime"]
-
-    for record in humidity:
-        record['y'] /= 10.0
-
-    data = {
-        "datas": [humidity],
-        "latestUpdateTime": latestUpdateTime,
-        "viewlimit": viewlimit("HUMIDITY", time)
+        "viewlimit": viewlimit("PRESSTEMP", time)
     }
 
     return jsonify(data)

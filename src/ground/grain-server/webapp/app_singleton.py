@@ -9,7 +9,7 @@ from .redis_store import redis_store
 from .blueprints.pages import pages
 from .blueprints.data import data
 from .blueprints.gl_test import gl_test
-from .blueprints.sound import sound
+from .blueprints.auth import auth
 
 app = Flask(
     __name__,
@@ -27,7 +27,4 @@ redis_store.init_app(app)
 app.register_blueprint(pages)
 app.register_blueprint(data)
 app.register_blueprint(gl_test)
-app.register_blueprint(sound)
-
-
-
+app.register_blueprint(auth)

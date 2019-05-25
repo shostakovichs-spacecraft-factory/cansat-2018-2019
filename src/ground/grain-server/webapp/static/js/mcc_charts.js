@@ -6,6 +6,7 @@ function makeChart(canvasId, datasets) {
             "datasets": datasets
         },
         options: {
+            aspectRatio: 1,
             scales: {
                 yAxes: [{
                     id: 'y1',

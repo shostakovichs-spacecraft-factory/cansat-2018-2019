@@ -43,19 +43,12 @@ STATUS_DATA_UPDATE_PERIOD_MS = 1000
 """ период обновления статуса (в мс) """
 
 IMU_PLOT_SCOPE_MS = timedelta(seconds=15)
-""" Диапазон отображения на графике последних данных MPU6000 """
+""" Диапазон отображения на графике последних данных с IMU"""
 
-PRESSURE_PLOT_SCOPE_MS = timedelta(seconds=15)
-""" Диапазон отображения на графике последних данных MPU6000 """
+PRESSTEMP_PLOT_SCOPE_MS = timedelta(seconds=15)
+""" Диапазон отображения на графиках последних данных температуры и давления"""
+PRESSTEMP_INTERNAL_PLOT_SCOPE_MS = PRESSTEMP_PLOT_SCOPE_MS
+PRESSTEMP_EXTERNAL_PLOT_SCOPE_MS = PRESSTEMP_PLOT_SCOPE_MS
 
 MAP_PLOT_SCOPE_MS = timedelta(seconds=15)
-""" Диапазон отображения на графике последних данных MPU6000 """
-
-DISTANCE_PLOT_SCOPE_MS = timedelta(seconds=15)
-""" Диапазон отображения на графике последних данных MPU6000 """
-
-LUMINOSITY_PLOT_SCOPE_MS = timedelta(seconds=15)
-""" Диапазон отображения на графике последних данных MPU6000 """
-
-HUMIDITY_PLOT_SCOPE_MS = timedelta(seconds=15)
-""" Диапазон отображения на графике последних данных MPU6000 """
+""" Диапазон отображения на графике последних данных положения """

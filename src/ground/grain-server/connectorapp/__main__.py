@@ -15,7 +15,7 @@ from pymavlink.dialects.v20.zikush import MAVLink_heartbeat_message, MAVLink_sca
 from .redis_store import redis_store
 
 from ..common.config import get_config
-from ..common.definitions import ZSET_NAME_SCALED_PRESSURE, ZSET_NAME_SCALED_PRESSURE2, ZSET_NAME_SPECTRUM, ZSET_NAME_MAP, \
+from ..common.definitions import ZSET_NAME_PRESSTEMP_INTERNAL, ZSET_NAME_PRESSTEMP_EXTERNAL, ZSET_NAME_SPECTRUM, ZSET_NAME_MAP, \
     ZSET_NAME_ATTITUDE, ZSET_NAME_SPECTRUM, ZSET_NAME_SUNSENSOR, ZSET_NAME_HUMIDITY, ZSET_NAME_POWER_STATE, ZSET_NAME_STATE\
 
 
@@ -92,11 +92,11 @@ def main(argv):
 
         elif isinstance(msg, MAVLink_scaled_pressure_message):
             """ Temperature and pressure from BME280 """
-            update_zset(ZSET_NAME_SCALED_PRESSURE, msg)
+            update_zset(ZSET_NAME_PRESSTEMP_INTERNAL, msg)
 
         elif isinstance(msg, MAVLink_scaled_pressure2_message):
             """ External temperature and pressure """
-            update_zset(ZSET_NAME_SCALED_PRESSURE2, msg)
+            update_zset(ZSET_NAME_PRESSTEMP_EXTERNAL, msg)
 
         elif isinstance(msg, MAVLink_zikush_humidity_message):
             """ Humidity """

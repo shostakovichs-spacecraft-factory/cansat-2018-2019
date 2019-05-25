@@ -4,7 +4,9 @@ function updateStatus(statusUpdateData) {
     $.getJSON(statusUpdateData.dataUrl, function(data) {
         console.log("updating status");
 
-        text = statusToText[data.status];
+        if(data.status != -1)
+            text = statusToText[data.status];
+        else text = "No signal ever!"
 
         $("#status-div").text(text)
     });

@@ -2,14 +2,14 @@ function updateSpectrum(spectrumUpdateData) {
     $.getJSON(spectrumUpdateData.dataUrl + "?latestIdentifier=" + spectrumUpdateData.latestIdentifier, function(data) {
         console.log("updating spectrum");
 
-        if(data.identifier != spectrumUpdateData.latestIdentifier)
+        if(data.identifier != spectrumUpdateData.latestIdentifier && data.identifier != -1)
         {
             spectrumUpdateData.chart.data.datasets[0].data = data.data;
             spectrumUpdateData.chart.update();
             spectrumUpdateData.latestIdentifier = data.identifier;
-        }
 
-        document.getElementById("spectrum-img").src = spectrumUpdateData.IMGUrl + '?identifier=' +  spectrumUpdateData.latestIdentifier;
+            document.getElementById("spectrum-img").src = spectrumUpdateData.IMGUrl + '?identifier=' +  spectrumUpdateData.latestIdentifier;
+        }
     });
 
     spectrumUpdateData.timeoutContext.setTimeout(
@@ -38,6 +38,7 @@ function mccSpectrumMain(spectrumDataUrl, spectrumIMGUrl)
                         ]
         },
         options: {
+            aspectRatio: 2,
             scales: {
                 yAxes: [{
                     id: 'y1',

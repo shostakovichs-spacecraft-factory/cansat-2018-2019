@@ -24,12 +24,6 @@
 
 <div id="status-div" style="color: white; font-size: 30px;">No-state</div>
 
-<audio controls>
-    <source src="/sound" type="audio/wav">
-    Your browser does not support the audio tag.
-</audio>
-
-
 {% endblock %}
 
 
@@ -42,37 +36,43 @@
     </div>
 
     <div class="row h-100 center-block margin-bottom">
-        <div class="col-xl-3 text-center">
+        <div class="col-sm-6 col-md-4 col-lg-3 text-center">
             <canvas id="acc-plot-canvas"></canvas>
         </div>
 
-        <div class="col-xl-3 text-center">
+        <div class="col-sm-6 col-md-4 col-lg-3 text-center">
             <canvas id="gyro-plot-canvas"></canvas>
         </div>
 
-        <div class="col-xl-3 text-center">
-            <canvas id="temperature-bmp-plot-canvas"></canvas>
+        <div class="col-sm-6 col-md-4 col-lg-3 text-center">
+            <canvas id="temperature-plot-canvas"></canvas>
         </div>
 
-        <div class="col-xl-3 text-center">
-            <canvas id="temperature-am-plot-canvas"></canvas>
-        </div>
-
-        <div class="col-xl-3 text-center">
+        <div class="col-sm-6 col-md-4 col-lg-3 text-center">
             <canvas id="pressure-plot-canvas"></canvas>
         </div>
+    </div>
 
-        <div class="col-xl-3 text-center">
-            <canvas id="distance-plot-canvas"></canvas>
+    <div class="row h-100 center-block margin-bottom">
+        <div class="col-sm-6 col-md-6 text-center" style="display: flex; align-items: center;">
+            <img id="spectrum-img" src="{{ url_for("data.spectrum_img") }}?identifier=-1" alt="Stay tuned!" class="img-fluid text-center"/>
         </div>
+        <div class="col-sm-6 col-md-6 text-center">
+            <canvas id="spectrum-plot-canvas"></canvas>
+        </div>
+    </div>
 
-        <div class="col-xl-3 text-center">
-            <canvas id="humidity-plot-canvas"></canvas>
+    <div class="row h-50 center-block margin-bottom">
+        <div class="col-sm-6 col-md-6 text-center">
+            <div class="h-100 center-block three-js-scene" id="orientation-model-scene"></div>
         </div>
+        <div class="col-sm-6 col-md-6 text-center">
+            <div class="h-100 center-block" id="map"></div>
+        </div>
+    </div>
 
-        <div class="col-xl-3 text-center">
-            <canvas id="luminosity-plot-canvas"></canvas>
-        </div>
+    <div style="display: none;">
+        <div id="popup" title="Telemetry"></div>
     </div>
 
 {% endblock %}
@@ -199,28 +199,23 @@ $(document).ready(function(){
 
         ]
     },{
-        name: "temperature-bmp",
+        name: "temperature",
         datasets:
         [
             {
-                "label": "Температура по датчику BMP280 (degC)",
+                "label": "Внутренняя температура (BMP280) (degC)",
                 "fill": false,
                 "pointRadius": 0,
-                "borderColor": "#f44242",
+                "borderColor": "#15ff00",
                 "borderWidth": 2,
                 "lineTension": 0,
                 "data": [],
             },
-        ]
-    },{
-        name: "temperature-am",
-        datasets:
-        [
             {
-                "label": "Температура по датчику AM2320 (degC)",
+                "label": "Внешняя температура (DS18B20) (degC)",
                 "fill": false,
                 "pointRadius": 0,
-                "borderColor": "#15ff00",
+                "borderColor": "#f44242",
                 "borderWidth": 2,
                 "lineTension": 0,
                 "data": [],
@@ -231,7 +226,7 @@ $(document).ready(function(){
         datasets:
         [
             {
-                "label": "Давление по датчику BMP280 (hPa)",
+                "label": "Внутреннее давление (BMP280) (hPa)",
                 "fill": false,
                 "pointRadius": 0,
                 "borderColor": "#15ff00",
@@ -239,44 +234,11 @@ $(document).ready(function(){
                 "lineTension": 0,
                 "data": [],
             },
-        ]
-    },{
-        name: "distance",
-        datasets:
-        [
             {
-                "label": "Дистанция до поверхности (cm)",
+                "label": "Внешнее давление (DS18B20) (hPa)",
                 "fill": false,
                 "pointRadius": 0,
-                "borderColor": "#15ff00",
-                "borderWidth": 2,
-                "lineTension": 0,
-                "data": [],
-            },
-        ]
-    },{
-        name: "humidity",
-        datasets:
-        [
-            {
-                "label": "Относительная влажность воздуха (%)",
-                "fill": false,
-                "pointRadius": 0,
-                "borderColor": "#15ff00",
-                "borderWidth": 2,
-                "lineTension": 0,
-                "data": [],
-            },
-        ]
-    },{
-        name: "luminosity",
-        datasets:
-        [
-            {
-                "label": "Освещённость",
-                "fill": false,
-                "pointRadius": 0,
-                "borderColor": "#15ff00",
+                "borderColor": "#f44242",
                 "borderWidth": 2,
                 "lineTension": 0,
                 "data": [],
