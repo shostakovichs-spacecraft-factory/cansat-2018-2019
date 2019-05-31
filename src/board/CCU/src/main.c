@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include "diag/Trace.h"
 
+#include <mavlink/zikush/mavlink.h>
+#include <canmavlink_hal.h>
+
 #include "zikush_config.h"
 
 /* coprocessor control register (fpu) */
@@ -24,6 +27,8 @@ boolean spectrum_photo_ready;
 
 int main(int argc, char* argv[])
 {
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 	/* enable FPU on Cortex-M4F core */
 	SCB_CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2)); /* set CP10 Full Access and set CP11 Full Access */
 
