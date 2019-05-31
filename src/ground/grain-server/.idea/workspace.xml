@@ -2,17 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a29cf80a-6178-4680-ae34-78975dde51bc" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/definitions.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/definitions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/configs/base.py" beforeDir="false" afterPath="$PROJECT_DIR$/configs/base.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connectorapp/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/connectorapp/__main__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/webapp/app_singleton.py" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/app_singleton.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/blueprints/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/blueprints/data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/blueprints/sound.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/static/js/mcc_charts.js" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/static/js/mcc_charts.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/static/js/mcc_spectrum.js" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/static/js/mcc_spectrum.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/static/js/mcc_status.js" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/static/js/mcc_status.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/templates/overview.html" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/templates/overview.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/webapp/blueprints/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/blueprints/auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/webapp/templates/basic.html" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/templates/basic.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -22,23 +15,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/webapp/templates/overview.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="128">
+            <state relative-caret-position="-2587">
               <caret line="64" column="24" selection-start-line="64" selection-start-column="24" selection-end-line="64" selection-end-column="24" />
-              <folding>
-                <element signature="e#1268#1311#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/webapp/templates/overview_old.html">
+        <entry file="file://$PROJECT_DIR$/webapp/templates/basic.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="184">
-              <caret line="80" column="14" selection-start-line="80" selection-start-column="14" selection-end-line="80" selection-end-column="14" />
+            <state relative-caret-position="186">
+              <caret line="91" column="15" lean-forward="true" selection-start-line="91" selection-start-column="15" selection-end-line="91" selection-end-column="15" />
             </state>
           </provider>
         </entry>
@@ -46,8 +36,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/webapp/blueprints/data.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
-              <caret line="19" column="54" selection-start-line="19" selection-end-line="19" selection-end-column="54" />
+            <state relative-caret-position="270">
+              <caret line="33" column="35" selection-start-line="22" selection-end-line="33" selection-end-column="35" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -58,23 +48,32 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/webapp/blueprints/auth.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="5" column="4" selection-start-line="5" selection-start-column="4" selection-end-line="5" selection-end-column="4" />
+            <state relative-caret-position="350">
+              <caret line="24" column="10" selection-start-line="24" selection-start-column="10" selection-end-line="24" selection-end-column="10" />
               <folding>
-                <element signature="e#0#69#0" expanded="true" />
+                <element signature="e#0#91#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/webapp/app_singleton.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="435">
-              <caret line="29" column="28" selection-start-line="29" selection-start-column="28" selection-end-line="29" selection-end-column="28" />
+            <state relative-caret-position="215">
+              <caret line="26" lean-forward="true" selection-start-line="26" selection-end-line="26" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/webapp/auth.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="45">
+              <caret line="3" column="16" selection-start-line="3" selection-start-column="16" selection-end-line="3" selection-end-column="16" />
             </state>
           </provider>
         </entry>
@@ -106,7 +105,6 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/webapp/static/scss/main.scss" />
-        <option value="$PROJECT_DIR$/webapp/templates/basic.html" />
         <option value="$PROJECT_DIR$/connectorapp/streams_sink.py" />
         <option value="$PROJECT_DIR$/connectorapp/__main__.py" />
         <option value="$PROJECT_DIR$/webapp/blueprints/pages.py" />
@@ -117,8 +115,10 @@
         <option value="$PROJECT_DIR$/webapp/static/js/mcc_spectrum.js" />
         <option value="$PROJECT_DIR$/webapp/templates/overview.html" />
         <option value="$PROJECT_DIR$/webapp/blueprints/data.py" />
-        <option value="$PROJECT_DIR$/webapp/blueprints/auth.py" />
+        <option value="$PROJECT_DIR$/webapp/auth.py" />
         <option value="$PROJECT_DIR$/webapp/app_singleton.py" />
+        <option value="$PROJECT_DIR$/webapp/templates/basic.html" />
+        <option value="$PROJECT_DIR$/webapp/blueprints/auth.py" />
       </list>
     </option>
   </component>
@@ -144,6 +144,11 @@
             <path>
               <item name="grain-server" type="b2602c69:ProjectViewProjectNode" />
               <item name="grain-server" type="462c0819:PsiDirectoryNode" />
+              <item name="configs" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="grain-server" type="b2602c69:ProjectViewProjectNode" />
+              <item name="grain-server" type="462c0819:PsiDirectoryNode" />
               <item name="webapp" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -151,6 +156,18 @@
               <item name="grain-server" type="462c0819:PsiDirectoryNode" />
               <item name="webapp" type="462c0819:PsiDirectoryNode" />
               <item name="blueprints" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="grain-server" type="b2602c69:ProjectViewProjectNode" />
+              <item name="grain-server" type="462c0819:PsiDirectoryNode" />
+              <item name="webapp" type="462c0819:PsiDirectoryNode" />
+              <item name="static" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="grain-server" type="b2602c69:ProjectViewProjectNode" />
+              <item name="grain-server" type="462c0819:PsiDirectoryNode" />
+              <item name="webapp" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -254,6 +271,7 @@
         <env name="FLASK_DEBUG" value="True" />
         <env name="MAVLINK20" value="True" />
         <env name="MAVLINK_DIALECT" value="zikush" />
+        <env name="TOTP_SECRET" value="toptotpsecret" />
       </envs>
       <option name="SDK_HOME" value="$USER_HOME$/venv-cansat-2018-2019/bin/python" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/.." />
@@ -392,9 +410,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/configs/__init__.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/configs/dev.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -433,13 +448,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/webapp/templates/basic.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="586">
-          <caret line="77" column="62" selection-start-line="77" selection-start-column="62" selection-end-line="77" selection-end-column="62" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/webapp/templates/plots.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="215">
@@ -467,16 +475,6 @@
           <caret line="23" column="16" selection-start-line="23" selection-start-column="16" selection-end-line="23" selection-end-column="16" />
           <folding>
             <element signature="e#0#60#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/configs/base.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="230">
-          <caret line="44" column="3" selection-start-line="44" selection-start-column="3" selection-end-line="44" selection-end-column="3" />
-          <folding>
-            <element signature="e#0#14#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -567,25 +565,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/webapp/templates/overview.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="128">
-          <caret line="64" column="24" selection-start-line="64" selection-start-column="24" selection-end-line="64" selection-end-column="24" />
-          <folding>
-            <element signature="e#1268#1311#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/webapp/blueprints/sound.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#109#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/webapp/blueprints/sound.py" />
     <entry file="file://$USER_HOME$/venv-cansat-2018-2019/lib/python3.5/site-packages/flask/app.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="119">
@@ -596,40 +576,77 @@
     <entry file="file://$PROJECT_DIR$/webapp/static/js/mcc_gl.js">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/webapp/templates/overview_old.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
-          <caret line="80" column="14" selection-start-line="80" selection-start-column="14" selection-end-line="80" selection-end-column="14" />
-        </state>
-      </provider>
+    <entry file="file://$PROJECT_DIR$/webapp/redis_store.py">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/webapp/blueprints/data.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="19" column="54" selection-start-line="19" selection-end-line="19" selection-end-column="54" />
+        <state relative-caret-position="270">
+          <caret line="33" column="35" selection-start-line="22" selection-end-line="33" selection-end-column="35" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/webapp/blueprints/auth.py">
+    <entry file="file://$PROJECT_DIR$/configs/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/configs/base.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="4" selection-start-line="5" selection-start-column="4" selection-end-line="5" selection-end-column="4" />
+        <state relative-caret-position="660">
+          <caret line="44" column="3" selection-start-line="44" selection-start-column="3" selection-end-line="44" selection-end-column="3" />
           <folding>
-            <element signature="e#0#69#0" expanded="true" />
+            <element signature="e#0#14#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/webapp/app_singleton.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="29" column="28" selection-start-line="29" selection-start-column="28" selection-end-line="29" selection-end-column="28" />
+        <state relative-caret-position="215">
+          <caret line="26" lean-forward="true" selection-start-line="26" selection-end-line="26" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/webapp/auth.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="16" selection-start-line="3" selection-start-column="16" selection-end-line="3" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/webapp/templates/overview_old.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1084">
+          <caret line="80" column="14" selection-start-line="80" selection-start-column="14" selection-end-line="80" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/webapp/blueprints/auth.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="350">
+          <caret line="24" column="10" selection-start-line="24" selection-start-column="10" selection-end-line="24" selection-end-column="10" />
+          <folding>
+            <element signature="e#0#91#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/webapp/templates/basic.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="186">
+          <caret line="91" column="15" lean-forward="true" selection-start-line="91" selection-start-column="15" selection-end-line="91" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/webapp/templates/overview.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2587">
+          <caret line="64" column="24" selection-start-line="64" selection-start-column="24" selection-end-line="64" selection-end-column="24" />
         </state>
       </provider>
     </entry>

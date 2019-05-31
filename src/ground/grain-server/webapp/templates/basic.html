@@ -53,6 +53,19 @@
                 <a class="nav-link" href="/overview">Overview</a>
                 <a class="nav-link" href="/plots">Plots</a>
             </li>
+
+            <div id="login_form">
+                <form name="login" action="">
+                  <fieldset>
+                    <label for="totpcode" id="totpcode_label">TOTP code</label>
+                    <input type="text" name="totpcode" id="totpcode" size="30" value="" class="text-input" />
+                    <label class="error" for="totpcode" id="name_error">This field is required.</label>
+
+                    <br />
+                    <input type="submit" name="submit" class="button" id="submit_btn" value="Send" />
+                  </fieldset>
+                </form>
+            </div>
         </ul>
     </div>
 

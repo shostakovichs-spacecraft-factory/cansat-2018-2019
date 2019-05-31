@@ -5,6 +5,7 @@ from flask import Flask
 
 from .assets import assets
 from .redis_store import redis_store
+from .auth import loginmanager
 
 from .blueprints.pages import pages
 from .blueprints.data import data
@@ -23,6 +24,7 @@ log.setLevel(app.config["WEB_LOG_LEVEL"])
 
 assets.init_app(app)
 redis_store.init_app(app)
+loginmanager.init_app(app)
 
 app.register_blueprint(pages)
 app.register_blueprint(data)
