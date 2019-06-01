@@ -221,8 +221,8 @@ int main()
 	onewire_t how;
 	onewire_Init(&how, GPIOB, GPIO_PIN_3);
 
-	struct bme280_dev_s hbme;
-	thread_init_bme280(&hbme, &hi2c);
+	struct bme280_dev_s *hbme;
+	thread_init_bme280(hbme, &hi2c);
 
 	ds18b20_config_t hds;
 	thread_init_ds18b20(&hds, &how);
