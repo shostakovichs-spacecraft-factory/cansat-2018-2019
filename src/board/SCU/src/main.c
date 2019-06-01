@@ -1,4 +1,5 @@
 #include <stm32f4xx_hal.h>
+#include <stm32f4xx_hal_can.h>
 
 #include "lsm6ds3.h"
 #include "i2c.h"
@@ -13,6 +14,8 @@
 
 #include "thread.h"
 
+#include <mavlink/zikush/mavlink.h>
+#include <canmavlink_hal.h>
 
 void
 __initialize_hardware(void);
@@ -184,25 +187,80 @@ typedef struct{
 	float mpx_pres;
 } data_struct_t;
 
-void CAN_Send(uint8_t *data, size_t count)
+CAN_HandleTypeDef hcan;
+
+void CAN_Send(data_struct_t * data)
 {
-	data_struct_t *d = (data_struct_t*)data;
-	trace_printf("pres bme: %6.0f /tpres mpx: %6.0f /ttemp bme: %3.3f /ttemp ds: %3.3f /thum bme: %3.3f \n",
-			d->bme_pres, d->mpx_pres, d->bme_temp, d->ds_temp, d->bme_hum);
+	trace_printf("%f %f %f\n", data->ds_temp, data->bme_temp, data->bme_hum);
+	/*mavlink_message_t mavlink_msg;
+	CANMAVLINK_TX_FRAME_T frames[34];
+
+	mavlink_heartbeat_t heartbeat =
+	{
+		.type = MAV_TYPE_ONBOARD_CONTROLLER,
+		.autopilot = MAV_AUTOPILOT_INVALID,
+		.base_mode = MAV_MODE_FLAG_TEST_ENABLED,
+		.system_status = MAV_STATE_ACTIVE
+	};
+
+	mavlink_scaled_pressure_t pressuretemp_internal =
+	{
+		.press_abs = data->bme_pres,
+		.press_diff = NAN,
+		.temperature = (int16_t)(data->bme_temp * 100),
+		.time_boot_ms = HAL_GetTick()
+	};
+
+	mavlink_scaled_pressure2_t pressuretemp_external =
+	{
+		.press_abs = data->mpx_pres,
+		.press_diff = NAN,
+		.temperature = (int16_t)(data->ds_temp * 100),
+		.time_boot_ms = HAL_GetTick()
+	};
+
+
+	mavlink_msg_heartbeat_encode(0, ZIKUSH_SCU, &mavlink_msg, &heartbeat);
+	volatile uint8_t framecount = canmavlink_msg_to_frames(frames, &mavlink_msg);
+	for(int i = 0; i < framecount; i++) //FIXME rewrite with IRQs
+	{
+		hcan.pTxMsg = frames + i; //DELICIOUS!!
+		HAL_CAN_Transmit(&hcan, 1000);
+	}
+
+	mavlink_msg_scaled_pressure_encode(0, ZIKUSH_SCU, &mavlink_msg, &pressuretemp_internal);
+	framecount = canmavlink_msg_to_frames(frames, &mavlink_msg);
+	for(int i = 0; i < framecount; i++) //FIXME rewrite with IRQs
+	{
+		hcan.pTxMsg = frames + i; //DELICIOUS!!
+		HAL_CAN_Transmit(&hcan, 1000);
+	}
+
+	mavlink_msg_scaled_pressure2_encode(0, ZIKUSH_SCU, &mavlink_msg, &pressuretemp_external);
+	framecount = canmavlink_msg_to_frames(frames, &mavlink_msg);
+	for(int i = 0; i < framecount; i++) //FIXME rewrite with IRQs
+	{
+		hcan.pTxMsg = frames + i; //DELICIOUS!!
+		HAL_CAN_Transmit(&hcan, 1000);
+	}*/
+
 }
 
 int main()
 {
 
-	__initialize_hardware();
+	//__initialize_hardware();
 
 
 	// Call the CSMSIS system clock routine to store the clock frequency
 	// in the SystemCoreClock global RAM location.
 	//SystemCoreClockUpdate();
 	__GPIOB_CLK_ENABLE();
+	__GPIOA_CLK_ENABLE();
 
 	__I2C1_CLK_ENABLE();
+	__CAN1_CLK_ENABLE();
+	//__CAN2_CLK_ENABLE();
 
 	I2C_HandleTypeDef hi2c;
 	i2c_pin_scl_init(GPIOB, GPIO_PIN_6);
@@ -210,6 +268,43 @@ int main()
 	i2c_config_default(&hi2c);
 	hi2c.Instance = I2C1;
 	i2c_init(&hi2c);
+
+	/*CAN initialisation*/
+	GPIO_InitTypeDef gpio_init =
+	{
+		.Mode = GPIO_MODE_AF_PP,
+		.Alternate = GPIO_AF9_CAN1,
+		.Pull = GPIO_NOPULL,
+		.Speed = GPIO_SPEED_LOW,
+		.Pin = GPIO_PIN_12
+	};
+	HAL_GPIO_Init(GPIOA, &gpio_init);
+
+	gpio_init.Mode = GPIO_MODE_INPUT;
+	gpio_init.Pin = GPIO_PIN_11;
+	HAL_GPIO_Init(GPIOA, &gpio_init);
+
+	GPIOA->AFR[1] &= ~(0x0F << 12);
+	GPIOA->AFR[1] |= GPIO_AF9_CAN1 << 12;
+
+	GPIOA->MODER &= ~GPIO_MODER_MODER11;
+	GPIOA->MODER |= GPIO_MODER_MODER11_1;
+
+	hcan.Instance = CAN1;
+	hcan.Init.Prescaler = 466;
+	hcan.Init.Mode = CAN_MODE_NORMAL;
+	hcan.Init.SJW = CAN_SJW_1TQ;
+	hcan.Init.BS1 = CAN_BS1_5TQ;
+	hcan.Init.BS2 = CAN_BS2_2TQ;
+	hcan.Init.TTCM = DISABLE;
+	hcan.Init.ABOM = DISABLE;
+	hcan.Init.AWUM = DISABLE;
+	hcan.Init.NART = ENABLE;
+	hcan.Init.RFLM = DISABLE;
+	hcan.Init.TXFP = DISABLE;
+	HAL_CAN_Init(&hcan);
+
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
 
 
 	ADS1x1x_config_t ads;
@@ -221,8 +316,8 @@ int main()
 	onewire_t how;
 	onewire_Init(&how, GPIOB, GPIO_PIN_3);
 
-	struct bme280_dev_s *hbme;
-	thread_init_bme280(hbme, &hi2c);
+	struct bme280_dev_s hbme;
+	thread_init_bme280(&hbme, &hi2c);
 
 	ds18b20_config_t hds;
 	thread_init_ds18b20(&hds, &how);
@@ -234,101 +329,37 @@ int main()
 	uint8_t arg[100];
 	while(1)
 	{
-
-		if(isGood[0])
 		{
 			thread_update_bme280(&hbme, arg);
 
-			struct bme280_float_data_s *d = (struct bme280_float_data_s*)(arg + 1);
+			struct bme280_float_data_s *d = (struct bme280_float_data_s*)(arg + 4);
 
 			Data.bme_pres = d->pressure;
 			Data.bme_hum = d->humidity;
 			Data.bme_temp = d->temperature;
-
-			isGood[0] = !arg[0];
-			arg[0] = 0;
 		}
-		if(isGood[1])
+
 		{
 			thread_update_ds18b20(&hds, arg);
 
 			float *d = (float*)(arg + 1);
 
 			Data.ds_temp = *d;
-
-			isGood[1] = !arg[0];
-			arg[0] = 0;
 		}
-		if(isGood[2])
+
 		{
 			thread_update_mpx2100ap(&ads, arg);
 
 			float *d = (float*)(arg + 1);
 
 			Data.mpx_pres = *d;
-
-			isGood[2] = !arg[0];
-			arg[0] = 0;
 		}
-		int test = 0;
-		for(int i = 0; i < 3; i++)
-			if(isGood[i])
-				test = 1;
 
-		if(test)
-		{
-			for(int i = 0; i < 3; i++)
-				isGood[i] = 1;
-			CAN_Send((uint8_t*)&Data, sizeof(Data));
+		CAN_Send(&Data);
 
-		}
+		HAL_Delay(1000); //Stupid but simple
 	}
-
-
-	//bmp_test(&Hi2c);
-	//ads1115_test(&Hi2c);
-	/*
-	delay_init();
-	ds18b20_config_t hds;
-	hds.resolution = ds18b20_Resolution_12bits;
-	onewire_t how;
-	onewire_Init(&how, GPIOB, GPIO_PIN_3);
-	onewire_ReadRom(&how, &hds.rom);
-
-	hds.how = &how;
-	ds18b20_SetResolution(&hds, hds.resolution);
-	float temp = 0;*//*
-	while(1)
-	{
-		int a = 0;
-		a = ds18b20_GetResolution(&hds);
-		ds18b20_StartAll(&hds);
-		HAL_Delay(500);
-		while(!ds18b20_Read(&hds, &temp));
-		trace_printf("temp: %8.5f %d\n", temp, a);
-	}*/
-
-/*
-	GPIO_InitTypeDef gp;
-	gp.Mode = GPIO_MODE_INPUT;
-	gp.Pin = GPIO_PIN_3;
-	gp.Pull = GPIO_PULLUP;
-	gp.Speed = GPIO_SPEED_FAST;
-
-	HAL_GPIO_Init(GPIOB, &gp);
-
-	while(1)
-	{
-		int i = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_3);
-		trace_printf("%d\n", i);
-		HAL_Delay(200);
-	}*/
 
 	return 0;
 }
-
-//void HAL_TIM_Base_MspInit()
-
-
-
 

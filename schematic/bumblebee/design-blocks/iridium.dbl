@@ -2,9 +2,8 @@
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
 <eagle version="9.3.0">
 <designblock>
-<description>iridium board</description>
+<description></description>
 <attributes>
-<attribute name="AIRWIRES" value="YES"/>
 <attribute name="BOARDSIZE" value="53.3 x 45.6 mm"/>
 <attribute name="LAYERS" value="1: 1"/>
 </attributes>
@@ -1608,8 +1607,7 @@ design rules under a new name.</description>
 </signal>
 <signal name="NETWORK_AVAILABLE">
 <contactref element="USER_PORT" pad="19"/>
-<wire x1="22.613" y1="16.285" x2="18.328" y2="12" width="0.2" layer="1"/>
-<wire x1="18.328" y1="12" x2="16" y2="12" width="0.2" layer="1"/>
+<wire x1="22.613" y1="16.285" x2="16.079" y2="9.751" width="0.254" layer="1"/>
 </signal>
 <signal name="SUPPLY_OUT">
 <contactref element="USER_PORT" pad="20"/>
@@ -1649,7 +1647,7 @@ design rules under a new name.</description>
 <wire x1="23.725" y1="15.45884375" x2="23.033078125" y2="14.766921875" width="0.254" layer="1"/>
 <wire x1="23.033078125" y1="14.766921875" x2="22.102921875" y2="14.766921875" width="0.254" layer="1"/>
 <wire x1="22.102921875" y1="14.766921875" x2="16.583" y2="9.247" width="0.254" layer="1"/>
-<wire x1="11.46220625" y1="9.247" x2="16.583" y2="9.247" width="0" layer="19" extent="1-1"/>
+<wire x1="16.583" y1="9.247" x2="11.46220625" y2="9.247" width="0.254" layer="1"/>
 </signal>
 <signal name="DF_CTS">
 <contactref element="USER_PORT" pad="11"/>
@@ -1672,17 +1670,17 @@ design rules under a new name.</description>
 <wire x1="24.733" y1="20.88315625" x2="24.733" y2="14.94130625" width="0.254" layer="1"/>
 <wire x1="23.495846875" y1="13.704153125" x2="22.465690625" y2="13.704153125" width="0.254" layer="1"/>
 <wire x1="22.465690625" y1="13.704153125" x2="17.0005375" y2="8.239" width="0.254" layer="1"/>
-<wire x1="17.0005375" y1="8.239" x2="11.04466875" y2="8.239" width="0" layer="19" extent="1-1"/>
+<wire x1="17.0005375" y1="8.239" x2="11.04466875" y2="8.239" width="0.254" layer="1"/>
 </signal>
 <signal name="DF_S_RX">
 <contactref element="USER_PORT" pad="7"/>
 <wire x1="22.0810375" y1="4.073" x2="18.0189625" y2="4.073" width="0.254" layer="1"/>
 <wire x1="22.613" y1="23.905" x2="22.636" y2="23.882" width="0.254" layer="1"/>
 <wire x1="22.636" y1="23.882" x2="23.00415625" y2="23.882" width="0.254" layer="1"/>
+<wire x1="18.0189625" y1="4.073" x2="14.3569625" y2="7.735" width="0.254" layer="1"/>
 <wire x1="23.00415625" y1="23.882" x2="25.237" y2="21.64915625" width="0.254" layer="1"/>
 <wire x1="25.237" y1="21.64915625" x2="25.237" y2="7.2289625" width="0.254" layer="1"/>
 <wire x1="25.237" y1="7.2289625" x2="22.0810375" y2="4.073" width="0.254" layer="1"/>
-<wire x1="10.8359" y1="7.735" x2="18.0189625" y2="4.073" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="ON_OFF">
 <contactref element="USER_PORT" pad="5"/>

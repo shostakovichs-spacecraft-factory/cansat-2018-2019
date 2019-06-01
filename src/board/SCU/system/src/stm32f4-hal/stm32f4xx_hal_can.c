@@ -123,7 +123,7 @@
 /** @addtogroup CAN_Private_Constants
   * @{
   */
-#define CAN_TIMEOUT_VALUE  10U
+#define CAN_TIMEOUT_VALUE  1000U
 /**
   * @}
   */
@@ -297,6 +297,9 @@ HAL_StatusTypeDef HAL_CAN_Init(CAN_HandleTypeDef* hcan)
                 ((uint32_t)hcan->Init.BS1) | \
                 ((uint32_t)hcan->Init.BS2) | \
                ((uint32_t)hcan->Init.Prescaler - 1U);
+
+    CAN1 -> FA1R |= CAN_FA1R_FACT; /* All filters are active */
+    CAN1 -> FMR &= ~CAN_FMR_FINIT; /* Active filters mode. */
 
     /* Request leave initialisation */
     hcan->Instance->MCR &= ~(uint32_t)CAN_MCR_INRQ;

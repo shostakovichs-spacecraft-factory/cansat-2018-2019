@@ -58,6 +58,17 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define RADIO_BUSY_Pin GPIO_PIN_12
+#define RADIO_BUSY_GPIO_Port GPIOE
+#define NRF_CE_Pin GPIO_PIN_13
+#define NRF_CE_GPIO_Port GPIOE
+#define RADIO_NRST_Pin GPIO_PIN_14
+#define RADIO_NRST_GPIO_Port GPIOE
+#define RADIO_NSS_Pin GPIO_PIN_12
+#define RADIO_NSS_GPIO_Port GPIOB
+#define RADIO_IRQ_Pin GPIO_PIN_15
+#define RADIO_IRQ_GPIO_Port GPIOD
+#define RADIO_IRQ_EXTI_IRQn EXTI15_10_IRQn
 #define LEDPIN_Pin GPIO_PIN_6
 #define LEDPIN_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
