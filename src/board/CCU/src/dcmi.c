@@ -45,17 +45,16 @@
 #include "stm32f4xx_hal_dcmi.h"
 #include "stm32f4xx_hal_dma.h"
 #include "stm32f4xx_hal_tim.h"
+#include "stm32f4xx_hal_can.h"
 
 #include <mavlink/zikush/mavlink.h>
+#include <canmavlink_hal.h>
 
 #include "zikush_config.h"
 
 /* counters */
 volatile uint8_t image_counter = 0;
 volatile uint32_t frame_counter;
-volatile uint32_t time_last_frame = 0;
-volatile uint32_t cycle_time = 0;
-volatile uint32_t time_between_next_images;
 volatile uint8_t dcmi_calibration_counter = 0;
 
 /* state variables */
@@ -76,11 +75,10 @@ uint32_t time_between_images;
 uint16_t buffer_size;
 
 /* extern functions */
-extern uint32_t get_boot_time_us(void);
 extern void delay(unsigned msec);
 
 /* extern variables */
-extern DMA_HandleTypeDef DMA2_handle;
+extern CAN_HandleTypeDef hcan;
 
 /* Global variables */
 I2C_HandleTypeDef hi2c2;
@@ -171,11 +169,11 @@ void dma_swap_buffers(void)
 	{
 		/* swap dcmi image buffer */
 		if (dcmi_image_buffer_unused == 1)
-			HAL_DMAEx_ChangeMemory(&DMA2_handle, (uint32_t) dcmi_image_buffer_8bit_1, MEMORY0);
+			HAL_DMAEx_ChangeMemory(&hdma, (uint32_t) dcmi_image_buffer_8bit_1, MEMORY0);
 		else if (dcmi_image_buffer_unused == 2)
-			HAL_DMAEx_ChangeMemory(&DMA2_handle, (uint32_t) dcmi_image_buffer_8bit_2, MEMORY0);
+			HAL_DMAEx_ChangeMemory(&hdma, (uint32_t) dcmi_image_buffer_8bit_2, MEMORY0);
 		else
-			HAL_DMAEx_ChangeMemory(&DMA2_handle, (uint32_t) dcmi_image_buffer_8bit_3, MEMORY0);
+			HAL_DMAEx_ChangeMemory(&hdma, (uint32_t) dcmi_image_buffer_8bit_3, MEMORY0);
 
 		int tmp_buffer = dcmi_image_buffer_memory0;
 		dcmi_image_buffer_memory0 = dcmi_image_buffer_unused;
@@ -185,38 +183,21 @@ void dma_swap_buffers(void)
 	{
 		/* swap dcmi image buffer */
 		if (dcmi_image_buffer_unused == 1)
-			HAL_DMAEx_ChangeMemory(&DMA2_handle, (uint32_t) dcmi_image_buffer_8bit_1, MEMORY1);
+			HAL_DMAEx_ChangeMemory(&hdma, (uint32_t) dcmi_image_buffer_8bit_1, MEMORY1);
 		else if (dcmi_image_buffer_unused == 2)
-			HAL_DMAEx_ChangeMemory(&DMA2_handle, (uint32_t) dcmi_image_buffer_8bit_2, MEMORY1);
+			HAL_DMAEx_ChangeMemory(&hdma, (uint32_t) dcmi_image_buffer_8bit_2, MEMORY1);
 		else
-			HAL_DMAEx_ChangeMemory(&DMA2_handle, (uint32_t) dcmi_image_buffer_8bit_3, MEMORY1);
+			HAL_DMAEx_ChangeMemory(&hdma, (uint32_t) dcmi_image_buffer_8bit_3, MEMORY1);
 
 		int tmp_buffer = dcmi_image_buffer_memory1;
 		dcmi_image_buffer_memory1 = dcmi_image_buffer_unused;
 		dcmi_image_buffer_unused = tmp_buffer;
 	}
 
-	/* set next time_between_images */
-	cycle_time = get_boot_time_us() - time_last_frame;
-	time_last_frame = get_boot_time_us();
-
-	if(image_counter) // image was not fetched jet
-	{
-		time_between_next_images = time_between_next_images + cycle_time;
-	}
-	else
-	{
-		time_between_next_images = cycle_time;
-	}
-
 	/* set new image true and increment frame counter*/
 	image_counter += 1;
 
 	return;
-}
-
-uint32_t get_time_between_images(void){
-	return time_between_images;
 }
 
 uint32_t get_frame_counter(void){
@@ -244,9 +225,6 @@ void dma_copy_image_buffers(uint8_t ** current_image, uint8_t ** previous_image,
 	}
 
 	image_counter = 0;
-
-	/* time between images */
-	time_between_images = time_between_next_images;
 
 	/* copy image */
 	if (dcmi_image_buffer_unused == 1)
@@ -277,21 +255,33 @@ void send_calibration_image(uint8_t ** image_buffer_fast_1, uint8_t ** image_buf
 
 	/*  transmit raw 8-bit image */
 	/* TODO image is too large for this transmission protocol (too much packets), but it works */
-	mavlink_msg_data_transmission_handshake_send( //TODO rewrite for canmavlink
-			MAVLINK_COMM_2,
-			MAVLINK_DATA_STREAM_IMG_RAW8U,
-			FULL_IMAGE_SIZE * 4,
-			FULL_IMAGE_ROW_SIZE * 2,
-			FULL_IMAGE_COLUMN_SIZE * 2,
-			FULL_IMAGE_SIZE * 4 / MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN + 1,
-			MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN,
-			100);
+
+	mavlink_data_transmission_handshake_t handshake = {
+		.type = MAVLINK_DATA_STREAM_IMG_RAW8U,
+		.size = FULL_IMAGE_SIZE * 4,
+		.width = FULL_IMAGE_ROW_SIZE * 2,
+		.height = FULL_IMAGE_COLUMN_SIZE * 2,
+		.packets = FULL_IMAGE_SIZE * 4 / MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN + 1,
+		.payload = MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN,
+		.jpg_quality = 100
+	};
+	mavlink_encapsulated_data_t encdata = {};
+	mavlink_message_t msg;
+	CANMAVLINK_TX_FRAME_T canframes[34];
+
+	mavlink_msg_data_transmission_handshake_encode(0, ZIKUSH_CCU, &msg, &handshake);
+	uint8_t canframecount = canmavlink_msg_to_frames(canframes, &msg);
+	for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
+	{
+		hcan.pTxMsg = canframes + i; //DELICIOUS!!
+		HAL_CAN_Transmit(&hcan, 1000);
+	}
 
 	uint16_t frame = 0;
 	uint8_t image = 0;
-	uint8_t frame_buffer[MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN];
+	uint8_t * frame_buffer = encdata.data;
 
-	for (int i = 0; i < FULL_IMAGE_SIZE * 4; i++)
+	for (int i = 0; i < FULL_IMAGE_SIZE * 4; i++) //TODO messy, rewrite with memcpy
 	{
 
 		if (i % FULL_IMAGE_SIZE == 0 && i != 0)
@@ -301,7 +291,15 @@ void send_calibration_image(uint8_t ** image_buffer_fast_1, uint8_t ** image_buf
 
 		if (i % MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN == 0 && i != 0)
 		{
-			mavlink_msg_encapsulated_data_send(MAVLINK_COMM_2, frame, frame_buffer);
+			encdata.seqnr = frame;
+			mavlink_msg_encapsulated_data_encode(0, ZIKUSH_CCU, &msg, &encdata);
+			canframecount = canmavlink_msg_to_frames(canframes, &msg);
+			for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
+			{
+				hcan.pTxMsg = canframes + i; //DELICIOUS!!
+				HAL_CAN_Transmit(&hcan, 1000);
+			}
+
 			frame++;
 			delay(2);
 		}
@@ -346,8 +344,14 @@ void send_calibration_image(uint8_t ** image_buffer_fast_1, uint8_t ** image_buf
 		}
 	}
 
-	mavlink_msg_encapsulated_data_send(MAVLINK_COMM_2, frame, frame_buffer);
-
+	encdata.seqnr = frame;
+	mavlink_msg_encapsulated_data_encode(0, ZIKUSH_CCU, &msg, &encdata);
+	canframecount = canmavlink_msg_to_frames(canframes, &msg);
+	for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
+	{
+		hcan.pTxMsg = canframes + i; //DELICIOUS!!
+		HAL_CAN_Transmit(&hcan, 1000);
+	}
 }
 
 /**
@@ -399,7 +403,7 @@ void dcmi_dma_enable()
 		hdcmi.State = HAL_DCMI_STATE_BUSY;
 
 		/* Enable DCMI by setting DCMIEN bit */
-		__HAL_DCMI_ENABLE(hdcmi);
+		__HAL_DCMI_ENABLE(&hdcmi);
 
 		/* Configure the DCMI Mode */
 		hdcmi.Instance->CR &= ~(DCMI_CR_CM);
@@ -436,9 +440,9 @@ void dcmi_dma_enable()
 void dcmi_dma_disable()
 {
 	/* Disable DMA2 stream 1 and DCMI interface then stop image capture */
-	DMA_Cmd(DMA2_Stream1, DISABLE);
-	DCMI_Cmd(DISABLE);
-	DCMI_CaptureCmd(DISABLE);
+	DMA2_Stream1->CR &= ~( (uint32_t)DMA_SxCR_EN );
+	DCMI->CR &= ~( (uint32_t)DCMI_CR_ENABLE );
+	DCMI->CR &= ~( (uint32_t)DCMI_CR_CAPTURE );
 }
 
 void reset_frame_counter()
@@ -597,10 +601,11 @@ void dcmi_dma_init(uint16_t buffsize)
 	__DMA2_CLK_ENABLE();
 
 	/* DMA2 Stream1 Configuration */
-	DMA_DeInit(DMA2_Stream1);
-
-	hdma.Instance = DMA2;
+	hdma.Instance = DMA2_Stream1;
 	hdma.Init.Channel = DMA_CHANNEL_1;
+
+	HAL_DMA_DeInit(&hdma);
+
 	hdma.Init.Direction = DMA_PERIPH_TO_MEMORY;
 	hdma.Init.PeriphInc = DMA_PINC_ENABLE;
 	hdma.Init.MemInc = DMA_MINC_ENABLE;

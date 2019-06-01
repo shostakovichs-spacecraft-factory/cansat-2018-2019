@@ -4,6 +4,11 @@
 #define CCU_SPECTRUM_WIDTH	188
 #define CCU_SPECTRUM_HEIGHT	120
 
+#define CCU_SPECTRUM_Y_START	0
+#define CCU_SPECTRUM_Y_END		188
+#define CCU_SPECTRUM_X_START	0
+#define CCU_SPECTRUM_X_END		120
+
 // params directly from Flow config. Better explanation could be found in datasheet
 // TODO maybe we should implement on-the-fly parameters change?
 #define CCU_SPECTRUM_PARAM_GAIN_MAX					16

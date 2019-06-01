@@ -61,8 +61,8 @@
 			<field type="int8_t" name="state">Should the power be provided</field>
 		</message>
 
-		<message id="151" name="ZIKUSH_CMD_TAKE_SPECTRE">
-			<description>Set the state of the power bus</description>
+		<message id="151" name="ZIKUSH_CMD_TAKE_SPECTRUM">
+			<description>Take spectrum sample</description>
 			<field type="uint16_t" name="width">Sample width</field>
 			<field type="uint16_t" name="heigth">Sample heigth</field>
 			<field type="uint8_t" name="send_picture">Should the picture be sent?</field>

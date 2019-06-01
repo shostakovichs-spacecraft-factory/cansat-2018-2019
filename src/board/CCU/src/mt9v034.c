@@ -46,6 +46,14 @@
 
 extern I2C_HandleTypeDef hi2c2;
 
+inline bool FLOAT_AS_BOOL(float f)
+{
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+  return (f != 0.0f);
+#pragma GCC diagnostic pop
+}
+
 /**
   * @brief  Configures the mt9v034 camera with two context (binning 4 and binning 2).
   */

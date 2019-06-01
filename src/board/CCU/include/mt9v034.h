@@ -145,7 +145,7 @@ void mt9v034_context_configuration(void);
 /**
   * @brief  Changes sensor context based on settings
   */
-void mt9v034_set_context(void);
+void mt9v034_set_context(mt9v034_context_t context);
 
 uint16_t mt9v034_ReadReg16(uint8_t address);
 uint8_t mt9v034_WriteReg16(uint16_t address, uint16_t Data);
