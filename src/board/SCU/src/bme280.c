@@ -148,7 +148,7 @@ int bme280_pull_raw_data( const struct bme280_dev_s * priv, struct bme280_raw_da
  int bme280_init(struct bme280_dev_s *bme280)
 {
     int rc = OK;
-     struct bme280_dev_s * priv  = bme280;
+    struct bme280_dev_s * priv  = bme280;
 
 
     // lets load device settings? just in case
@@ -210,7 +210,7 @@ end:
 
     case SNIOC_BME280_WRITECONF:
         {
-            assert(arg != NULL);
+            assert(arg != 0);
             const struct bme280_conf_s * user_settings_ptr = (struct bme280_conf_s *)arg;
             priv->settings = *user_settings_ptr;
 
@@ -220,7 +220,7 @@ end:
 
     case SNIOC_BME280_READCALIB:
         {
-        	assert(arg != NULL);
+        	assert(arg != 0);
             struct bme280_calib_data_s * user_calvals_ptr = (struct bme280_calib_data_s *)arg;
             memcpy(user_calvals_ptr, &priv->calib_data, sizeof(priv->calib_data));
         }

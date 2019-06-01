@@ -11,6 +11,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <sys/types.h>
 
 
 #ifdef __cplusplus
@@ -347,7 +348,7 @@ struct lsm6ds3_setup_conf_s
         // spi bus params
         struct
         {
-             struct spi_dev_s * bus; // spi bus
+        	struct spi_dev_s * bus; // spi bus
             uint32_t bus_freq;          // spi bus frequency
             int dev_id;                 // spi device id for cs callbacks
         } spi;
@@ -361,8 +362,87 @@ struct lsm6ds3_setup_conf_s
 
 };
 
+struct lsm6ds3_dev_s
+{
+    /* locking semaphore to protect access to device driver structure */
+
+    /* device startup and hw configuration */
+    struct lsm6ds3_setup_conf_s * setup_conf;
+
+    /* Registers read function pointer */
+    ssize_t (*_do_read_regn)(const struct lsm6ds3_dev_s * priv, uint8_t regaddr,
+            uint8_t * data, size_t datasize);
+
+    /* Registers write function pointer */
+    ssize_t (*_do_write_regn)( const struct lsm6ds3_dev_s * priv, uint8_t regaddr,
+            const uint8_t * data, size_t datasize);
+
+    /* current device configuration */
+    struct lsm6ds3_conf_s conf;
+
+    // mode of reading data
+    lsm6ds3_readmode_t readmode;
+    // additional parameter to read mode
+    uint8_t readmode_arg;
+
+};
+
 // registration of device on spi bus
-int lsm6ds3_register_spi( const char *devpath,  struct lsm6ds3_setup_conf_s * const config);
+int lsm6ds3_register_spi(struct lsm6ds3_setup_conf_s * config, struct spi_dev_s * bus);
+// configure spi bus to work with this particular device
+void lsm6ds3_prepare_spi_bus(const struct lsm6ds3_dev_s * priv);
+
+
+
+// reading n registers data abstract from transfer bus
+ssize_t lsm6ds3_read_regn(const struct lsm6ds3_dev_s * priv, uint8_t regaddr,
+        uint8_t * data, size_t datasize);
+
+// writing n registers data abstract from transfer bus
+ssize_t lsm6ds3_write_regn(const struct lsm6ds3_dev_s *priv, uint8_t regaddr,
+        const uint8_t * data, size_t datasize);
+
+
+// lock device structure
+int lsm6ds3_lock(const struct lsm6ds3_dev_s * priv);
+// unlock device
+int lsm6ds3_unlock(const struct lsm6ds3_dev_s * priv);
+// halt device measurements to allow applying new settings (or to put it to sleep)
+//int lsm6ds3_halt(struct lsm6ds3_dev_s *priv);
+// software device reset and wait until it completes
+int lsm6ds3_sw_reset(const struct lsm6ds3_dev_s *priv);
+// reset gyro hpf filter
+int lsm6ds3_reset_g_hpf(const struct lsm6ds3_dev_s *priv);
+// load default configuration to as it as after reset
+void lsm6ds3_conf_default(struct lsm6ds3_conf_s * conf);
+
+
+// send gyroscope settings to device
+int lsm6ds3_g_push_conf(const struct lsm6ds3_dev_s *priv,
+        const struct lsm6ds3_g_conf_s * g_conf);
+
+// send accelerometer settings to device
+int lsm6ds3_xl_push_conf(const struct lsm6ds3_dev_s *priv,
+        const struct lsm6ds3_xl_conf_s * xl_conf);
+
+// read raw gyro and acc values
+int lsm6ds3_gxl_pull(const struct lsm6ds3_dev_s *priv,
+        struct lsm6ds3_raw_data_s * raw);
+
+
+// push fifo config to device
+// its assumed that device (or at least fifo) is halted
+int lsm6ds3_fifo_push_conf(const struct lsm6ds3_dev_s *priv,
+        const struct lsm6ds3_fifo_conf_s * fifo_conf);
+
+// get full status of fifo
+int lsm6ds3_fifo_pull_status(const struct lsm6ds3_dev_s *priv,
+        struct lsm6ds3_fifo_status_s * status);
+
+// read data from device to local buffer
+// reading in terms of struct lsm6ds3_raw_data elems
+ssize_t lsm6ds3_fifo_pull_data(const struct lsm6ds3_dev_s * priv,
+        uint16_t * buffer, size_t buffersize16, size_t size_factor);
 
 #undef EXTERN
 #ifdef __cplusplus

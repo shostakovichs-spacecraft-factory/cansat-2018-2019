@@ -11,11 +11,17 @@
 #include <string.h>
 #include <math.h>
 #include <errno.h>
+#include <assert.h>
+#include <diag/Trace.h>
 
 #include <stm32f4xx_hal.h>
 // ===========================================
 // SPI BUS settings
 // ===========================================
+
+#define warning trace_printf
+#define snerr trace_printf
+#define sninfo trace_printf
 
 #define LSM6DS3_SPI_MODE 1
 #define LSM6DS3_SPI_BITS (8)
@@ -378,49 +384,10 @@
 #define LSM6DS3_FIFO_DATA_OUT_L_REGADDR     (0x3e)
 #define LSM6DS3_FIFO_DATA_OUT_H_REGADDR     (0x3f)
 
-typedef int sem_t;
-// private device driver structure
-struct lsm6ds3_dev_s
-{
-    /* locking semaphore to protect access to device driver structure */
-    sem_t device_sem;
 
-    /* device startup and hw configuration */
-    struct lsm6ds3_setup_conf_s * setup_conf;
-
-    /* Registers read function pointer */
-    ssize_t (*_do_read_regn)( const struct lsm6ds3_dev_s * priv, uint8_t regaddr,
-            uint8_t * data, size_t datasize);
-
-    /* Registers write function pointer */
-    ssize_t (*_do_write_regn)( const struct lsm6ds3_dev_s * priv, uint8_t regaddr,
-            const uint8_t * data, size_t datasize);
-
-    /* current device configuration */
-    struct lsm6ds3_conf_s conf;
-
-    // mode of reading data
-    lsm6ds3_readmode_t readmode;
-    // additional parameter to read mode
-    uint8_t readmode_arg;
-
-    // uart handler for stm
-	UART_HandleTypeDef uartHandler;
-};
-struct file{
-
-};
 /****************************************************************************
  * private functions definements
  ****************************************************************************/
-
-// character device methods
-// ========================================================================
-static int lsm6ds3_chdev_open( struct file *filep);
-static int lsm6ds3_chdev_close( struct file *filep);
-static int lsm6ds3_chdev_ioctl( struct file *filep, int cmd, unsigned long arg);
-static ssize_t lsm6ds3_chdev_read( struct file *filep,  char *buffer, size_t buflen);
-static ssize_t lsm6ds3_chdev_write( struct file *filep,  const char *buffer, size_t buflen);
 
 //static const struct file_operations lsm6ds3_fops =
 //{
@@ -437,74 +404,13 @@ static ssize_t lsm6ds3_chdev_write( struct file *filep,  const char *buffer, siz
 //};
 
 
-// private driver functions
-// ========================================================================
-
-// configure spi bus to work with this particular device
-inline static void lsm6ds3_prepare_spi_bus(const struct lsm6ds3_dev_s * priv);
-
-// read registers data through spi bus
-static ssize_t lsm6ds3_do_read_regn_spi( const struct lsm6ds3_dev_s */*priv*/, uint8_t /*regaddr*/,
-        uint8_t */*data*/, size_t /*datasize*/);
-
-// write registers data through spi bus
-static ssize_t lsm6ds3_do_write_regn_spi( const struct lsm6ds3_dev_s */*priv*/, uint8_t /*regaddr*/,
-        const uint8_t */*data*/, size_t /*datasize*/);
-
-
-// reading n registers data abstract from transfer bus
-inline static ssize_t lsm6ds3_read_regn( const struct lsm6ds3_dev_s * priv, uint8_t regaddr,
-        uint8_t * data, size_t datasize);
-
-// writing n registers data abstract from transfer bus
-inline static ssize_t lsm6ds3_write_regn( const struct lsm6ds3_dev_s *priv, uint8_t regaddr,
-        const uint8_t * data, size_t datasize);
-
-
-// halt device measurements to allow applying new settings (or to put it to sleep)
-//static int lsm6ds3_halt( struct lsm6ds3_dev_s *priv);
-// software device reset and wait until it completes
-static int lsm6ds3_sw_reset( const struct lsm6ds3_dev_s *priv);
-// reset gyro hpf filter
-static int lsm6ds3_reset_g_hpf( const struct lsm6ds3_dev_s *priv);
-// load default configuration to as it as after reset
-static void lsm6ds3_conf_default( struct lsm6ds3_conf_s * conf);
-
-
-// send gyroscope settings to device
-static int lsm6ds3_g_push_conf( const struct lsm6ds3_dev_s *priv,
-         const struct lsm6ds3_g_conf_s * g_conf);
-
-// send accelerometer settings to device
-static int lsm6ds3_xl_push_conf( const struct lsm6ds3_dev_s *priv,
-         const struct lsm6ds3_xl_conf_s * xl_conf);
-
-// read raw gyro and acc values
-static int lsm6ds3_gxl_pull( const struct lsm6ds3_dev_s *priv,
-         struct lsm6ds3_raw_data_s * raw);
-
-
-// push fifo config to device
-// its assumed that device (or at least fifo) is halted
-static int lsm6ds3_fifo_push_conf( const struct lsm6ds3_dev_s *priv,
-         const struct lsm6ds3_fifo_conf_s * fifo_conf);
-
-// get full status of fifo
-static int lsm6ds3_fifo_pull_status( const struct lsm6ds3_dev_s *priv,
-         struct lsm6ds3_fifo_status_s * status);
-
-// read data from device to local buffer
-// reading in terms of struct lsm6ds3_raw_data elems
-static ssize_t lsm6ds3_fifo_pull_data( const struct lsm6ds3_dev_s * priv,
-         uint16_t * buffer, size_t buffersize16, size_t size_factor);
-
 /****************************************************************************
  * private driver functions definitions
  ****************************************************************************/
 #define true 1
 #define false 0
 
-inline static void lsm6ds3_prepare_spi_bus(const struct lsm6ds3_dev_s * priv)
+void lsm6ds3_prepare_spi_bus(const struct lsm6ds3_dev_s * priv)
 {
 
      struct spi_dev_s * const bus = priv->setup_conf->iface.spi.bus;
@@ -579,14 +485,14 @@ static int lsm6ds3_do_write_regn_spi(const  struct lsm6ds3_dev_s * priv, uint8_t
 }
 
 
-inline static int lsm6ds3_read_regn( const struct lsm6ds3_dev_s * priv, uint8_t regaddr,
+inline int lsm6ds3_read_regn( const struct lsm6ds3_dev_s * priv, uint8_t regaddr,
         uint8_t * data, size_t datasize)
 {
     return priv->_do_read_regn(priv, regaddr, data, datasize);
 }
 
 
-inline static int lsm6ds3_write_regn( const struct lsm6ds3_dev_s *priv, uint8_t regaddr,
+inline int lsm6ds3_write_regn( const struct lsm6ds3_dev_s *priv, uint8_t regaddr,
         const uint8_t * data, size_t datasize)
 {
     return priv->_do_write_regn(priv, regaddr, data, datasize);
@@ -596,7 +502,7 @@ inline static int lsm6ds3_write_regn( const struct lsm6ds3_dev_s *priv, uint8_t 
 
 
 
-static int lsm6ds3_sw_reset( const struct lsm6ds3_dev_s *priv)
+int lsm6ds3_sw_reset( const struct lsm6ds3_dev_s *priv)
 {
     int rc = OK;
 
@@ -609,14 +515,14 @@ static int lsm6ds3_sw_reset( const struct lsm6ds3_dev_s *priv)
         return rc;
 
     // device will be ready after 20 ms according to datasheet
-    up_mdelay(25);
+    HAL_Delay(25);
 
     // thats is
     return rc;
 }
 
 
-static int lsm6ds3_reset_g_hpf( const struct lsm6ds3_dev_s *priv)
+int lsm6ds3_reset_g_hpf( const struct lsm6ds3_dev_s *priv)
 {
     int rc = OK;
     uint8_t ctrl7_reg;
@@ -636,7 +542,7 @@ static int lsm6ds3_reset_g_hpf( const struct lsm6ds3_dev_s *priv)
 }
 
 
-static void lsm6ds3_conf_default( struct lsm6ds3_conf_s * conf)
+void lsm6ds3_conf_default( struct lsm6ds3_conf_s * conf)
 {
 
     // xl default conf
@@ -716,7 +622,7 @@ static int lsm6ds3_halt( struct lsm6ds3_dev_s *priv)
 */
 
 
-static int lsm6ds3_g_push_conf( const struct lsm6ds3_dev_s *priv,
+int lsm6ds3_g_push_conf( const struct lsm6ds3_dev_s *priv,
          const struct lsm6ds3_g_conf_s * g_conf)
 {
     int rc = OK;
@@ -797,7 +703,7 @@ static int lsm6ds3_g_push_conf( const struct lsm6ds3_dev_s *priv,
 }
 
 
-static int lsm6ds3_xl_push_conf( const struct lsm6ds3_dev_s *priv,
+int lsm6ds3_xl_push_conf( const struct lsm6ds3_dev_s *priv,
          const struct lsm6ds3_xl_conf_s * xl_conf)
 {
     int rc = OK;
@@ -855,7 +761,7 @@ static int lsm6ds3_xl_push_conf( const struct lsm6ds3_dev_s *priv,
     ctrl10_reg = LSM6DS3_SET_BITS(ctrl10_reg, LSM6DS3_CTRL10C_FUNC_EN, cf_filter_enabled);
 
     if (!cf_filter_enabled && priv->conf.g.odr == LSM6DS3_G_ODR_POWER_DOWN)
-        warn("accelerometer cf filter should be enabled when device configured as acc only\n");
+        warning("accelerometer cf filter should be enabled when device configured as acc only\n");
 
     ctrl1_reg  &= ~LSM6DS3_CTRL1XL_RESEVED_MSK;
     ctrl4_reg  &= ~LSM6DS3_CTRL4C_RESEVED_MSK;
@@ -888,7 +794,7 @@ static int lsm6ds3_xl_push_conf( const struct lsm6ds3_dev_s *priv,
 }
 
 
-static int lsm6ds3_gxl_pull( const struct lsm6ds3_dev_s *priv,
+int lsm6ds3_gxl_pull( const struct lsm6ds3_dev_s *priv,
          struct lsm6ds3_raw_data_s * raw)
 {
     int rc = 0;
@@ -897,7 +803,7 @@ static int lsm6ds3_gxl_pull( const struct lsm6ds3_dev_s *priv,
 }
 
 
-static int lsm6ds3_fifo_push_conf( const struct lsm6ds3_dev_s *priv,
+int lsm6ds3_fifo_push_conf( const struct lsm6ds3_dev_s *priv,
          const struct lsm6ds3_fifo_conf_s * fifo_conf)
 {
     int rc = OK;
@@ -955,7 +861,7 @@ static int lsm6ds3_fifo_push_conf( const struct lsm6ds3_dev_s *priv,
 }
 
 
-static int lsm6ds3_fifo_pull_status( const struct lsm6ds3_dev_s *priv,
+int lsm6ds3_fifo_pull_status( const struct lsm6ds3_dev_s *priv,
          struct lsm6ds3_fifo_status_s * status)
 {
     int rc = OK;
@@ -981,7 +887,7 @@ static int lsm6ds3_fifo_pull_status( const struct lsm6ds3_dev_s *priv,
 }
 
 
-static ssize_t lsm6ds3_fifo_pull_data( const struct lsm6ds3_dev_s * priv,
+ssize_t lsm6ds3_fifo_pull_data( const struct lsm6ds3_dev_s * priv,
          uint16_t * buffer, size_t buffersize16, size_t size_factor16)
 {
     int rc = OK;
@@ -1016,3 +922,60 @@ static ssize_t lsm6ds3_fifo_pull_data( const struct lsm6ds3_dev_s * priv,
 
     return rc;
 }
+
+int lsm6ds3_register_spi(struct lsm6ds3_setup_conf_s * config, struct spi_dev_s * bus)
+{
+
+	struct lsm6ds3_dev_s *priv;
+    int rc;
+
+    /* Sanity check */
+    assert(config == 0);
+    assert(bus == 0);
+
+    /* Initialize the LIS3MDL device structure */
+    priv = (struct lsm6ds3_dev_s *)malloc(sizeof(struct lsm6ds3_dev_s));
+    if (priv == NULL)
+    {
+        snerr("ERROR: Failed to allocate instance\n");
+        return -ENOMEM;
+    }
+
+    priv->setup_conf = config;
+    priv->_do_read_regn = lsm6ds3_do_read_regn_spi;
+    priv->_do_write_regn = lsm6ds3_do_write_regn_spi;
+    priv->readmode = LSM6DS3_READMODE_SCALED;
+
+    // reset the sensor
+    rc = lsm6ds3_sw_reset(priv);
+    if (rc < 0)
+    {
+        snerr("can`t reset device: %d\n", rc);
+        return rc;
+    }
+
+
+    // load default configuration
+    lsm6ds3_conf_default(&priv->conf);
+
+
+    // checking whoami register
+    uint8_t reg_whoami;
+    rc = lsm6ds3_read_regn(priv, LSM6DS3_WHOAMI_REGADDR, &reg_whoami, 1);
+    if (rc < 0)
+    {
+        snerr("can`t get whoami reg value: %d\n");
+        return rc;
+    }
+
+    if (reg_whoami != LSM6DS3_WHOAMI_REGVAL)
+    {
+        snerr("who_am_i value is wrong: 0x%02X, while 0x%02X expected\n", reg_whoami, LSM6DS3_WHOAMI_REGVAL);
+        return -ENODEV;
+    }
+
+    sninfo("INFO: LMD6DS3 driver loaded sucessfully\n");
+
+    return OK;
+}
+

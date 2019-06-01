@@ -1,5 +1,4 @@
 #include <stm32f4xx_hal.h>
-#include <stm32f4xx_hal_can.h>
 
 #include "lsm6ds3.h"
 #include "i2c.h"
@@ -14,12 +13,172 @@
 
 #include "thread.h"
 
-#include <mavlink/zikush/mavlink.h>
-#include <canmavlink_hal.h>
-
 void
 __initialize_hardware(void);
 
+typedef struct{
+	float ds_temp;
+	float bme_temp;
+	float bme_pres;
+	float bme_hum;
+	float mpx_pres;
+} data_struct_t;
+
+CAN_HandleTypeDef hcan;
+void CAN_Send(data_struct_t * data);
+
+void bmp_test(I2C_HandleTypeDef * Hi2c);
+
+void adc_iternal();
+
+void uart_test();
+
+void ads1115_test(I2C_HandleTypeDef * hi2c);
+
+
+int main()
+{
+
+	//__initialize_hardware();
+
+
+	// Call the CSMSIS system clock routine to store the clock frequency
+	// in the SystemCoreClock global RAM location.
+	//SystemCoreClockUpdate();
+	__GPIOB_CLK_ENABLE();
+	__GPIOA_CLK_ENABLE();
+
+	__I2C1_CLK_ENABLE();
+	__CAN1_CLK_ENABLE();
+	//__CAN2_CLK_ENABLE();
+
+
+
+	return 0;
+}
+
+//
+//int main_spring_show()
+//{
+//
+//	//__initialize_hardware();
+//
+//
+//	// Call the CSMSIS system clock routine to store the clock frequency
+//	// in the SystemCoreClock global RAM location.
+//	//SystemCoreClockUpdate();
+//	__GPIOB_CLK_ENABLE();
+//	__GPIOA_CLK_ENABLE();
+//
+//	__I2C1_CLK_ENABLE();
+//	__CAN1_CLK_ENABLE();
+//	//__CAN2_CLK_ENABLE();
+//
+//	I2C_HandleTypeDef hi2c;
+//	i2c_pin_scl_init(GPIOB, GPIO_PIN_6);
+//	i2c_pin_sda_init(GPIOB, GPIO_PIN_7);
+//	i2c_config_default(&hi2c);
+//	hi2c.Instance = I2C1;
+//	i2c_init(&hi2c);
+//
+//	/*CAN initialisation*/
+//	GPIO_InitTypeDef gpio_init =
+//	{
+//		.Mode = GPIO_MODE_AF_PP,
+//		.Alternate = GPIO_AF9_CAN1,
+//		.Pull = GPIO_NOPULL,
+//		.Speed = GPIO_SPEED_LOW,
+//		.Pin = GPIO_PIN_12
+//	};
+//	HAL_GPIO_Init(GPIOA, &gpio_init);
+//
+//	gpio_init.Mode = GPIO_MODE_INPUT;
+//	gpio_init.Pin = GPIO_PIN_11;
+//	HAL_GPIO_Init(GPIOA, &gpio_init);
+//
+//	GPIOA->AFR[1] &= ~(0x0F << 12);
+//	GPIOA->AFR[1] |= GPIO_AF9_CAN1 << 12;
+//
+//	GPIOA->MODER &= ~GPIO_MODER_MODER11;
+//	GPIOA->MODER |= GPIO_MODER_MODER11_1;
+//
+//	hcan.Instance = CAN1;
+//	hcan.Init.Prescaler = 466;
+//	hcan.Init.Mode = CAN_MODE_NORMAL;
+//	hcan.Init.SJW = CAN_SJW_1TQ;
+//	hcan.Init.BS1 = CAN_BS1_5TQ;
+//	hcan.Init.BS2 = CAN_BS2_2TQ;
+//	hcan.Init.TTCM = DISABLE;
+//	hcan.Init.ABOM = DISABLE;
+//	hcan.Init.AWUM = DISABLE;
+//	hcan.Init.NART = ENABLE;
+//	hcan.Init.RFLM = DISABLE;
+//	hcan.Init.TXFP = DISABLE;
+//	HAL_CAN_Init(&hcan);
+//
+//	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+//
+//
+//	ADS1x1x_config_t ads;
+//	ADS1x1x_config_default(&ads);
+//	ADS1x1x_register_i2c(&ads, &hi2c, ADS1x1x_I2C_ADDRESS_ADDR_TO_GND << 1);
+//	ADS1x1x_init(&ads);
+//
+//	delay_init();
+//	onewire_t how;
+//	onewire_Init(&how, GPIOB, GPIO_PIN_3);
+//
+//	struct bme280_dev_s hbme;
+//	thread_init_bme280(&hbme, &hi2c);
+//
+//	ds18b20_config_t hds;
+//	thread_init_ds18b20(&hds, &how);
+//
+//	thread_init_mpx2100ap(&ads);
+//
+//	data_struct_t Data;
+//	uint8_t isGood[3] = {1,};
+//	uint8_t arg[100];
+//	while(1)
+//	{
+//		{
+//			thread_update_bme280(&hbme, arg);
+//
+//			struct bme280_float_data_s *d = (struct bme280_float_data_s*)(arg + 4);
+//
+//			Data.bme_pres = d->pressure;
+//			Data.bme_hum = d->humidity;
+//			Data.bme_temp = d->temperature;
+//		}
+//
+//		{
+//			thread_update_ds18b20(&hds, arg);
+//
+//			float *d = (float*)(arg + 1);
+//
+//			Data.ds_temp = *d;
+//		}
+//
+//		{
+//			thread_update_mpx2100ap(&ads, arg);
+//
+//			float *d = (float*)(arg + 1);
+//
+//			Data.mpx_pres = *d;
+//		}
+//
+//		CAN_Send(&Data);
+//
+//		HAL_Delay(1000); //Stupid but simple
+//	}
+//
+//	return 0;
+//}
+
+
+////////////////////
+//Test functions and some other stuff
+///////////////
 void ads1115_test(I2C_HandleTypeDef * hi2c)
 {
 
@@ -179,15 +338,6 @@ void bmp_test(I2C_HandleTypeDef * Hi2c)
 	i2c_deinit(&i2c_handler);
 }
 
-typedef struct{
-	float ds_temp;
-	float bme_temp;
-	float bme_pres;
-	float bme_hum;
-	float mpx_pres;
-} data_struct_t;
-
-CAN_HandleTypeDef hcan;
 
 void CAN_Send(data_struct_t * data)
 {
@@ -245,121 +395,3 @@ void CAN_Send(data_struct_t * data)
 	}*/
 
 }
-
-int main()
-{
-
-	//__initialize_hardware();
-
-
-	// Call the CSMSIS system clock routine to store the clock frequency
-	// in the SystemCoreClock global RAM location.
-	//SystemCoreClockUpdate();
-	__GPIOB_CLK_ENABLE();
-	__GPIOA_CLK_ENABLE();
-
-	__I2C1_CLK_ENABLE();
-	__CAN1_CLK_ENABLE();
-	//__CAN2_CLK_ENABLE();
-
-	I2C_HandleTypeDef hi2c;
-	i2c_pin_scl_init(GPIOB, GPIO_PIN_6);
-	i2c_pin_sda_init(GPIOB, GPIO_PIN_7);
-	i2c_config_default(&hi2c);
-	hi2c.Instance = I2C1;
-	i2c_init(&hi2c);
-
-	/*CAN initialisation*/
-	GPIO_InitTypeDef gpio_init =
-	{
-		.Mode = GPIO_MODE_AF_PP,
-		.Alternate = GPIO_AF9_CAN1,
-		.Pull = GPIO_NOPULL,
-		.Speed = GPIO_SPEED_LOW,
-		.Pin = GPIO_PIN_12
-	};
-	HAL_GPIO_Init(GPIOA, &gpio_init);
-
-	gpio_init.Mode = GPIO_MODE_INPUT;
-	gpio_init.Pin = GPIO_PIN_11;
-	HAL_GPIO_Init(GPIOA, &gpio_init);
-
-	GPIOA->AFR[1] &= ~(0x0F << 12);
-	GPIOA->AFR[1] |= GPIO_AF9_CAN1 << 12;
-
-	GPIOA->MODER &= ~GPIO_MODER_MODER11;
-	GPIOA->MODER |= GPIO_MODER_MODER11_1;
-
-	hcan.Instance = CAN1;
-	hcan.Init.Prescaler = 466;
-	hcan.Init.Mode = CAN_MODE_NORMAL;
-	hcan.Init.SJW = CAN_SJW_1TQ;
-	hcan.Init.BS1 = CAN_BS1_5TQ;
-	hcan.Init.BS2 = CAN_BS2_2TQ;
-	hcan.Init.TTCM = DISABLE;
-	hcan.Init.ABOM = DISABLE;
-	hcan.Init.AWUM = DISABLE;
-	hcan.Init.NART = ENABLE;
-	hcan.Init.RFLM = DISABLE;
-	hcan.Init.TXFP = DISABLE;
-	HAL_CAN_Init(&hcan);
-
-	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
-
-
-	ADS1x1x_config_t ads;
-	ADS1x1x_config_default(&ads);
-	ADS1x1x_register_i2c(&ads, &hi2c, ADS1x1x_I2C_ADDRESS_ADDR_TO_GND << 1);
-	ADS1x1x_init(&ads);
-
-	delay_init();
-	onewire_t how;
-	onewire_Init(&how, GPIOB, GPIO_PIN_3);
-
-	struct bme280_dev_s hbme;
-	thread_init_bme280(&hbme, &hi2c);
-
-	ds18b20_config_t hds;
-	thread_init_ds18b20(&hds, &how);
-
-	thread_init_mpx2100ap(&ads);
-
-	data_struct_t Data;
-	uint8_t isGood[3] = {1,};
-	uint8_t arg[100];
-	while(1)
-	{
-		{
-			thread_update_bme280(&hbme, arg);
-
-			struct bme280_float_data_s *d = (struct bme280_float_data_s*)(arg + 4);
-
-			Data.bme_pres = d->pressure;
-			Data.bme_hum = d->humidity;
-			Data.bme_temp = d->temperature;
-		}
-
-		{
-			thread_update_ds18b20(&hds, arg);
-
-			float *d = (float*)(arg + 1);
-
-			Data.ds_temp = *d;
-		}
-
-		{
-			thread_update_mpx2100ap(&ads, arg);
-
-			float *d = (float*)(arg + 1);
-
-			Data.mpx_pres = *d;
-		}
-
-		CAN_Send(&Data);
-
-		HAL_Delay(1000); //Stupid but simple
-	}
-
-	return 0;
-}
-
