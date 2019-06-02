@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a29cf80a-6178-4680-ae34-78975dde51bc" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../../board/CCU/include/dcmi.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/CCU/include/dcmi.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../board/CCU/src/dcmi.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/CCU/src/dcmi.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../board/CCU/src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/CCU/src/main.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../common/mavlink/message_definitions/v1.0/zikush.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../common/mavlink/message_definitions/v1.0/zikush.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connectorapp/streams_sink.py" beforeDir="false" afterPath="$PROJECT_DIR$/connectorapp/streams_sink.py" afterDir="false" />
-    </list>
+    <list default="true" id="a29cf80a-6178-4680-ae34-78975dde51bc" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,7 +22,7 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/connectorapp/streams_sink.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="337">
+            <state relative-caret-position="112">
               <caret line="155" column="68" lean-forward="true" selection-start-line="155" selection-start-column="68" selection-end-line="155" selection-end-column="68" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
@@ -302,7 +295,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-3" y="0" width="1372" height="771" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24981412" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -632,7 +624,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/connectorapp/streams_sink.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="337">
+        <state relative-caret-position="112">
           <caret line="155" column="68" lean-forward="true" selection-start-line="155" selection-start-column="68" selection-end-line="155" selection-end-column="68" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />

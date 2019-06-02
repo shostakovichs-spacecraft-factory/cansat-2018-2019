@@ -264,7 +264,7 @@ static void MX_CAN_Init(void)
 
   	CAN_FilterTypeDef filter = {
   		.FilterMaskIdHigh = 0,
-		.FilterMaskIdHigh = 0,
+		.FilterMaskIdLow = 0,
 		.FilterMode = CAN_FILTERMODE_IDMASK,
 		.FilterActivation = CAN_FILTER_ENABLE,
 		.FilterFIFOAssignment = CAN_FILTER_FIFO0,

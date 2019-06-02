@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "diag/Trace.h"
 
+#include <stm32f4xx_hal.h>
 #include <stm32f4xx_hal_can.h>
 
 #include <dcmi.h>
@@ -34,7 +35,7 @@ uint8_t buffer_reset_needed;
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #pragma GCC diagnostic ignored "-Wreturn-type"
 
-uint8_t spectrum_processing_y_start = CCU_SPECTRUM_Y_START,\
+uint16_t spectrum_processing_y_start = CCU_SPECTRUM_Y_START,\
 		spectrum_processing_y_end	= CCU_SPECTRUM_Y_END,\
 		spectrum_processing_x_start = CCU_SPECTRUM_X_START,\
 		spectrum_processing_x_end	= CCU_SPECTRUM_X_END;
@@ -47,6 +48,8 @@ enum {
 
 bool nadircam_request = false;
 bool zenithcam_request = false;
+
+CAN_HandleTypeDef hcan;
 
 void spectrum_take(bool sendphoto)
 {
@@ -105,17 +108,14 @@ void can_init()
 	hcan.Init.TXFP = DISABLE;
 	HAL_CAN_Init(&hcan);
 
-	HAL_CAN_Start(&hcan);
-
 	CAN_FilterConfTypeDef filter = {
 		.FilterMaskIdHigh = 0,
-		.FilterMaskIdHigh = 0,
+		.FilterMaskIdLow = 0,
 		.FilterMode = CAN_FILTERMODE_IDMASK,
 		.FilterActivation = ENABLE,
 		.FilterFIFOAssignment = CAN_FILTER_FIFO0,
 		.FilterScale = CAN_FILTERSCALE_16BIT,
-		.FilterBank = 0,
-		.SlaveStartFilterBank = 14,
+		.BankNumber = 0
 	};
 
 	HAL_CAN_ConfigFilter(&hcan, &filter);
@@ -129,11 +129,14 @@ void can_init()
 void USB_LP_CAN1_RX0_IRQHandler(void)
 {
   /* USER CODE BEGIN USB_LP_CAN1_RX0_IRQn 0 */
-	volatile CANMAVLINK_RX_FRAME_T frame;
-	static volatile mavlink_message_t msg;
-	static volatile mavlink_status_t status;
+	CANMAVLINK_RX_FRAME_T frame;
+	static mavlink_message_t msg;
+	static mavlink_status_t status;
+	static mavlink_zikush_cmd_take_photo_t cmd_photo;
+	static mavlink_zikush_cmd_take_spectrum_t cmd_spectrum;
 
-	HAL_CAN_GetRxMessage(&hcan, 0, &frame, frame.Data);
+	hcan.pRxMsg = &frame;
+	HAL_CAN_Receive(&hcan, 0, 0);
 
 	volatile uint8_t result = canmavlink_parse_frame(&frame, &msg, &status);
 
@@ -144,33 +147,34 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 		case MAVLINK_MSG_ID_ZIKUSH_CMD_TAKE_SPECTRUM:
 			if(!spectrum_request)
 			{
-				mavlink_zikush_cmd_take_spectrum_t cmd;
-				mavlink_msg_zikush_cmd_take_spectrum_decode(&msg, &cmd);
+				mavlink_msg_zikush_cmd_take_spectrum_decode(&msg, &cmd_spectrum);
 
-				if(cmd.send_picture)
+				if(cmd_spectrum.send_picture)
 					spectrum_request = SPRQ_FULL;
 				else
 					spectrum_request = SPQR_DATAONLY;
 
-				spectrum_processing_x_start = cmd.x_start;
-				spectrum_processing_x_end = cmd.x_end;
-				spectrum_processing_y_start = cmd.y_start;
-				spectrum_processing_y_end = cmd.y_end;
+				spectrum_processing_x_start = cmd_spectrum.x_start;
+				spectrum_processing_x_end = cmd_spectrum.x_end;
+				spectrum_processing_y_start = cmd_spectrum.y_start;
+				spectrum_processing_y_end = cmd_spectrum.y_end;
 
 			} //else TODO maybe we should send some info msg?
 
 			break;
 
 		case MAVLINK_MSG_ID_ZIKUSH_CMD_TAKE_PHOTO:
-			mavlink_zikush_cmd_take_photo_t cmd;
-			mavlink_msg_zikush_cmd_take_photo_decode(&msg, &cmd);
+			mavlink_msg_zikush_cmd_take_photo_decode(&msg, &cmd_photo);
 
-			if(cmd.camid == ZIKUSH_CAM_NADIR)
+			if(cmd_photo.camid == ZIKUSH_CAM_NADIR)
 				nadircam_request = true;
 
-			else if(cmd.camid == ZIKUSH_CAM_ZENITH)
+			else if(cmd_photo.camid == ZIKUSH_CAM_ZENITH)
 				zenithcam_request = true;
 
+			break;
+
+		default:
 			break;
 		}
 	}

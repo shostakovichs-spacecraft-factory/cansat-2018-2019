@@ -74,13 +74,10 @@ uint8_t dcmi_image_buffer_8bit_3[FULL_IMAGE_SIZE];
 uint32_t time_between_images;
 uint16_t buffer_size;
 
-/* extern functions */
-extern void delay(unsigned msec);
-
 /* extern variables */
 extern CAN_HandleTypeDef hcan;
 
-extern uint8_t spectrum_processing_y_start, spectrum_processing_y_end, spectrum_processing_x_start, spectrum_processing_x_end;
+extern uint16_t spectrum_processing_y_start, spectrum_processing_y_end, spectrum_processing_x_start, spectrum_processing_x_end;
 
 /* Global variables */
 I2C_HandleTypeDef hi2c2;
@@ -93,7 +90,7 @@ void enable_image_capture(void)
 {
 	dcmi_clock_init();
 	dcmi_hw_init();
-	dcmi_dma_init(CCU_SPECTRUM_WIDTH * CCU_SPECTRUM_HEIGHT);
+	dcmi_dma_init(FULL_IMAGE_ROW_SIZE * FULL_IMAGE_COLUMN_SIZE);
 	mt9v034_context_configuration();
 	dcmi_dma_enable();
 }
@@ -324,7 +321,7 @@ void send_spectrum_photo(uint8_t * image_buffer_fast_1, uint8_t * image_buffer_f
 			}
 
 			frame++;
-			delay(2);
+			HAL_Delay(2);
 		}
 
 		if (image == 0 )
@@ -439,9 +436,9 @@ void send_spectrum_data(uint8_t * image_buffer_fast_1, uint8_t * image_buffer_fa
 
 			if(calibration_used)
 			{
-				if (calibration_mem0 == 1 == 1)
+				if (calibration_mem0 == 1)
 					rowdata = dcmi_image_buffer_8bit_1 + shift;
-				else if (calibration_mem0 == 2)
+				else if (calibration_mem0)
 					rowdata = dcmi_image_buffer_8bit_2 + shift;
 				else
 					rowdata = dcmi_image_buffer_8bit_3 + shift;
@@ -617,7 +614,7 @@ void dcmi_clock_init()
 	HAL_TIM_PWM_ConfigChannel(&htim, &TIM_OCInitStructure, TIM_CHANNEL_3);
 
 	/* TIM3 enable counter */
-	HAL_TIM_Base_Start(TIM3);
+	HAL_TIM_Base_Start(&htim);
 }
 
 /**
@@ -625,7 +622,7 @@ void dcmi_clock_init()
  */
 void dcmi_hw_init(void)
 {
-	uint16_t image_size = CCU_SPECTRUM_WIDTH * CCU_SPECTRUM_HEIGHT;
+	uint16_t image_size = FULL_IMAGE_ROW_SIZE * FULL_IMAGE_COLUMN_SIZE;
 	GPIO_InitTypeDef gpio_init;
 
 	/* Reset image buffers */
