@@ -28,7 +28,7 @@
 			<entry value="1" name="ZIKUSH_STATUSFLAGS_LIFTOFF">
 				<description></description>
 			</entry>
-			<entry value="2" name="ZIKUSH_STATUSFLAGS_EXECUTING_MISSIONц">
+			<entry value="2" name="ZIKUSH_STATUSFLAGS_EXECUTING_MISSION">
 				<description></description>
 			</entry>
 			<entry value="3" name="ZIKUSH_STATUSFLAGS_FALLING">
@@ -63,14 +63,16 @@
 
 		<message id="151" name="ZIKUSH_CMD_TAKE_SPECTRUM">
 			<description>Take spectrum sample</description>
-			<field type="uint16_t" name="width">Sample width</field>
-			<field type="uint16_t" name="heigth">Sample heigth</field>
+			<field type="uint8_t" name="x_start">Sampled area start on x axis</field>
+			<field type="uint8_t" name="x_end">Sampled area end on x axis</field>
+			<field type="uint8_t" name="y_start">Sampled area start on y axis</field>
+			<field type="uint8_t" name="y_end">Sampled area end on y axis</field>
 			<field type="uint8_t" name="send_picture">Should the picture be sent?</field>
 		</message>
 
 		<message id="152" name="ZIKUSH_CMD_TAKE_PHOTO">
 			<description>Set the state of the power bus</description>
-			<field type="uint16_t" name="width">Picture width</field>
+			<field type="uint16_t" name="width">Picture width FIXME Do we need it? Can the camera be reconfigured on-the-fly?</field>
 			<field type="uint16_t" name="heigth">Picutre heigth</field>
 			<field type="uint8_t" name="camid">0 - nadir, 1 - zenith</field>
 		</message>

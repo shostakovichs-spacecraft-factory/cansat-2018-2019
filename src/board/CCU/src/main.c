@@ -34,9 +34,6 @@ uint8_t buffer_reset_needed;
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #pragma GCC diagnostic ignored "-Wreturn-type"
 
-uint8_t spectrum_photo[CCU_SPECTRUM_WIDTH * CCU_SPECTRUM_HEIGHT];
-bool spectrum_photo_ready;
-
 uint8_t spectrum_processing_y_start = CCU_SPECTRUM_Y_START,\
 		spectrum_processing_y_end	= CCU_SPECTRUM_Y_END,\
 		spectrum_processing_x_start = CCU_SPECTRUM_X_START,\
@@ -48,13 +45,10 @@ enum {
 	SPRQ_FULL = 2
 } spectrum_request = SPRQ_NO;
 
-enum {
-	CAMRQ_NO = 0,
-	CAMQR_NADIR = 1,
-	CAMRQ_ZENITH = 2
-} cam_request = CAMRQ_NO;
+bool nadircam_request = false;
+bool zenithcam_request = false;
 
-void spectrum_take()
+void spectrum_take(bool sendphoto)
 {
 	dcmi_restart_calibration_routine();
 
@@ -69,9 +63,10 @@ void spectrum_take()
 	/* waiting for all image parts */
 	while(get_frame_counter() < 4){}
 
-	send_calibration_image(&previous_image, &current_image);
+	if(sendphoto)
+		send_spectrum_photo(previous_image, current_image);
 
-
+	send_spectrum_data(previous_image, current_image);
 }
 
 void can_init()
@@ -157,12 +152,25 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 				else
 					spectrum_request = SPQR_DATAONLY;
 
+				spectrum_processing_x_start = cmd.x_start;
+				spectrum_processing_x_end = cmd.x_end;
+				spectrum_processing_y_start = cmd.y_start;
+				spectrum_processing_y_end = cmd.y_end;
+
 			} //else TODO maybe we should send some info msg?
 
 			break;
 
 		case MAVLINK_MSG_ID_ZIKUSH_CMD_TAKE_PHOTO:
-			mavlink_zikush_cmd_take_photo_t
+			mavlink_zikush_cmd_take_photo_t cmd;
+			mavlink_msg_zikush_cmd_take_photo_decode(&msg, &cmd);
+
+			if(cmd.camid == ZIKUSH_CAM_NADIR)
+				nadircam_request = true;
+
+			else if(cmd.camid == ZIKUSH_CAM_ZENITH)
+				zenithcam_request = true;
+
 			break;
 		}
 	}
@@ -190,7 +198,19 @@ int main(int argc, char* argv[])
 
 	can_init();
 
+	while(true)
+	{
+		if(spectrum_request)
+		{
+			spectrum_take(spectrum_request == SPRQ_FULL);
+			spectrum_request = SPRQ_NO;
+		}
 
+		//TODO add cam requests processing
+
+
+		HAL_Delay(200); //TODO Add transition into true sleep mode?
+	}
 }
 
 #pragma GCC diagnostic pop

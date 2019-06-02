@@ -80,6 +80,8 @@ extern void delay(unsigned msec);
 /* extern variables */
 extern CAN_HandleTypeDef hcan;
 
+extern uint8_t spectrum_processing_y_start, spectrum_processing_y_end, spectrum_processing_x_start, spectrum_processing_x_end;
+
 /* Global variables */
 I2C_HandleTypeDef hi2c2;
 DCMI_HandleTypeDef hdcmi;
@@ -246,12 +248,12 @@ void dma_copy_image_buffers(uint8_t ** current_image, uint8_t ** previous_image,
 
 
 /**
- * @brief Send calibration image with MAVLINK over USB
+ * @brief Send spectrum image with MAVLINK over CAN
  *
  * @param image_buffer_fast_1 Image buffer in fast RAM
  * @param image_buffer_fast_2 Image buffer in fast RAM
  */
-void send_calibration_image(uint8_t ** image_buffer_fast_1, uint8_t ** image_buffer_fast_2) {
+void send_spectrum_photo(uint8_t * image_buffer_fast_1, uint8_t * image_buffer_fast_2) {
 
 	/*  transmit raw 8-bit image */
 	/* TODO image is too large for this transmission protocol (too much packets), but it works */
@@ -265,12 +267,33 @@ void send_calibration_image(uint8_t ** image_buffer_fast_1, uint8_t ** image_buf
 		.payload = MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN,
 		.jpg_quality = 100
 	};
+
+	mavlink_zikush_picture_header_t picture_header = {
+		.camid = ZIKUSH_CAM_SPECTRUM,
+		.size = FULL_IMAGE_SIZE * 4,
+		.packets = FULL_IMAGE_SIZE * 4 / MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN + 1,
+		.y_upleft_crop = spectrum_processing_y_start, //TODO what for?
+		.time_boot_ms = HAL_GetTick(),
+	};
+
 	mavlink_encapsulated_data_t encdata = {};
 	mavlink_message_t msg;
 	CANMAVLINK_TX_FRAME_T canframes[34];
 
+
+	/*We send both data_transmission_handshake and zikush_picture_header so it can be received by spectrum_viewer,
+	 * 	QGriund control and Grain MCC
+	 */
 	mavlink_msg_data_transmission_handshake_encode(0, ZIKUSH_CCU, &msg, &handshake);
 	uint8_t canframecount = canmavlink_msg_to_frames(canframes, &msg);
+	for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
+	{
+		hcan.pTxMsg = canframes + i; //DELICIOUS!!
+		HAL_CAN_Transmit(&hcan, 1000);
+	}
+
+	mavlink_msg_zikush_picture_header_encode(0, ZIKUSH_CCU, &msg, &picture_header);
+	canframecount = canmavlink_msg_to_frames(canframes, &msg);
 	for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
 	{
 		hcan.pTxMsg = canframes + i; //DELICIOUS!!
@@ -306,11 +329,11 @@ void send_calibration_image(uint8_t ** image_buffer_fast_1, uint8_t ** image_buf
 
 		if (image == 0 )
 		{
-			frame_buffer[i % MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN] = (uint8_t)(*image_buffer_fast_1)[i % FULL_IMAGE_SIZE];
+			frame_buffer[i % MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN] = (uint8_t)image_buffer_fast_1[i % FULL_IMAGE_SIZE];
 		}
 		else if (image == 1 )
 		{
-			frame_buffer[i % MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN] = (uint8_t)(*image_buffer_fast_2)[i % FULL_IMAGE_SIZE];
+			frame_buffer[i % MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN] = (uint8_t)image_buffer_fast_2[i % FULL_IMAGE_SIZE];
 		}
 		else if (image == 2)
 		{
@@ -351,6 +374,111 @@ void send_calibration_image(uint8_t ** image_buffer_fast_1, uint8_t ** image_buf
 	{
 		hcan.pTxMsg = canframes + i; //DELICIOUS!!
 		HAL_CAN_Transmit(&hcan, 1000);
+	}
+}
+
+/**
+ * @brief Send spectrum data with MAVLINK over CAN
+ *
+ * @param image_buffer_fast_1 Image buffer in fast RAM
+ * @param image_buffer_fast_2 Image buffer in fast RAM
+ */
+void send_spectrum_data(uint8_t * image_buffer_fast_1, uint8_t * image_buffer_fast_2)
+{
+	uint8_t * rowdata;
+	mavlink_zikush_spectrum_intensity_header_t spectrum_header = {
+		.size =	(spectrum_processing_y_end - spectrum_processing_y_start) * 2,
+		.packets = (spectrum_processing_y_end - spectrum_processing_y_start) / \
+					MAVLINK_MSG_ZIKUSH_SPECTRUM_INTENSITY_ENCAPSULATED_DATA_FIELD_DATA_LEN + 1, //FIXME correct ceiling?
+		.y_upleft_crop = spectrum_processing_y_start,
+		.time_boot_ms = HAL_GetTick()
+	};
+	mavlink_zikush_spectrum_intensity_encapsulated_data_t encdata = {
+			.seqnr = 0
+	};
+	mavlink_message_t msg;
+	CANMAVLINK_TX_FRAME_T canframes[34];
+
+
+	mavlink_msg_zikush_spectrum_intensity_header_encode(0, ZIKUSH_CCU, &msg, &spectrum_header);
+	uint8_t canframecount = canmavlink_msg_to_frames(canframes, &msg);
+	for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
+	{
+		hcan.pTxMsg = canframes + i; //DELICIOUS!!
+		HAL_CAN_Transmit(&hcan, 1000);
+	}
+
+
+	//iterating over rows
+	for(int row = spectrum_processing_y_start; row < spectrum_processing_y_end; row++)
+	{
+		int relrow = row - spectrum_processing_y_start;
+
+		//Selecting one of the many buffers in which the current row is placed
+		if(row < FULL_IMAGE_COLUMN_SIZE / 2)
+			rowdata = image_buffer_fast_1 + row * FULL_IMAGE_ROW_SIZE;
+
+		else if(row < FULL_IMAGE_COLUMN_SIZE)
+			rowdata = image_buffer_fast_2 + (row - FULL_IMAGE_COLUMN_SIZE / 2) * FULL_IMAGE_ROW_SIZE;
+
+		else if(row < (FULL_IMAGE_COLUMN_SIZE + FULL_IMAGE_COLUMN_SIZE / 2) )
+		{
+			uint16_t shift = (row - FULL_IMAGE_COLUMN_SIZE) * FULL_IMAGE_ROW_SIZE;
+
+			if (calibration_unused == 1)
+				rowdata = dcmi_image_buffer_8bit_1 + shift;
+			else if (calibration_unused == 2)
+				rowdata = dcmi_image_buffer_8bit_2 + shift;
+			else
+				rowdata = dcmi_image_buffer_8bit_3 + shift;
+		}
+
+		else
+		{
+			uint16_t shift = (row - (FULL_IMAGE_COLUMN_SIZE + FULL_IMAGE_COLUMN_SIZE / 2) ) * FULL_IMAGE_ROW_SIZE;
+
+			if(calibration_used)
+			{
+				if (calibration_mem0 == 1 == 1)
+					rowdata = dcmi_image_buffer_8bit_1 + shift;
+				else if (calibration_mem0 == 2)
+					rowdata = dcmi_image_buffer_8bit_2 + shift;
+				else
+					rowdata = dcmi_image_buffer_8bit_3 + shift;
+			}
+
+			else
+			{
+				if (calibration_mem1 == 1 == 1)
+					rowdata = dcmi_image_buffer_8bit_1 + shift;
+				else if (calibration_mem1 == 2)
+					rowdata = dcmi_image_buffer_8bit_2 + shift;
+				else
+					rowdata = dcmi_image_buffer_8bit_3 + shift;
+			}
+		}
+
+
+		encdata.data[row % MAVLINK_MSG_ZIKUSH_SPECTRUM_INTENSITY_ENCAPSULATED_DATA_FIELD_DATA_LEN] = 0;
+		for(int col = spectrum_processing_x_start; col < spectrum_processing_x_end; col++)
+		{
+			encdata.data[relrow % MAVLINK_MSG_ZIKUSH_SPECTRUM_INTENSITY_ENCAPSULATED_DATA_FIELD_DATA_LEN] += rowdata[col];
+		}
+
+		//send packet if it's full or if it is the last row
+		if( ( (relrow + 1) % MAVLINK_MSG_ZIKUSH_SPECTRUM_INTENSITY_ENCAPSULATED_DATA_FIELD_DATA_LEN == 0 && row != 0) \
+				|| row == (spectrum_processing_y_end - 1))
+		{
+			mavlink_msg_zikush_spectrum_intensity_encapsulated_data_encode(0, ZIKUSH_CCU, &msg, &encdata);
+			canframecount = canmavlink_msg_to_frames(canframes, &msg);
+			for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
+			{
+				hcan.pTxMsg = canframes + i; //DELICIOUS!!
+				HAL_CAN_Transmit(&hcan, 1000);
+			}
+
+			encdata.seqnr++;
+		}
 	}
 }
 
