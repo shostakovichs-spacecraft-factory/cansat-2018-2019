@@ -384,6 +384,7 @@
 #define LSM6DS3_FIFO_DATA_OUT_L_REGADDR     (0x3e)
 #define LSM6DS3_FIFO_DATA_OUT_H_REGADDR     (0x3f)
 
+#define LSM6DS3_TIMEOUT 100 //ms
 
 /****************************************************************************
  * private functions definements
@@ -410,34 +411,26 @@
 #define true 1
 #define false 0
 
-void lsm6ds3_prepare_spi_bus(const struct lsm6ds3_dev_s * priv)
-{
-
-     struct spi_dev_s * const bus = priv->setup_conf->iface.spi.bus;
-    SPI_SETFREQUENCY(bus, priv->setup_conf->iface.spi.bus_freq);
-    SPI_SETBITS(bus, LSM6DS3_SPI_BITS);
-    SPI_SETMODE(bus, LSM6DS3_SPI_MODE);
-    SPI_HWFEATURES(bus, 0);
-}
 
 
 static int lsm6ds3_do_read_regn_spi(const  struct lsm6ds3_dev_s * priv, uint8_t regaddr,
         uint8_t * data, size_t datasize)
 {
-    struct spi_dev_s * const bus = priv->setup_conf->iface.spi.bus;
+    SPI_HandleTypeDef * const bus = priv->setup_conf.iface.spi.bus;
 
     if (0 == datasize)
         return 0;
 
     regaddr |= 0x80; // for read by SPI, regaddr should be modified with most significant bit setted to 1
 
-    //SPI_LOCK(bus, true);
-    lsm6ds3_prepare_spi_bus(priv);
-    SPI_SELECT(bus, priv->setup_conf->iface.spi.dev_id, true);
-
     // passing register value
-    SPI_SEND(bus, regaddr);
+   // SPI_SEND(bus, regaddr);
+    int rc = 0;
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
+    if(rc = HAL_SPI_Transmit(bus, &regaddr, 1, LSM6DS3_TIMEOUT))
+    	trace_printf("ERROR: %d\n", rc);
 
+    //MY_HAL_SPI_TransmitReceive(bus, &regaddr, data, 1, datasize, LSM6DS3_TIMEOUT);
     // passing data
 
     // we have two type of read transfers
@@ -445,41 +438,52 @@ static int lsm6ds3_do_read_regn_spi(const  struct lsm6ds3_dev_s * priv, uint8_t 
     // and second - to read relatively large blocs of sensor data and even fifo buffers
     // its possible to use DMA for block transfers
     // and there is no need to use it for single byte transfer
-    if (datasize <= 2)
+    /*
+    if (datasize <= 1)
     {
-        data[0] = SPI_SEND(bus, 0xFF);
+        //data[0] = SPI_SEND(bus, 0xFF);
+
     }
     else
     {
         SPI_RECVBLOCK(bus, data, datasize);
-    }
+    }*/
+    if(rc = HAL_SPI_Receive(bus, data, datasize, LSM6DS3_TIMEOUT))
+    	trace_printf("ERROR: %d\n", rc);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
 
 
-    SPI_SELECT(bus, priv->setup_conf->iface.spi.dev_id, false);
-    SPI_LOCK(bus, false);
+
 
     return datasize;
 }
 
 
-static int lsm6ds3_do_write_regn_spi(const  struct lsm6ds3_dev_s * priv, uint8_t regaddr,
-        const uint8_t * data, size_t datasize)
+static int lsm6ds3_do_write_regn_spi( struct lsm6ds3_dev_s * priv, uint8_t regaddr,
+        uint8_t * data, size_t datasize)
 {
-    struct spi_dev_s * const bus = priv->setup_conf->iface.spi.bus;
+    SPI_HandleTypeDef * bus = priv->setup_conf.iface.spi.bus;
 
     if (0 == datasize)
         return 0;
+    uint8_t t[datasize + 1];
+    t[0] = regaddr;
+    for(int i = 1; i < datasize + 1; i++)
+    	t[i] = data[i - 1];
+    //lsm6ds3_prepare_spi_bus(priv);
+    int rc = 0;
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(bus, t, datasize + 1, LSM6DS3_TIMEOUT);
+//    if(rc = HAL_SPI_Transmit(bus, &regaddr, 1, LSM6DS3_TIMEOUT))
+//    	trace_printf("ERROR: %d\n", rc);
+//    if(rc = HAL_SPI_Transmit(bus, data, datasize, LSM6DS3_TIMEOUT))
+//    	trace_printf("ERROR: %d\n", rc);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
 
-    SPI_LOCK(bus, true);
-    lsm6ds3_prepare_spi_bus(priv);
-    SPI_SELECT(bus, priv->setup_conf->iface.spi.dev_id, true);
-
-    SPI_SEND(bus, regaddr);
-    SPI_SNDBLOCK(bus, (uint8_t*)data, datasize); // const should be removed here, since
+    //SPI_SEND(bus, regaddr);
+    //SPI_SNDBLOCK(bus, (uint8_t*)data, datasize); // const should be removed here, since
                                                  // it`s not conforms the spi bus interface
 
-    SPI_SELECT(bus, priv->setup_conf->iface.spi.dev_id, false);
-    SPI_LOCK(bus, false);
 
     return datasize;
 }
@@ -542,21 +546,41 @@ int lsm6ds3_reset_g_hpf( const struct lsm6ds3_dev_s *priv)
 }
 
 
-void lsm6ds3_conf_default( struct lsm6ds3_conf_s * conf)
+void lsm6ds3_conf_default(struct lsm6ds3_dev_s *hlsm )
 {
-
+	struct lsm6ds3_conf_s * conf = &hlsm->conf;
+//	 // xl default conf
+//	conf->xl.pm = LSM6DS3_XL_PM_LOW_POWER_OR_NORMAL;
+//	conf->xl.odr = LSM6DS3_XL_ODR_POWER_DOWN;
+//	conf->xl.fs = LSM6DS3_XL_FS_2G;
+//	conf->xl.cf = LSM6DS3_XL_CF_DISABLED;
+//	conf->xl.alpf_bw = LSM6DS3_XL_ALPF_BW_AUTO;
+//
+//	// g default conf
+//	conf->g.pm = LSM6DS3_G_PM_LOW_POWER_OR_NORMAL;
+//	conf->g.odr = LSM6DS3_G_ODR_POWER_DOWN;
+//	conf->g.fs = LSM6DS3_G_FS_250DPS;
+//	conf->g.hpf = LSM6DS3_G_HPF_DISABLED;
+//
+//	// fifo default conf
+//	conf->fifo.mode = LSM6DS3_FIFO_MODE_BYPASS;
+//	conf->fifo.odr = LSM6DS3_FIFO_ODR_DISABLED;
+//	conf->fifo.dec_g_set = LSM6DS3_FIFO_DECIMATION_IGNORE_DATA;
+//	conf->fifo.dec_xl_set = LSM6DS3_FIFO_DECIMATION_IGNORE_DATA;
+//	conf->fifo.dec_3rd_set = LSM6DS3_FIFO_DECIMATION_IGNORE_DATA;
+//	conf->fifo.dec_4rth_set = LSM6DS3_FIFO_DECIMATION_IGNORE_DATA;
     // xl default conf
-    conf->xl.pm = LSM6DS3_XL_PM_LOW_POWER_OR_NORMAL;
-    conf->xl.odr = LSM6DS3_XL_ODR_POWER_DOWN;
-    conf->xl.fs = LSM6DS3_XL_FS_2G;
+    conf->xl.pm = LSM6DS3_XL_PM_HIGH_PERFORMANCE;
+    conf->xl.odr = LSM6DS3_XL_ODR_104_HZ;
+    conf->xl.fs = LSM6DS3_XL_FS_8G;
     conf->xl.cf = LSM6DS3_XL_CF_DISABLED;
     conf->xl.alpf_bw = LSM6DS3_XL_ALPF_BW_AUTO;
 
     // g default conf
-    conf->g.pm = LSM6DS3_G_PM_LOW_POWER_OR_NORMAL;
-    conf->g.odr = LSM6DS3_G_ODR_POWER_DOWN;
-    conf->g.fs = LSM6DS3_G_FS_250DPS;
-    conf->g.hpf = LSM6DS3_G_HPF_DISABLED;
+    conf->g.pm = LSM6DS3_G_PM_HIGH_PERFORMANCE;
+    conf->g.odr = LSM6DS3_G_ODR_104_HZ;
+    conf->g.fs = LSM6DS3_G_FS_1000DPS;
+    conf->g.hpf = LSM6DS3_G_HPF_CUTOFF_0_0081_HZ;
 
     // fifo default conf
     conf->fifo.mode = LSM6DS3_FIFO_MODE_BYPASS;
@@ -740,7 +764,7 @@ int lsm6ds3_xl_push_conf( const struct lsm6ds3_dev_s *priv,
     ctrl1_reg = LSM6DS3_SET_BITS(ctrl1_reg, LSM6DS3_CTRL1XL_FS_XL, xl_conf->fs);
     ctrl1_reg = LSM6DS3_SET_BITS(ctrl1_reg, LSM6DS3_CTRL1XL_BW_XL, (xl_conf->alpf_bw & 0x0f));
 
-    ctrl4_reg = LSM6DS3_SET_BITS(ctrl1_reg, LSM6DS3_CTRL4C_XL_BW_SCAL_ODR, ((xl_conf->alpf_bw & 0x10) >> 4));
+    ctrl4_reg = LSM6DS3_SET_BITS(ctrl4_reg, LSM6DS3_CTRL4C_XL_BW_SCAL_ODR, ((xl_conf->alpf_bw & 0x10) >> 4));
 
     ctrl6_reg = LSM6DS3_SET_BITS(ctrl6_reg, LSM6DS3_CTRL6C_XL_HM_MODE, xl_conf->pm);
 
@@ -923,25 +947,17 @@ ssize_t lsm6ds3_fifo_pull_data( const struct lsm6ds3_dev_s * priv,
     return rc;
 }
 
-int lsm6ds3_register_spi(struct lsm6ds3_setup_conf_s * config, struct spi_dev_s * bus)
+int lsm6ds3_register_spi(struct lsm6ds3_dev_s * config, SPI_HandleTypeDef* bus)
 {
 
-	struct lsm6ds3_dev_s *priv;
+	struct lsm6ds3_dev_s *priv = config;
     int rc;
 
     /* Sanity check */
-    assert(config == 0);
-    assert(bus == 0);
+    assert(priv != 0);
+    assert(bus != 0);
 
-    /* Initialize the LIS3MDL device structure */
-    priv = (struct lsm6ds3_dev_s *)malloc(sizeof(struct lsm6ds3_dev_s));
-    if (priv == NULL)
-    {
-        snerr("ERROR: Failed to allocate instance\n");
-        return -ENOMEM;
-    }
-
-    priv->setup_conf = config;
+    priv->setup_conf.iface.spi.bus = bus;
     priv->_do_read_regn = lsm6ds3_do_read_regn_spi;
     priv->_do_write_regn = lsm6ds3_do_write_regn_spi;
     priv->readmode = LSM6DS3_READMODE_SCALED;
@@ -953,10 +969,6 @@ int lsm6ds3_register_spi(struct lsm6ds3_setup_conf_s * config, struct spi_dev_s 
         snerr("can`t reset device: %d\n", rc);
         return rc;
     }
-
-
-    // load default configuration
-    lsm6ds3_conf_default(&priv->conf);
 
 
     // checking whoami register
@@ -977,5 +989,14 @@ int lsm6ds3_register_spi(struct lsm6ds3_setup_conf_s * config, struct spi_dev_s 
     sninfo("INFO: LMD6DS3 driver loaded sucessfully\n");
 
     return OK;
+}
+
+int lsm6ds3_push_conf(struct lsm6ds3_dev_s *handler)
+{
+	int rc = 0;
+	rc |= lsm6ds3_fifo_push_conf(handler, &handler->conf.fifo);
+	rc |= lsm6ds3_g_push_conf(handler, &handler->conf.g);
+	rc |= lsm6ds3_xl_push_conf(handler, &handler->conf.xl);
+	return rc;
 }
 

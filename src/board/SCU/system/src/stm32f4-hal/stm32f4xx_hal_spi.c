@@ -602,6 +602,7 @@ error:
   return errorcode;
 }
 
+
 /**
   * @brief  Receive an amount of data in blocking mode.
   * @param  hspi: pointer to a SPI_HandleTypeDef structure that contains

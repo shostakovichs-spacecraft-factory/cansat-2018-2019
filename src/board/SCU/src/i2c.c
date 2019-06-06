@@ -45,7 +45,7 @@ I2C_HandleTypeDef I2C_init_for_bme280(int i2c_number)
 }
 int i2c_init(I2C_HandleTypeDef * hi2c)
 {
-	int rc = HAL_I2C_Init(hi2c);;
+	int rc = HAL_I2C_Init(hi2c);
 	if(rc)
 		trace_printf("ERROR: Can't init I2C: %d\n", rc);
 	return rc;
