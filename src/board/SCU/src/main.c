@@ -12,6 +12,7 @@
 #include "Time.h"
 #include "spi.h"
 #include "lsm6ds3.h"
+#include "lsm303c.h"
 
 #include "thread.h"
 
@@ -37,21 +38,8 @@ void uart_test();
 
 void ads1115_test(I2C_HandleTypeDef * hi2c);
 
-
-int main()
+int lsm6ds3_test()
 {
-
-	__initialize_hardware();
-
-
-	// Call the CSMSIS system clock routine to store the clock frequency
-	// in the SystemCoreClock global RAM location.
-	//SystemCoreClockUpdate();
-	__GPIOB_CLK_ENABLE();
-	__GPIOA_CLK_ENABLE();
-
-	__I2C1_CLK_ENABLE();
-	__CAN1_CLK_ENABLE();
 
 	SPI_HandleTypeDef hspi;
 	spi_config_default(&hspi);
@@ -101,10 +89,46 @@ int main()
 		trace_printf("Axel: %5.5f %5.5f %5.5f\n", dd[0], dd[1], dd[2]);
 
 	}
+	return 0;
+}
+
+int main()
+{
+
+	__initialize_hardware();
 
 
-	//__CAN2_CLK_ENABLE();I
+	// Call the CSMSIS system clock routine to store the clock frequency
+	// in the SystemCoreClock global RAM location.
+	//SystemCoreClockUpdate();
+	__GPIOB_CLK_ENABLE();
+	__GPIOA_CLK_ENABLE();
 
+	__I2C1_CLK_ENABLE();
+	__CAN1_CLK_ENABLE();
+
+	I2C_HandleTypeDef hi2c;
+	i2c_pin_scl_init(GPIOB, GPIO_PIN_6);
+	i2c_pin_sda_init(GPIOB, GPIO_PIN_7);
+	i2c_config_default(&hi2c);
+	hi2c.Instance = I2C1;
+	i2c_init(&hi2c);
+
+	struct lsm303c_handler_s hlsm3;
+	lsm303c_m_conf_default(&hlsm3);
+	lsm303c_register_i2c(&hlsm3, &hi2c);
+	lsm303c_m_push_conf(&hlsm3, &hlsm3.conf.m);
+
+	while(1)
+	{
+		struct lsm303c_raw_data_m_s rd;
+		lsm303c_m_pull(&hlsm3, &rd);
+		float data[3];
+		for(int i = 0; i < 3; i++)
+			data[i] = rd.m[i] / 16;
+
+		trace_printf("x: %5.5f y: %5.5f z: %5.5f\n", data[0], data[1], data[2]);
+	}
 
 
 	return 0;
