@@ -125,7 +125,7 @@ int main()
 		lsm303c_m_pull(&hlsm3, &rd);
 		float data[3];
 		for(int i = 0; i < 3; i++)
-			data[i] = rd.m[i] / 16;
+			data[i] = rd.m[i] / 16.0;
 
 		trace_printf("x: %5.5f y: %5.5f z: %5.5f\n", data[0], data[1], data[2]);
 	}

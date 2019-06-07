@@ -236,19 +236,10 @@ void lsm303c_m_conf_default(struct lsm303c_handler_s * handler);
 int lsm303c_m_push_conf(const struct lsm303c_handler_s *handler,
         const struct lsm303c_m_conf_s * m_conf);
 
-// send gyroscope settings to device
-int lsm303c_g_push_conf(const struct lsm303c_handler_s *priv,
-        const struct lsm303c_g_conf_s * g_conf);
-
-// send accelerometer settings to device
-int lsm303c_xl_push_conf(const struct lsm303c_handler_s *priv,
-        const struct lsm303c_xl_conf_s * xl_conf);
-
-// read raw gyro and acc values
-int lsm303c_gxl_pull(const struct lsm303c_handler_s *priv,
-        struct lsm303c_raw_data_s * raw);
 
 
+int lsm303c_m_pull(const struct lsm303c_handler_s *handler,
+        struct lsm303c_raw_data_m_s * m_raw);
 // push fifo config to device
 // its assumed that device (or at least fifo) is halted
 int lsm303c_fifo_push_conf(const struct lsm303c_handler_s *priv,
