@@ -20,16 +20,18 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <string.h>
 
 #include <sx1268.h>
-#include <nRF24L01P.h>
 
 #include <mavlink/zikush/mavlink.h>
 #include <canmavlink_hal.h>
+
+#include <zikush_config.h>
 
 /* USER CODE END Includes */
 
@@ -45,21 +47,22 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-uint8_t NRF_RXADDR[5] = {0xE7, 0xE7, 0xE7, 0xE7, 0xE7};
-uint8_t NRF_TXADDR[5] = {0xE7, 0xE7, 0xE7, 0xE7, 0xE7};
-#define NRF_RXBUFFSIZE	256
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 CAN_HandleTypeDef hcan;
 
+SD_HandleTypeDef hsd;
+
 SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
+//"private" means defined by user, not CubeMX. They're, in fact, global
 sx1268_t radio;
+sx1268_stm32_t radio_specific;
 uint8_t radio_rxbuf[255], radio_txbuf[255];
-nRF24L01P nrf;
-uint8_t nrf_rxbuff[NRF_RXBUFFSIZE];
+
+int16_t zikush_runsessnum = -1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -67,12 +70,72 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_CAN_Init(void);
+static void MX_SDIO_SD_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+void radio_init()
+{
+	sx1268_struct_init(&radio, &radio_specific, radio_rxbuf, 255, radio_txbuf, 255);
+	radio_specific.bus = &hspi2;
+	radio_specific.busy_port = RADIO_BUSY_GPIO_Port;
+	radio_specific.busy_pin = RADIO_BUSY_Pin;
+	radio_specific.cs_port = RADIO_NSS_GPIO_Port;
+	radio_specific.cs_pin = RADIO_NSS_Pin;
+	radio_specific.nrst_port = RADIO_NRST_GPIO_Port;
+	radio_specific.nrst_pin = RADIO_NRST_Pin;
+	sx1268_init(&radio);
+}
+
+void sd_init()
+{
+	FRESULT fileworkresult;
+	char filename[ICU_SD_MAXFILENAMELEN];
+
+	fileworkresult = f_mkdir("0:/zikush");
+	if( !( fileworkresult == FR_OK || fileworkresult == FR_EXIST ) )
+		printf("Problem %d with zikush folder creation\n", fileworkresult); //FIXME error handlers
+
+	for(zikush_runsessnum = 0; zikush_runsessnum < ICU_SD_SESSNUMBOUNDARY; zikush_runsessnum++)
+	{
+		sprintf(filename, ICU_SD_SESSFOLDERNAMEFMT, zikush_runsessnum);
+		fileworkresult = f_stat(filename, NULL);
+
+		if(fileworkresult != FR_OK)
+			break;
+
+		if(zikush_runsessnum == ICU_SD_SESSNUMBOUNDARY)
+			zikush_runsessnum = -2; //FIXME proper error handling
+	}
+
+	f_mkdir(filename);
+}
+
+void can_init()
+{
+	HAL_CAN_Start(&hcan);
+
+	CAN_FilterTypeDef filter = {
+		.FilterMaskIdHigh = 0,
+		.FilterMaskIdLow = 0,
+		.FilterMode = CAN_FILTERMODE_IDMASK,
+		.FilterActivation = CAN_FILTER_ENABLE,
+		.FilterFIFOAssignment = CAN_FILTER_FIFO0,
+		.FilterScale = CAN_FILTERSCALE_16BIT,
+		.FilterBank = 0,
+		.SlaveStartFilterBank = 14,
+	};
+
+	HAL_CAN_ConfigFilter(&hcan, &filter);
+
+	hcan.Instance->IER |= CAN_IER_FMPIE0;
+
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+}
 
 /* USER CODE END 0 */
 
@@ -83,17 +146,7 @@ static void MX_CAN_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	sx1268_stm32_t radio_specific;
 
-	canmavlink_TX_frame_t canmavlink_frames[34];
-	mavlink_message_t msg;
-	mavlink_heartbeat_t heartbeat =
-	{
-			.type = MAV_TYPE_FREE_BALLOON,
-			.autopilot = MAV_AUTOPILOT_INVALID,
-			.base_mode = MAV_MODE_FLAG_TEST_ENABLED,
-			.system_status = MAV_STATE_ACTIVE
-	};
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -115,75 +168,34 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_SPI2_Init();
-  //MX_CAN_Init();
+  MX_CAN_Init();
+  MX_SDIO_SD_Init();
+  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
-  	sx1268_struct_init(&radio, &radio_specific, radio_rxbuf, 255, radio_txbuf, 255);
-  	radio_specific.bus = &hspi2;
-  	radio_specific.busy_port = RADIO_BUSY_GPIO_Port;
-  	radio_specific.busy_pin = RADIO_BUSY_Pin;
-  	radio_specific.cs_port = RADIO_NSS_GPIO_Port;
-  	radio_specific.cs_pin = RADIO_NSS_Pin;
-  	radio_specific.nrst_port = RADIO_NRST_GPIO_Port;
-  	radio_specific.nrst_pin = RADIO_NRST_Pin;
-  	sx1268_init(&radio);
 
-  nrf.hspi = &hspi2;
-  nrf.CRC_Width = nRF_CRC_WIDTH_BYTE;
-  nrf.ADDR_Width = nRF_ADDR_WIDTH_5;
-  nrf.Data_Rate = nRF_DATA_RATE_1MBPS;
-  nrf.TX_Power = nRF_TX_PWR_0dBm;
-  nrf.State = nRF_STATE_TX;
+  radio_init();
+  sd_init();
+  can_init();
 
-  nrf.RF_Channel = 70;
-  nrf.PayloadWidth = nRF_RXPW_32BYTES;
-  nrf.RetransmitCount = nRF_RETX_COUNT_15;
-
-  nrf.RetransmitDelay = nRF_RETX_DELAY_1000uS;
-
-  nrf.RX_Address = (uint8_t *)NRF_RXADDR;
-  nrf.TX_Address = (uint8_t *)NRF_TXADDR;
-
-  nrf.RX_Buffer = nrf_rxbuff;
-
-  nrf.nRF_nSS_GPIO_PORT = RADIO_NSS_GPIO_Port;
-  nrf.nRF_nSS_GPIO_PIN = RADIO_NSS_Pin;
-  nrf.nRF_CE_GPIO_PORT = NRF_CE_GPIO_Port;
-  nrf.nRF_CE_GPIO_PIN = NRF_CE_Pin;
-
-  /*trace_printf("nRF: %d\n", */HAL_nRF24L01P_Init(&nrf)/*)*/;
-
-
-
-	//mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	//mavlink_msg_heartbeat_encode(0, ZIKUSH_ICU, &msg, &heartbeat);
-
 	while(1)
 	{
-		volatile uint8_t framecount = canmavlink_msg_to_frames(canmavlink_frames, &msg);
-
-		for(int i = 0; i < framecount; i++)
+		mavlink_message_t msg;
+		mavlink_heartbeat_t heartbeat =
 		{
-			uint32_t mb;
-			//HAL_CAN_AddTxMessage(&hcan, &( canmavlink_frames[i].Header ), canmavlink_frames[i].Data, &mb);
+			.type = MAV_TYPE_FREE_BALLOON,
+			.autopilot = MAV_AUTOPILOT_INVALID,
+			.base_mode = MAV_MODE_FLAG_TEST_ENABLED,
+			.system_status = MAV_STATE_ACTIVE
+		};
+		mavlink_msg_heartbeat_encode(0, ZIKUSH_ICU, &msg, &heartbeat);
 
-			bool pending;
-			do {
-				pending = HAL_CAN_IsTxMessagePending(&hcan, mb);
-			} while(pending);
-		}
-
-		uint8_t sending[] = "alalaIDIOTalalala!\n";
-		nrf.PayloadWidth = strlen((char *)sending);
-		HAL_nRF24L01P_TransmitPacketNonExt(&nrf, sending);
+		router_route(&msg);
 
 		HAL_Delay(1000);
-
-
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -260,23 +272,36 @@ static void MX_CAN_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN_Init 2 */
-  	HAL_CAN_Start(&hcan);
 
-  	CAN_FilterTypeDef filter = {
-  		.FilterMaskIdHigh = 0,
-		.FilterMaskIdLow = 0,
-		.FilterMode = CAN_FILTERMODE_IDMASK,
-		.FilterActivation = CAN_FILTER_ENABLE,
-		.FilterFIFOAssignment = CAN_FILTER_FIFO0,
-		.FilterScale = CAN_FILTERSCALE_16BIT,
-		.FilterBank = 0,
-		.SlaveStartFilterBank = 14,
-  	};
-
-  	HAL_CAN_ConfigFilter(&hcan, &filter);
-
-  	hcan.Instance->IER |= CAN_IER_FMPIE0;
   /* USER CODE END CAN_Init 2 */
+
+}
+
+/**
+  * @brief SDIO Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SDIO_SD_Init(void)
+{
+
+  /* USER CODE BEGIN SDIO_Init 0 */
+
+  /* USER CODE END SDIO_Init 0 */
+
+  /* USER CODE BEGIN SDIO_Init 1 */
+
+  /* USER CODE END SDIO_Init 1 */
+  hsd.Instance = SDIO;
+  hsd.Init.ClockEdge = SDIO_CLOCK_EDGE_RISING;
+  hsd.Init.ClockBypass = SDIO_CLOCK_BYPASS_DISABLE;
+  hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
+  hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
+  hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
+  hsd.Init.ClockDiv = 100;
+  /* USER CODE BEGIN SDIO_Init 2 */
+
+  /* USER CODE END SDIO_Init 2 */
 
 }
 
@@ -331,6 +356,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */

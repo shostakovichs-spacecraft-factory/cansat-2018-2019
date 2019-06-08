@@ -18,19 +18,19 @@
 #include "stm32f1xx_hal_can.h"
 
 typedef struct {
-	CAN_TxCANHEADERTypeDef CANHEADER;
+	CAN_TxHeaderTypeDef Header;
 	uint8_t Data[8];
 } canmavlink_TX_frame_t;
 
 typedef struct {
-	CAN_RxCANHEADERTypeDef CANHEADER;
+	CAN_RxHeaderTypeDef Header;
 	uint8_t Data[8];
 } canmavlink_RX_frame_t;
 
 #define CANMAVLINK_TX_FRAME_T		canmavlink_TX_frame_t
 #define CANMAVLINK_RX_FRAME_T		canmavlink_RX_frame_t
 #define CANDATA(FRAMEP)	FRAMEP->Data
-#define CANHEADER(FRAMEP)	FRAMEP->CANHEADER
+#define CANHEADER(FRAMEP)	FRAMEP->Header
 
 #endif
 
