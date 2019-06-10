@@ -76,10 +76,12 @@
     <messages>
     	<message id="150" name="ZIKUSH_CMD_PREFLIGHTRESET">
 			<description>Starts new flight session</description>
+			<field type="uint8_t" name="dummy">Cause it's needed for proper generation</field>
 		</message>
 
     	<message id="151" name="ZIKUSH_CMD_POWEROFF">
 			<description>Shutdown the probe</description>
+			<field type="uint8_t" name="dummy">Cause it's needed for proper generation</field>
 		</message>
 
 		<message id="152" name="ZIKUSH_CMD_POWERBUS">

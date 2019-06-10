@@ -511,7 +511,7 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 	_rxen_write(self, false);
 	_txen_write(self, false);
 
-	//_waitbusy(self, TIMEOUT);
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
 
 	_waitbusy(self, TIMEOUT);

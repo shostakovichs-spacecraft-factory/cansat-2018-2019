@@ -60,7 +60,7 @@ int main(int argc, char ** argv)
 	sx1268_init(&radio);
 
 	const char* hostname="172.16.164.208";
-	const char* portname="3000";
+	const char* portname="11000";
 	struct addrinfo hints;
 	memset(&hints,0,sizeof(hints));
 	hints.ai_family=AF_UNSPEC;

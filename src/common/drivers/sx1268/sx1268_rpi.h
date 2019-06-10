@@ -70,6 +70,9 @@ inline uint8_t _readbusypin(sx1268_t * self)
 	return gpioRead( ((sx1268_rpi_t *) self->platform_specific)->busy_pin );
 }
 
+inline void _rxen_write(sx1268_t * self, bool state){return;}
+inline void _txen_write(sx1268_t * self, bool state){return;}
+
 inline void _nrst_reset(sx1268_t * self)
 {
 	sx1268_rpi_t * self_specific = (sx1268_rpi_t *) self->platform_specific;

@@ -89,6 +89,7 @@ static void _nrst_reset(sx1268_t * self)
 	HAL_GPIO_WritePin(self_specific->nrst_port, self_specific->nrst_pin, GPIO_PIN_RESET);
 	HAL_Delay(500);
 	HAL_GPIO_WritePin(self_specific->nrst_port, self_specific->nrst_pin, GPIO_PIN_SET);
+	HAL_Delay(100);
 }
 
 static void _rxen_write(sx1268_t * self, bool state)

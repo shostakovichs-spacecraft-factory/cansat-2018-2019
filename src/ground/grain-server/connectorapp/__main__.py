@@ -24,7 +24,7 @@ from .streams_sink import StreamAggregator, SpectrumAcceptor, PictureSaver
 
 _log = logging.getLogger(__name__)
 _config = get_config()
-_putback = _config["MAV_PLOT_DATA_PBACK"]
+_putback = _config["CONN_PLOT_DATA_PBACK"]
 
 
 def update_zset(set_name, message):
@@ -65,23 +65,31 @@ def HeartbeatHandler(msg):
 
 
 def main(argv):
-    logging.basicConfig(stream=sys.stdout, level=_config["MAV_LOG_LEVEL"])
+    logging.basicConfig(stream=sys.stdout, level=_config["CONN_LOG_LEVEL"])
 
-    _log.info("Запускаюсь. Слушаю url: %s" % _config["MAV_LISTEN_URL"])
-    connection = mavutil.mavlink_connection(_config["MAV_LISTEN_URL"])
+    _log.info("Запускаюсь. Слушаю url: %s" % _config["CONN_LISTEN_URL"])
+    connection = mavutil.mavlink_connection(_config["CONN_LISTEN_URL"])
     mav = connection
 
     now = datetime.utcnow().isoformat()
     logfile = "/opt/logs/%s_mavlink_app.mav" % now
-    mav.setup_logfile(logfile)
-    _log.error("mavlog setted up %s" % logfile)
+    try:
+        mav.setup_logfile(logfile)
+    except FileNotFoundError:
+        print("Cannot setup logfile", logfile)
+    else:
+        _log.error("mavlog setted up %s" % logfile)
 
     connectorapp_path = os.path.dirname(os.path.abspath(__file__)) # Path to ...../grain_server/connectorapp
     grain_path = os.path.dirname(connectorapp_path)
-    filename_template = grain_path + '/webapp/tmp/img/%d.png'
+    spectrumpicture_filename_template = grain_path + '/webapp/tmp/img/spectrum/%d.png'
+    nadirpicture_filename_template = grain_path + '/webapp/tmp/img/nadir/%d.png'
+    zenithpicture_filename_template = grain_path + '/webapp/tmp/img/zenith/%d.png'
 
     stream_aggregator = StreamAggregator(spectrum_acceptor=SpectrumRedisSaver(),
-                                           picture_acceptor=PictureSaver(filename_template=filename_template))
+                        picture_acceptor_spectrum=PictureSaver(filename_template=spectrumpicture_filename_template),
+                        picture_acceptor_nadir = PictureSaver(filename_template=nadirpicture_filename_template),
+                        picture_acceptor_zenith = PictureSaver(filename_template=zenithpicture_filename_template)),
 
     while True:
         msg = mav.recv_match(blocking=True)
