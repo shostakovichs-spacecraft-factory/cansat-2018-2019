@@ -60,10 +60,12 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define RADIO_BUSY_Pin GPIO_PIN_12
 #define RADIO_BUSY_GPIO_Port GPIOE
-#define NRF_CE_Pin GPIO_PIN_13
-#define NRF_CE_GPIO_Port GPIOE
+#define RADIO_TXEN_Pin GPIO_PIN_13
+#define RADIO_TXEN_GPIO_Port GPIOE
 #define RADIO_NRST_Pin GPIO_PIN_14
 #define RADIO_NRST_GPIO_Port GPIOE
+#define RADIO_RXEN_Pin GPIO_PIN_15
+#define RADIO_RXEN_GPIO_Port GPIOE
 #define RADIO_NSS_Pin GPIO_PIN_12
 #define RADIO_NSS_GPIO_Port GPIOB
 #define RADIO_IRQ_Pin GPIO_PIN_15

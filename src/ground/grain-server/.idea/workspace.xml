@@ -2,17 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a29cf80a-6178-4680-ae34-78975dde51bc" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../../board/CCU/include/zikush_config.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/CCU/include/zikush_config.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../board/ICU/.cproject" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/.cproject" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../board/ICU/.mxproject" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/.mxproject" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../board/ICU/ICU.ioc" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/ICU.ioc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../board/ICU/Inc/main.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/Inc/main.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../board/ICU/Inc/router.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/Inc/router.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../board/ICU/Inc/stm32f1xx_hal_conf.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/Inc/stm32f1xx_hal_conf.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../board/ICU/Src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/Src/main.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../board/ICU/Src/router.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/Src/router.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../board/ICU/Src/stm32f1xx_hal_msp.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/Src/stm32f1xx_hal_msp.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../common/mavlink/custom/canmavlink_hal.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../common/mavlink/custom/canmavlink_hal.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -319,7 +313,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-3" y="0" width="1286" height="1027" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2494043" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />

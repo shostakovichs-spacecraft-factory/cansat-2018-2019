@@ -88,6 +88,11 @@ void radio_init()
 	radio_specific.cs_pin = RADIO_NSS_Pin;
 	radio_specific.nrst_port = RADIO_NRST_GPIO_Port;
 	radio_specific.nrst_pin = RADIO_NRST_Pin;
+	radio_specific.rxen_port = RADIO_RXEN_GPIO_Port;
+	radio_specific.rxen_pin = RADIO_RXEN_Pin;
+	radio_specific.txen_port = RADIO_TXEN_GPIO_Port;
+	radio_specific.txen_pin = RADIO_TXEN_Pin;
+
 	sx1268_init(&radio);
 }
 
@@ -328,7 +333,7 @@ static void MX_SPI2_Init(void)
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -360,7 +365,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(NRF_CE_GPIO_Port, NRF_CE_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, RADIO_TXEN_Pin|RADIO_RXEN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(RADIO_NRST_GPIO_Port, RADIO_NRST_Pin, GPIO_PIN_SET);
@@ -377,12 +382,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(RADIO_BUSY_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : NRF_CE_Pin */
-  GPIO_InitStruct.Pin = NRF_CE_Pin;
+  /*Configure GPIO pins : RADIO_TXEN_Pin RADIO_RXEN_Pin */
+  GPIO_InitStruct.Pin = RADIO_TXEN_Pin|RADIO_RXEN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(NRF_CE_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pin : RADIO_NRST_Pin */
   GPIO_InitStruct.Pin = RADIO_NRST_Pin;
