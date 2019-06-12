@@ -13,6 +13,7 @@
 #include "spi.h"
 #include "lsm6ds3.h"
 #include "lsm303c.h"
+#include "mag_calib.h"
 
 #include "thread.h"
 
@@ -119,15 +120,22 @@ int main()
 	lsm303c_register_i2c(&hlsm3, &hi2c);
 	lsm303c_m_push_conf(&hlsm3, &hlsm3.conf.m);
 
+	mag_calib_init();
+	mag_calib_calibrate_lsm303c(&hlsm3, 500, 20);
+
 	while(1)
 	{
 		struct lsm303c_raw_data_m_s rd;
 		lsm303c_m_pull(&hlsm3, &rd);
 		float data[3];
 		for(int i = 0; i < 3; i++)
-			data[i] = rd.m[i] / 16.0;
+			data[i] = rd.m[i];
+		mag_calib_scale(data, data + 1, data + 2);
 
-		trace_printf("x: %5.5f y: %5.5f z: %5.5f\n", data[0], data[1], data[2]);
+		for(int i = 0; i < 3; i++)
+			data[i] /= 16.0;
+		trace_printf("x: %05.3f y: %05.3f z: %05.3f \n", data[0], data[1], data[2]);
+		HAL_Delay(30);
 	}
 
 
