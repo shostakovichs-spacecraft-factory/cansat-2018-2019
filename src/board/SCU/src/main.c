@@ -14,6 +14,9 @@
 #include "lsm6ds3.h"
 #include "lsm303c.h"
 #include "mag_calib.h"
+#include <math.h>
+#include "madgwick/MadgwickAHRS.h"
+#include "madgwick/ahrs.h"
 
 #include "thread.h"
 
@@ -93,6 +96,25 @@ int lsm6ds3_test()
 	return 0;
 }
 
+void toEulerAngle(quaternion_t *q, double *roll, double *pitch, double *yaw)
+{
+	// roll (x-axis rotation)
+	double sinr_cosp = +2.0 * (q->w * q->x + q->y * q->z);
+	double cosr_cosp = +1.0 - 2.0 * (q->x * q->x + q->y * q->y);
+	*roll = atan2(sinr_cosp, cosr_cosp);
+
+	// *pitch (y-axis rotation)
+	double sinp = +2.0 * (q->w * q->y - q->z * q->x);
+	if (fabs(sinp) >= 1)
+		*pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+	else
+		*pitch = asin(sinp);
+
+	// *yaw (z-axis rotation)
+	double siny_cosp = +2.0 * (q->w * q->z + q->x * q->y);
+	double cosy_cosp = +1.0 - 2.0 * (q->y * q->y + q->z * q->z);
+	*yaw = atan2(siny_cosp, cosy_cosp);
+}
 int main()
 {
 
@@ -108,6 +130,23 @@ int main()
 	__I2C1_CLK_ENABLE();
 	__CAN1_CLK_ENABLE();
 
+	SPI_HandleTypeDef hspi;
+	spi_config_default(&hspi);
+	hspi.Instance = SPI1;
+	spi_pin_miso_init(&hspi, GPIOA, GPIO_PIN_6);
+	spi_pin_mosi_init(&hspi, GPIOA, GPIO_PIN_7);
+	spi_pin_sck_init(&hspi, GPIOA, GPIO_PIN_5);
+	spi_pin_nss_init(&hspi, GPIOA, GPIO_PIN_4);
+
+	spi_init(&hspi);
+
+	struct lsm6ds3_dev_s hlsm6;
+	lsm6ds3_conf_default(&hlsm6);
+	lsm6ds3_register_spi(&hlsm6, &hspi);
+	HAL_Delay(50);
+	lsm6ds3_push_conf(&hlsm6);
+
+
 	I2C_HandleTypeDef hi2c;
 	i2c_pin_scl_init(GPIOB, GPIO_PIN_6);
 	i2c_pin_sda_init(GPIOB, GPIO_PIN_7);
@@ -120,22 +159,92 @@ int main()
 	lsm303c_register_i2c(&hlsm3, &hi2c);
 	lsm303c_m_push_conf(&hlsm3, &hlsm3.conf.m);
 
-	mag_calib_init();
-	mag_calib_calibrate_lsm303c(&hlsm3, 500, 20);
 
+	trace_printf("\n%s\n", "Hi!");
+	HAL_Delay(5000);
+	mag_calib_init();
+	trace_printf("%s\n", "Begin mag calibration");
+	mag_calib_calibrate_lsm303c(&hlsm3, 500, 20);
+	trace_printf("%s\n", "End mag calibration");
+	HAL_Delay(5000);
+
+
+	struct lsm303c_raw_data_m_s rdm;
+	struct lsm6ds3_raw_data_s rd = {{0,0,0},{0,0,0}};
+	float ddx[3], ddg[3], ddm[3];
+	vector_t vx, vg, vm;
+
+	lsm303c_m_pull(&hlsm3, &rdm);
+	lsm303c_scale_m(&hlsm3, rdm.m, ddm, 3);
+	mag_calib_scale(ddm, ddm + 1, ddm + 2);
+
+	ahrs_init();
+	ahrs_setKoefB(10.0);
+	ahrs_vectorActivate(AHRS_LIGHT, 0);
+	ahrs_vectorActivate(AHRS_MAG, 1);
+	ahrs_vectorActivate(AHRS_ACCEL, 1);
+
+	vx.x = ddx[0];
+	vx.y = ddx[1];
+	vx.z = ddx[2];
+	vec_normalize(&vx);
+
+	vm.x = ddm[0];
+	vm.y = ddm[1];
+	vm.z = ddm[2];
+	vec_normalize(&vm);
+	ahrs_updateVecReal(AHRS_ACCEL, vx);
+	ahrs_updateVecReal(AHRS_MAG, vm);
+
+	uint32_t time_prev = HAL_GetTick();
+	HAL_Delay(10);
 	while(1)
 	{
-		struct lsm303c_raw_data_m_s rd;
-		lsm303c_m_pull(&hlsm3, &rd);
-		float data[3];
-		for(int i = 0; i < 3; i++)
-			data[i] = rd.m[i];
-		mag_calib_scale(data, data + 1, data + 2);
+		uint32_t time_now = HAL_GetTick();
 
+		lsm303c_m_pull(&hlsm3, &rdm);
+		lsm6ds3_gxl_pull(&hlsm6, &rd);
+
+		lsm303c_scale_m(&hlsm3, rdm.m, ddm, 3);
+		lsm6ds3_scale_g(&hlsm6.conf.g, rd.g, ddg, 3);
+		lsm6ds3_scale_xl(&hlsm6.conf.xl, rd.xl, ddx, 3);
 		for(int i = 0; i < 3; i++)
-			data[i] /= 16.0;
-		trace_printf("x: %05.3f y: %05.3f z: %05.3f \n", data[0], data[1], data[2]);
-		HAL_Delay(30);
+		{
+			ddg[i] *= 2 * M_PI;
+		}
+		mag_calib_scale(ddm, ddm + 1, ddm + 2);
+		/*
+		trace_printf("Gyro: \t%8.3f %8.3f %8.3f \n", ddg[0], ddg[1], ddg[2]);
+
+	    //lsm6ds3_read_regn(&hlsm6, 0x22, (uint8_t*)&rd, sizeof(rd)/2);
+		trace_printf("Axel: \t%8.3f %8.3f %8.3f \n", ddx[0], ddx[1], ddx[2]);
+
+
+
+		trace_printf("Mag: \t%8.3f %8.3f %8.3f \n\n", ddm[0], ddm[1], ddm[2]);*/
+		vx.x = ddx[0];
+		vx.y = ddx[1];
+		vx.z = ddx[2];
+		vec_normalize(&vx);
+
+		vm.x = ddm[0];
+		vm.y = ddm[1];
+		vm.z = ddm[2];
+		vec_normalize(&vm);
+		ahrs_updateVecMeasured(AHRS_ACCEL, vx);
+		ahrs_updateVecMeasured(AHRS_MAG, vm);
+		ahrs_updateGyroData(vec_init(0,0,0));
+		ahrs_calculateOrientation((time_now - time_prev)/1000.0);
+		quaternion_t result = ahrs_getOrientation();
+		double r[3];
+		toEulerAngle(&result, &r[0], &r[1], &r[2]);
+		for(int i = 0; i < 3; i++)
+		{
+			r[i] *= 180 / M_PI;
+		}
+		trace_printf("\t%8.3lf %8.3lf %8.3lf \n", r[0], r[1], r[2]);
+
+		time_prev = time_now;
 	}
 
 

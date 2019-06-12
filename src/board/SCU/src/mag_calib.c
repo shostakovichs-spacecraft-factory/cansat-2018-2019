@@ -56,12 +56,16 @@ void mag_calib_calibrate_lsm303c(struct lsm303c_handler_s *handler, int n, uint3
 
 	for(int i = 0; i < n; i++)
 	{
+		uint32_t st = HAL_GetTick();
 		struct lsm303c_raw_data_m_s rd;
 		lsm303c_m_pull(handler, &rd);
+
+		float dd[3];
+		lsm303c_scale_m(handler, rd.m, dd, 3);
 		mag_calib_hard.arr[0] += rd.m[0];
 		mag_calib_hard.arr[1] += rd.m[1];
 		mag_calib_hard.arr[2] += rd.m[2];
-		HAL_Delay(wait_ms);
+		while(HAL_GetTick() - st < wait_ms);
 	}
 	mag_calib_hard.arr[0] /= -(float)n;
 	mag_calib_hard.arr[1] /= -(float)n;

@@ -8,8 +8,9 @@
 #include "quaternion.h"
 
 #include <math.h>
-#include <stdio.h>
+#include <diag/Trace.h>
 
+#define printf trace_printf
 quaternion_t quat_mulByNum(quaternion_t * a, double k) {
 
 	quaternion_t result;
@@ -115,11 +116,18 @@ vector_t vec_rotate(vector_t * vect, quaternion_t * rotation) {
 }
 
 
+void vec_normalize(vector_t *vec)
+{
+	float v = sqrt(vec->x * vec->x + vec->y * vec->y + vec->z * vec->z);
+	vec->x /= v;
+	vec->y /= v;
+	vec->z /= v;
+}
 int vecToMatrix(Matrixf *result, vector_t *vec)
 {
 	if(!matrix_isThatSize(result, 3, 1))
 	{
-		fprintf(stderr, "Bad sizes: vec -> matrix\n");
+		printf("Bad sizes: vec -> matrix\n");
 		return -1;
 	}
 	*matrix_at(result, 0, 0) = vec->x;
@@ -133,7 +141,7 @@ int quatToMatrix(Matrixf *result, quaternion_t *quat)
 {
 	if(!matrix_isThatSize(result, 4, 1))
 	{
-		fprintf(stderr, "Bad sizes: quat -> matrix\n");
+		printf("Bad sizes: quat -> matrix\n");
 		return -1;
 	}
 	*matrix_at(result, 0, 0) = quat->w;
@@ -159,7 +167,7 @@ int matrixToQuat(quaternion_t *result, Matrixf *m)
 {
 	if(!matrix_isThatSize(m, 4, 1))
 	{
-		fprintf(stderr, "Bad sizes: matrix -> quat\n");
+		printf("Bad sizes: matrix -> quat\n");
 		return -1;
 	}
 	result->w = *matrix_at(m, 0, 0);
@@ -189,14 +197,6 @@ vector_t vec_init(double x, double y, double z)
 vector_t vec_zero()
 {
 	return vec_init(0,0,0);
-}
-
-void vec_normalize(vector_t *vec)
-{
-	float v = vec->x * vec->x + vec->y * vec->y + vec->z * vec->z;
-	vec->x /= v;
-	vec->y /= v;
-	vec->z /= v;
 }
 
 void quat_print(quaternion_t *a)

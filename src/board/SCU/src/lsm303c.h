@@ -202,6 +202,7 @@ struct lsm303c_raw_data_m_s
 
 
 
+void lsm303c_scale_m(const struct lsm303c_handler_s *handler, int16_t *in, float *out, int count);
 
 // registration of device on spi bus
 int lsm303c_register_i2c(struct lsm303c_handler_s * config, I2C_HandleTypeDef* bus);

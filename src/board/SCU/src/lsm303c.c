@@ -211,10 +211,29 @@ int lsm303c_m_push_conf(const struct lsm303c_handler_s *handler,
 int lsm303c_m_pull(const struct lsm303c_handler_s *handler,
         struct lsm303c_raw_data_m_s * m_raw)
 {
-	return handler->read_regn(handler, LSM303C_OUT_X_L_M, (uint8_t*)m_raw, 6);
-
+	int rc = handler->read_regn(handler, LSM303C_OUT_X_L_M, (uint8_t*)m_raw, 6);
+	for(int i = 0; i < 3; i++)
+	{
+		m_raw->m[i] /= 16.0;
+	}
+	return rc;
 }
 
+void lsm303c_scale_m(const struct lsm303c_handler_s *handler, int16_t *in, float *out, int count)
+{
+	float k = 1;
+	switch(handler->conf.m.fs)
+	{
+	case LSM303C_M_FS_16_GAUSS:
+		k = 16.0;
+		break;
+	}
+
+	for(int i = 0; i < count; i++)
+	{
+		out[i] = in[i] / k;
+	}
+}
 
 // push fifo config to device
 // its assumed that device (or at least fifo) is halted
