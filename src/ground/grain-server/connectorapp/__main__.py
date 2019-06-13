@@ -38,7 +38,7 @@ def update_zset(set_name, message):
     dmsg = message.to_dict()
     jmsg = json.dumps(dmsg)
 
-    p.zadd(set_name, timestamp, jmsg)
+    p.zadd(set_name, {jmsg: timestamp} )
     p.execute()
 
     # Теперь удаляем из zrange все что старше, чем позволяет наши pback из конфига

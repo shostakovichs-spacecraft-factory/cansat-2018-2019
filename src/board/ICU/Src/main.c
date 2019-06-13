@@ -139,7 +139,7 @@ void can_init()
 
 	hcan.Instance->IER |= CAN_IER_FMPIE0;
 
-	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+	//mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
 }
 
 /* USER CODE END 0 */
@@ -191,12 +191,23 @@ int main(void)
 		mavlink_message_t msg;
 		mavlink_heartbeat_t heartbeat =
 		{
-			.type = MAV_TYPE_FREE_BALLOON,
-			.autopilot = MAV_AUTOPILOT_INVALID,
-			.base_mode = MAV_MODE_FLAG_TEST_ENABLED,
-			.system_status = MAV_STATE_ACTIVE
+		    .type = MAV_TYPE_FREE_BALLOON,
+		    .autopilot = MAV_AUTOPILOT_INVALID,
+		    .base_mode = MAV_MODE_FLAG_TEST_ENABLED,
+		    .system_status = MAV_STATE_ACTIVE
 		};
 		mavlink_msg_heartbeat_encode(0, ZIKUSH_ICU, &msg, &heartbeat);
+
+		//router_route(&msg);
+
+		mavlink_scaled_pressure_t pressure =
+		{
+		    .press_abs = 100.0f,
+		    .press_diff = 0,
+		    .temperature = 2213,
+		    .time_boot_ms = HAL_GetTick(),
+		};
+		mavlink_msg_scaled_pressure_encode(0, ZIKUSH_ICU, &msg, &pressure);
 
 		router_route(&msg);
 
