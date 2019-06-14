@@ -508,6 +508,8 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 	volatile uint8_t status;
 
 	_nrst_reset(self);
+	_rxen_write(self, false);
+	_txen_write(self, false);
 
 	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
@@ -587,6 +589,8 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 
 	_waitbusy(self, TIMEOUT);
 	_cmd_SetRX(self, 0);
+	_txen_write(self, false);
+	_rxen_write(self, true);
 
 	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
@@ -614,6 +618,8 @@ sx1268_status_t sx1268_send(sx1268_t * self, uint8_t * data, int len)
 	if(STATUS_CHIPMODE(status) != STATUS_CHIPMODE_STBY_RC)
 		_cmd_SetStandby(self, false);
 
+	_rxen_write(self, false);
+	_txen_write(self, true);
 	_dotx(self, data, MIN(len, 255));
 
 	if(len > 255) //we can send only 255 bytes in one packet, so everything except should be saved to fifo
@@ -679,6 +685,9 @@ void sx1268_event(sx1268_t * self)
 
 	if(!self->fifo_tx.empty)
 	{
+		_rxen_write(self, false);
+		_txen_write(self, true);
+
 		int len = FIFO_USEDSPACE((&self->fifo_tx));
 		len = MIN(len, 255);
 
@@ -690,6 +699,8 @@ void sx1268_event(sx1268_t * self)
 	else
 		_waitbusy(self, TIMEOUT);
 		_cmd_SetRX(self, 0);
+		_txen_write(self, false);
+		_rxen_write(self, true);
 
 	_critical_exit(self);
 }

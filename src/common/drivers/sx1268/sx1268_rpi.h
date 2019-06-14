@@ -59,6 +59,7 @@ inline sx1268_status_t _cmd_ReadBuffer(sx1268_t * self,	uint8_t addr, uint8_t * 
 	uint8_t opcode = 0x1E;
 	spiWrite(self_specific->bus_handle, &opcode, 1);
 	spiWrite(self_specific->bus_handle, &addr, 1);
+	spiRead(self_specific->bus_handle, data, 1); //throwing away status byte, we wouldn't handle it
 	spiRead(self_specific->bus_handle, data, length);
 
 	gpioWrite(self_specific->cs_pin, 1);
@@ -69,6 +70,9 @@ inline uint8_t _readbusypin(sx1268_t * self)
 {
 	return gpioRead( ((sx1268_rpi_t *) self->platform_specific)->busy_pin );
 }
+
+inline void _rxen_write(sx1268_t * self, bool state){return;}
+inline void _txen_write(sx1268_t * self, bool state){return;}
 
 inline void _nrst_reset(sx1268_t * self)
 {

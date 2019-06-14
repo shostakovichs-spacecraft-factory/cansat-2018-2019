@@ -3,6 +3,8 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <netdb.h>
+#include <string.h>
 
 #include <pigpio.h>
 #include <sx1268.h>
@@ -57,21 +59,29 @@ int main(int argc, char ** argv)
 
 	sx1268_init(&radio);
 
-	int sock = socket(PF_INET, SOCK_DGRAM, 0);
+	const char* hostname="172.16.164.208";
+	const char* portname="11000";
+	struct addrinfo hints;
+	memset(&hints,0,sizeof(hints));
+	hints.ai_family=AF_UNSPEC;
+	hints.ai_socktype=SOCK_DGRAM;
+	hints.ai_protocol=0;
+	hints.ai_flags=AI_ADDRCONFIG;
+	struct addrinfo* addr=0;
+	err = getaddrinfo(hostname,portname,&hints,&addr);
 
-	struct sockaddr_in addr =
-	{
-		.sin_family = AF_INET,
-		.sin_addr = INADDR(127,0,0,1),
-		.sin_port = 3000,
-	};
+	int sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+	printf("sock: %d   addr err: %d\n", sock, err);
+
 
 	while(1) {
 		if( RXLEN(radio) != 0)
 		{
 			int rxlen = RXLEN(radio);
-			sx1268_receive(&radio, tmpbuff, rxlen);
-			sendto(sock, tmpbuff, rxlen, 0, (struct sockaddr *)&addr, sizeof(addr));
+			sx1268_status_t status = sx1268_receive(&radio, tmpbuff, rxlen);
+			printf("stat: %d   rxlen: %d\n", status, rxlen);
+			int res = sendto(sock, tmpbuff, rxlen, 0, addr->ai_addr, addr->ai_addrlen);
+			printf("res: %d\n", res);
 		}
 		usleep(10000);
 	}

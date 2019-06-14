@@ -16,7 +16,7 @@ environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1498831859/RASPB
 environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1498831859/RASPBIAN_FLAGS/value=--sysroot\=${SYSROOT} -Wl,--sysroot\=${SYSROOT} -march\=armv6 -mfloat-abi\=hard -mfpu\=vfp -marm
 environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1498831859/SYSROOT/delimiter=\:
 environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1498831859/SYSROOT/operation=replace
-environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1498831859/SYSROOT/value=/home/kirs/rpi-dev/sysroot/
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1498831859/SYSROOT/value=/home/kirs/development/rpi-dev/sysroot/
 environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1498831859/append=true
 environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1498831859/appendContributed=true
 environment/project/cdt.managedbuild.config.gnu.cross.exe.release.326507859/CFLAGS/delimiter=\:

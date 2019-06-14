@@ -1,0 +1,129 @@
+{% extends "basic.html" %}
+
+
+{% block styles %}
+{{ super() }}
+
+{% assets "openlayers_css" %}
+<link rel="stylesheet" href="{{ ASSET_URL }}"/>
+{% endassets %}
+
+<style>
+
+.three-js-scene {
+    min-height: 70vh;
+    height: 70vh;
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+    <div class="row h-100 center-block">
+        <div class="col-xl-12 text-center">
+            <h1>GL TESTS HERE</h1>
+        </div>
+    </div>
+
+    <div class="row mh1 center-block">
+        <div class="col-xl-1"> </div>
+        <div class="col-xl-10 text-center three-js-scene" id="orientation-model-scene"></div>
+        <div class="col-xl-1"> </div>
+    </div>
+{% endblock %}
+
+
+
+{% block js %}
+{{ super() }}
+
+{% assets "three" %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+
+{% assets "three_stl_loader" %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+
+<script type="text/javascript">
+
+    var scene;
+    var camera;
+    var renderer;
+
+    function gl_main(container)
+    {
+        width = container.width();
+        height = container.height();
+        modelUrl = "{{ url_for('static', filename='rocket.stl') }}";
+
+
+        // Scene
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
+        camera.position.set(30, 30, 30);
+        var cameraTarget = new THREE.Vector3(0, 0, 0);
+        camera.lookAt(cameraTarget);
+
+        // Plane
+        var plane = new THREE.Mesh(
+        new THREE.PlaneBufferGeometry( 40, 40 ),
+        new THREE.MeshPhongMaterial( { color: 0x999999, specular: 0x101010 } )
+        );
+        plane.rotation.x = -Math.PI/2;
+        plane.position.y = -0.5;
+        scene.add( plane );
+
+        plane.receiveShadow = true;
+
+        // Lights
+        scene.add( new THREE.HemisphereLight( 0x443333, 0x111122 ) );
+
+        // addShadowedLight( 1, 1, 1, 0xffffff, 1.35 );
+        // addShadowedLight( 0.5, 1, -1, 0xffaa00, 1 );
+
+        // Rocket
+        var loader = new THREE.STLLoader();
+        var group = new THREE.Object3D();
+        loader.load(modelUrl, function (geometry) {
+            console.log(geometry);
+            var mat = new THREE.MeshLambertMaterial({color: 0x7777ff});
+            group = new THREE.Mesh(geometry, mat);
+            // group.rotation.x = -0.5 * Math.PI;
+            group.translateY(8);
+            group.scale.set(0.2, 0.2, 0.2);
+            scene.add(group);
+        });
+
+
+        // renderer
+        renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.gammaInput = true;
+        renderer.gammaOutput = true;
+        renderer.shadowMap.enabled = true;
+        renderer.setSize(width, height);
+        container.append(renderer.domElement);
+
+
+        render();
+    }
+
+
+    function render(){
+        requestAnimationFrame(render);
+        renderer.render(scene, camera);
+    }
+
+
+    $(document).ready(function(){
+        gl_main($("#orientation-model-scene"));
+    });
+
+
+</script>
+{% endblock %}

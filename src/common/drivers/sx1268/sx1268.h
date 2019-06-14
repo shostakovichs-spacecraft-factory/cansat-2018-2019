@@ -31,7 +31,7 @@ typedef struct
 
 typedef enum
 {
-	SX1268_OK,
+	SX1268_OK = 0,
 	SX1268_TIMEOUT,
 	SX1268_BUSY,
 	SX1268_ERR_BUFSIZE,

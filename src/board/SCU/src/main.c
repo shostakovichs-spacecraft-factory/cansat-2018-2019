@@ -191,7 +191,8 @@ CAN_HandleTypeDef hcan;
 
 void CAN_Send(data_struct_t * data)
 {
-	mavlink_message_t mavlink_msg;
+	trace_printf("%f %f %f\n", data->ds_temp, data->bme_temp, data->bme_hum);
+	/*mavlink_message_t mavlink_msg;
 	CANMAVLINK_TX_FRAME_T frames[34];
 
 	mavlink_heartbeat_t heartbeat =
@@ -220,7 +221,7 @@ void CAN_Send(data_struct_t * data)
 
 
 	mavlink_msg_heartbeat_encode(0, ZIKUSH_SCU, &mavlink_msg, &heartbeat);
-	uint8_t framecount = canmavlink_msg_to_frames(frames, &mavlink_msg);
+	volatile uint8_t framecount = canmavlink_msg_to_frames(frames, &mavlink_msg);
 	for(int i = 0; i < framecount; i++) //FIXME rewrite with IRQs
 	{
 		hcan.pTxMsg = frames + i; //DELICIOUS!!
@@ -241,14 +242,14 @@ void CAN_Send(data_struct_t * data)
 	{
 		hcan.pTxMsg = frames + i; //DELICIOUS!!
 		HAL_CAN_Transmit(&hcan, 1000);
-	}
+	}*/
 
 }
 
 int main()
 {
 
-	__initialize_hardware();
+	//__initialize_hardware();
 
 
 	// Call the CSMSIS system clock routine to store the clock frequency
@@ -259,6 +260,7 @@ int main()
 
 	__I2C1_CLK_ENABLE();
 	__CAN1_CLK_ENABLE();
+	//__CAN2_CLK_ENABLE();
 
 	I2C_HandleTypeDef hi2c;
 	i2c_pin_scl_init(GPIOB, GPIO_PIN_6);
@@ -273,13 +275,23 @@ int main()
 		.Mode = GPIO_MODE_AF_PP,
 		.Alternate = GPIO_AF9_CAN1,
 		.Pull = GPIO_NOPULL,
-		.Speed = GPIO_SPEED_FREQ_VERY_HIGH,
-		.Pin = GPIO_PIN_11 | GPIO_PIN_12
+		.Speed = GPIO_SPEED_LOW,
+		.Pin = GPIO_PIN_12
 	};
 	HAL_GPIO_Init(GPIOA, &gpio_init);
 
+	gpio_init.Mode = GPIO_MODE_INPUT;
+	gpio_init.Pin = GPIO_PIN_11;
+	HAL_GPIO_Init(GPIOA, &gpio_init);
+
+	GPIOA->AFR[1] &= ~(0x0F << 12);
+	GPIOA->AFR[1] |= GPIO_AF9_CAN1 << 12;
+
+	GPIOA->MODER &= ~GPIO_MODER_MODER11;
+	GPIOA->MODER |= GPIO_MODER_MODER11_1;
+
 	hcan.Instance = CAN1;
-	hcan.Init.Prescaler = 400;
+	hcan.Init.Prescaler = 466;
 	hcan.Init.Mode = CAN_MODE_NORMAL;
 	hcan.Init.SJW = CAN_SJW_1TQ;
 	hcan.Init.BS1 = CAN_BS1_5TQ;
@@ -292,6 +304,9 @@ int main()
 	hcan.Init.TXFP = DISABLE;
 	HAL_CAN_Init(&hcan);
 
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
+
 	ADS1x1x_config_t ads;
 	ADS1x1x_config_default(&ads);
 	ADS1x1x_register_i2c(&ads, &hi2c, ADS1x1x_I2C_ADDRESS_ADDR_TO_GND << 1);
@@ -301,8 +316,8 @@ int main()
 	onewire_t how;
 	onewire_Init(&how, GPIOB, GPIO_PIN_3);
 
-	struct bme280_dev_s *hbme;
-	thread_init_bme280(hbme, &hi2c);
+	struct bme280_dev_s hbme;
+	thread_init_bme280(&hbme, &hi2c);
 
 	ds18b20_config_t hds;
 	thread_init_ds18b20(&hds, &how);
@@ -317,7 +332,7 @@ int main()
 		{
 			thread_update_bme280(&hbme, arg);
 
-			struct bme280_float_data_s *d = (struct bme280_float_data_s*)(arg + 1);
+			struct bme280_float_data_s *d = (struct bme280_float_data_s*)(arg + 4);
 
 			Data.bme_pres = d->pressure;
 			Data.bme_hum = d->humidity;
@@ -342,7 +357,7 @@ int main()
 
 		CAN_Send(&Data);
 
-		HAL_Delay(900); //Stupid but simple
+		HAL_Delay(1000); //Stupid but simple
 	}
 
 	return 0;

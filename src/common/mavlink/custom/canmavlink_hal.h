@@ -10,27 +10,27 @@
 
 #define CANMAVLINK_TX_FRAME_T		CanTxMsgTypeDef
 #define CANMAVLINK_RX_FRAME_T		CanRxMsgTypeDef
-#define DATA(FRAMEP)	FRAMEP->Data
-#define HEADER(FRAMEP)	(*FRAMEP)
+#define CANDATA(FRAMEP)	FRAMEP->Data
+#define CANHEADER(FRAMEP)	(*FRAMEP)
 
-#else if defined STM32F103xx
+#elif defined STM32F103xE
 #include <stm32f1xx_hal.h>
 #include "stm32f1xx_hal_can.h"
 
 typedef struct {
 	CAN_TxHeaderTypeDef Header;
 	uint8_t Data[8];
-} canmavlink_CANMAVLINK_TX_FRAME_T;
+} canmavlink_TX_frame_t;
 
 typedef struct {
 	CAN_RxHeaderTypeDef Header;
 	uint8_t Data[8];
-} canmavlink_CANMAVLINK_RX_FRAME_T;
+} canmavlink_RX_frame_t;
 
-#define CANMAVLINK_TX_FRAME_T		canmavlink_CANMAVLINK_TX_FRAME_T
-#define CANMAVLINK_RX_FRAME_T		canmavlink_CANMAVLINK_RX_FRAME_T
-#define DATA(FRAMEP)	FRAMEP->Data
-#define HEADER(FRAMEP)	FRAMEP->Header
+#define CANMAVLINK_TX_FRAME_T		canmavlink_TX_frame_t
+#define CANMAVLINK_RX_FRAME_T		canmavlink_RX_frame_t
+#define CANDATA(FRAMEP)	FRAMEP->Data
+#define CANHEADER(FRAMEP)	FRAMEP->Header
 
 #endif
 
@@ -48,9 +48,9 @@ typedef struct {
 
 #define CAN_STDID_PACK(COMPID, FFFLAG, MSGID) ( (COMPID & 0x03) << 9 | \
 												(FFFLAG & 0x01) << 8 | (MSGID & 0xFF) )
-#define CAN_STDID_COMPID(FRAMEP)	( (HEADER(FRAMEP).StdId >> 9) & 0x03 )
-#define CAN_STDID_FFFLAG(FRAMEP)	( (HEADER(FRAMEP).StdId >> 8) & 0x01 )
-#define CAN_STDID_MSGID(FRAMEP)		( (HEADER(FRAMEP).StdId >> 0) & 0xFF )
+#define CAN_STDID_COMPID(FRAMEP)	( (CANHEADER(FRAMEP).StdId >> 9) & 0x03 )
+#define CAN_STDID_FFFLAG(FRAMEP)	( (CANHEADER(FRAMEP).StdId >> 8) & 0x01 )
+#define CAN_STDID_MSGID(FRAMEP)		( (CANHEADER(FRAMEP).StdId >> 0) & 0xFF )
 
 #define ISFIRSTFRAME(FRAMEP) (CAN_STDID_FFFLAG(FRAMEP) & FIRSTFRAME_FLAG)
 #define FIRSTFRAMEDATALEN	4
@@ -72,10 +72,10 @@ MAVLINK_HELPER uint8_t canmavlink_msg_to_frames(CANMAVLINK_TX_FRAME_T * frames, 
 	CANMAVLINK_TX_FRAME_T * firstframe = frames;
 
 	if (msg->magic == MAVLINK_STX_MAVLINK1) {
-		HEADER(firstframe).IDE = CAN_ID_STD;
-		HEADER(firstframe).RTR = CAN_RTR_DATA;
-		HEADER(firstframe).DLC = 4;
-		HEADER(firstframe).StdId = CAN_STDID_PACK(msg->compid, FIRSTFRAME_FLAG, msg->msgid);
+		CANHEADER(firstframe).IDE = CAN_ID_STD;
+		CANHEADER(firstframe).RTR = CAN_RTR_DATA;
+		CANHEADER(firstframe).DLC = 4;
+		CANHEADER(firstframe).StdId = CAN_STDID_PACK(msg->compid, FIRSTFRAME_FLAG, msg->msgid);
 		firstframe->Data[0] = length;
 		firstframe->Data[1] = msg->seq;
 		firstframe->Data[2] = msg->sysid;
@@ -90,16 +90,16 @@ MAVLINK_HELPER uint8_t canmavlink_msg_to_frames(CANMAVLINK_TX_FRAME_T * frames, 
 			memcpy(currframe->Data, _MAV_PAYLOAD(msg) + i, copylen);
 			i += copylen;
 
-			HEADER(currframe).IDE = CAN_ID_STD;
-			HEADER(currframe).RTR = CAN_RTR_DATA;
-			HEADER(currframe).DLC = copylen;
-			HEADER(currframe).StdId = CAN_STDID_PACK(msg->compid, !FIRSTFRAME_FLAG, msg->msgid);
+			CANHEADER(currframe).IDE = CAN_ID_STD;
+			CANHEADER(currframe).RTR = CAN_RTR_DATA;
+			CANHEADER(currframe).DLC = copylen;
+			CANHEADER(currframe).StdId = CAN_STDID_PACK(msg->compid, !FIRSTFRAME_FLAG, msg->msgid);
 
 			if(copylen < 7) //We should append CRC
 			{
 				currframe->Data[copylen] = (uint8_t)(msg->checksum & 0xFF);
 				currframe->Data[copylen + 1] = (uint8_t)(msg->checksum >> 8);
-				HEADER(currframe).DLC += 2;
+				CANHEADER(currframe).DLC += 2;
 
 				break;
 			}
@@ -125,7 +125,7 @@ MAVLINK_HELPER uint8_t canmavlink_msg_to_frames(CANMAVLINK_TX_FRAME_T * frames, 
  */
 MAVLINK_HELPER uint8_t canmavlink_parse_frame(CANMAVLINK_RX_FRAME_T * frame, mavlink_message_t* r_message, mavlink_status_t* r_mavlink_status)
 {
-	if(HEADER(frame).IDE != CAN_ID_STD) return MAVLINK_FRAMING_INCOMPLETE;
+	if(CANHEADER(frame).IDE != CAN_ID_STD) return MAVLINK_FRAMING_INCOMPLETE;
 
 	uint8_t chan = CAN_STDID_COMPID(frame); // Implicit logic channel separation
 
@@ -135,8 +135,8 @@ MAVLINK_HELPER uint8_t canmavlink_parse_frame(CANMAVLINK_RX_FRAME_T * frame, mav
 
 	if(ISFIRSTFRAME(frame)) //We should process 1st frame differently
 	{
-		if(HEADER(frame).DLC != FIRSTFRAMEDATALEN) return 0;
-		copylen = HEADER(frame).DLC;
+		if(CANHEADER(frame).DLC != FIRSTFRAMEDATALEN) return 0;
+		copylen = CANHEADER(frame).DLC;
 
 		msgbuf->msgid = CAN_STDID_MSGID(frame);
 		msgbuf->magic = MAVLINK_STX_MAVLINK1; //FIXME maybe we should add 2.0?
@@ -153,17 +153,17 @@ MAVLINK_HELPER uint8_t canmavlink_parse_frame(CANMAVLINK_RX_FRAME_T * frame, mav
 		msgbuf->compat_flags = 0;
 		msgstat->parse_state = MAVLINK_PARSE_STATE_GOT_MSGID3;
 
-		r_mavlink_status->msg_received = MAVLINK_FRAMING_INCOMPLETE;
+		msgstat->msg_received = MAVLINK_FRAMING_INCOMPLETE;
 
 	} else	// If it's a consecutive frame, just copy
 	{
-		copylen = MIN(msgbuf->len - msgstat->packet_idx, HEADER(frame).DLC); //copy only data, not CRC
+		copylen = MIN(msgbuf->len - msgstat->packet_idx, CANHEADER(frame).DLC); //copy only data, not CRC
 
 		memcpy(_MAV_PAYLOAD_NON_CONST(msgbuf) + msgstat->packet_idx, frame->Data, copylen);
 		msgstat->packet_idx += copylen;
 	}
 
-	for(int i = 0; i < copylen; i++) //Handle CRC for header and data
+	for(int i = 0; i < copylen; i++) //Handle CRC for CANHEADER and data
 	{
 		mavlink_update_checksum(msgbuf, frame->Data[i]);
 	}
@@ -171,7 +171,7 @@ MAVLINK_HELPER uint8_t canmavlink_parse_frame(CANMAVLINK_RX_FRAME_T * frame, mav
 	if( ISFIRSTFRAME(frame) )
 				mavlink_update_checksum(msgbuf, msgbuf->msgid & 0xFF);
 
-	if(HEADER(frame).DLC - copylen == 2) //We've got CRC
+	if(CANHEADER(frame).DLC - copylen == 2) //We've got CRC
 	{
 		//Proper handling of predefined messages' properties (copied from mavlink code)
 		const mavlink_msg_entry_t *e = mavlink_get_msg_entry(msgbuf->msgid);

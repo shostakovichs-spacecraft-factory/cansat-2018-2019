@@ -1,0 +1,297 @@
+{% extends "basic.html" %}
+
+{% block styles %}
+{{ super() }}
+
+{% assets "openlayers_css" %}
+<link rel="stylesheet" href="{{ ASSET_URL }}"/>
+{% endassets %}
+
+<style>
+
+    .three-js-scene {
+        min-height: 70vh;
+        height: 70vh;
+    }
+
+</style>
+
+{% endblock %}
+
+
+
+{% block content %}
+    <div class="row h-100 center-block">
+        <div class="col-xl-12 text-center" id="header">
+            <h1>OVERVIEW</h1>
+        </div>
+    </div>
+
+    <div class="row h-100 center-block margin-bottom">
+        <div class="col-xl-6 text-center">
+            <canvas id="acc-plot-canvas"></canvas>
+        </div>
+
+        <div class="col-xl-6 text-center">
+            <canvas id="gyro-plot-canvas"></canvas>
+        </div>
+
+        <div class="col-xl-6 text-center">
+            <canvas id="temperature-plot-canvas"></canvas>
+        </div>
+
+        <div class="col-xl-6 text-center">
+            <canvas id="pressure-plot-canvas"></canvas>
+        </div>
+
+        <div class="col-xl-6 text-center">
+            <canvas id="distance-plot-canvas"></canvas>
+        </div>
+
+        <div class="col-xl-6 text-center">
+            <canvas id="humidity-plot-canvas"></canvas>
+        </div>
+
+        <div class="col-xl-6 text-center">
+            <canvas id="luminosity-plot-canvas"></canvas>
+        </div>
+    </div>
+
+    <div class="row h-100 center-block margin-bottom">
+        <div class="col-xl-6 text-center">
+            <img id="spectrum-img" src="{{ url_for("data.spectrum_img") }}" alt="Stay tuned!" style="max-height:300px"/>
+        </div>
+        <div class="col-xl-6 text-center">
+            <canvas id="spectrum-plot-canvas"></canvas>
+        </div>
+    </div>
+
+    <div class="row h-100 center-block margin-bottom">
+        <div class="col-xl-6 text-center">
+            <div class="h-100 center-block three-js-scene" id="orientation-model-scene"></div>
+        </div>
+        <div class="col-xl-6 text-center">
+            <div class="h-100 center-block" id="map"></div>
+        </div>
+    </div>
+
+    <div style="display: none;">
+        <div id="popup" title="Telemetry"></div>
+    </div>
+
+{% endblock %}
+
+
+
+
+{% block js %}
+
+{% assets "popper_js" %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+{{ super() }}
+
+{% assets "chart_js" %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+{% assets "mcc_charts" %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+
+{% assets "openlayers_js" %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+{% assets "mcc_map" %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+
+{% assets "three" %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+{% assets "three_stl_loader" %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+{% assets "mcc_gl" %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+
+{% assets "mcc_spectrum" %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+
+<script type="text/javascript">
+
+
+$(document).ready(function(){
+    var charts = [{
+        name: "acc",
+        datasets:
+        [
+            {
+                "label": "Ускорения по X (g)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#f44242",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+            {
+                "label": "Ускорения по Y (g)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#15ff00",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+            {
+                "label": "Ускорения по Z (g)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#001dff",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+        ]
+    },{
+        name: "gyro",
+        datasets:
+        [
+            {
+                "label": "Угловая скорость по X (deg/s)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#f44242",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+            {
+                "label": "Угловая скорость по Y (deg/s)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#15ff00",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+            {
+                "label": "Угловая скорость по Z (deg/s)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#001dff",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+
+        ]
+    },{
+        name: "temperature",
+        datasets:
+        [
+            {
+                "label": "Температура по датчику BMP280 (degC)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#f44242",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+            {
+                "label": "Температура по датчику AM2320 (degC)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#15ff00",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+        ]
+    },{
+        name: "pressure",
+        datasets:
+        [
+            {
+                "label": "Давление по датчику BMP280 (hPa)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#15ff00",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+        ]
+    },{
+        name: "distance",
+        datasets:
+        [
+            {
+                "label": "Дистанция до поверхности (cm)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#15ff00",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+        ]
+    },{
+        name: "humidity",
+        datasets:
+        [
+            {
+                "label": "Относительная влажность воздуха (%)",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#15ff00",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+        ]
+    },{
+        name: "luminosity",
+        datasets:
+        [
+            {
+                "label": "Освещённость",
+                "fill": false,
+                "pointRadius": 0,
+                "borderColor": "#15ff00",
+                "borderWidth": 2,
+                "lineTension": 0,
+                "data": [],
+            },
+        ]
+    }];
+
+    updatePeriodMs = {{ config["PLOT_DATA_UPDATE_PERIOD_MS"] }}
+    updatePeriodGLMs = {{ config["MODEL_DATA_UPDATE_PERIOD_MS"] }}
+    updatePeriodSpectrumMs = {{ config["SPECTRUM_DATA_UPDATE_PERIOD_MS"] }}
+
+    plotDataUrl = "{{ url_for("data.plot_data") }}"
+    mapDataUrl = "{{ url_for("data.map_data") }}"
+    glDataUrl = "{{ url_for("data.gl_data") }}"
+    spectrumDataUrl = "{{ url_for("data.spectrum_data") }}"
+    spectrumIMGUrl = "{{ url_for("data.spectrum_img") }}"
+
+    mccChartsMain(charts, updatePeriodMs, plotDataUrl );
+    mccMapMain(mapDataUrl);
+    mccGLMain($("#orientation-model-scene"), "{{ url_for('static', filename='cansat.stl') }}", glDataUrl);
+    mccSpectrumMain(spectrumDataUrl, spectrumIMGUrl);
+})
+
+</script>
+{% endblock %}
