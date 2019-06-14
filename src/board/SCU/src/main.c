@@ -119,8 +119,9 @@ int main()
 {
 
 	__initialize_hardware();
-
-
+	//uint32_t t1 = HAL_GetTick();
+	//int *arr = malloc(sizeof(*arr) * 30000);
+	//trace_printf("%d, %d", HAL_GetTick() - t1, arr);
 	// Call the CSMSIS system clock routine to store the clock frequency
 	// in the SystemCoreClock global RAM location.
 	//SystemCoreClockUpdate();
@@ -184,6 +185,10 @@ int main()
 	ahrs_vectorActivate(AHRS_MAG, 1);
 	ahrs_vectorActivate(AHRS_ACCEL, 1);
 
+	lsm6ds3_gxl_pull(&hlsm6, &rd);
+	lsm6ds3_scale_xl(&hlsm6.conf.xl, rd.xl, ddx, 3);
+
+
 	vx.x = ddx[0];
 	vx.y = ddx[1];
 	vx.z = ddx[2];
@@ -213,6 +218,7 @@ int main()
 			ddg[i] *= 2 * M_PI;
 		}
 		mag_calib_scale(ddm, ddm + 1, ddm + 2);
+		trace_printf("Mag: \t%8.3f %8.3f %8.3f \n\n", ddm[0], ddm[1], ddm[2]);
 		/*
 		trace_printf("Gyro: \t%8.3f %8.3f %8.3f \n", ddg[0], ddg[1], ddg[2]);
 
@@ -242,7 +248,7 @@ int main()
 		{
 			r[i] *= 180 / M_PI;
 		}
-		trace_printf("\t%8.3lf %8.3lf %8.3lf \n", r[0], r[1], r[2]);
+	//	trace_printf("\t%8.3lf %8.3lf %8.3lf \n", r[0], r[1], r[2]);
 
 		time_prev = time_now;
 	}

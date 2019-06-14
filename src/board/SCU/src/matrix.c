@@ -260,9 +260,17 @@ int matrix_inverse(Matrixf *matrix)
 			//printf("%f",t);
 			matrix_addRow(matrix, x, i, t);
 			matrix_addRow(&result, x, i, t);
-			//matrix_print(matrix);
+			//matrix_print(result);
 		}
 	}
+	for(int j = 0; j < matrix->width; j++)
+	{
+		for(int i = j + 1; i < matrix->height; i++)
+		{
+			*matrix_at(matrix, i, j) = 0;
+		}
+	}
+	//matrix_print(matrix);
 	for (int i = matrix->width - 1; i >= 0; i--)
 	{
 		matrix_mulRowNum(&result, i, 1 / *matrix_at(matrix, i, i));
@@ -274,6 +282,7 @@ int matrix_inverse(Matrixf *matrix)
 			matrix_addRow(matrix, i, j, t);
 			matrix_addRow(&result, i, j, t);
 		}
+		//matrix_print(&result);
 	}
 	matrix_copy(&result, matrix, 0);
 	//matrix_print(matrix);
