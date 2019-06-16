@@ -49,8 +49,10 @@
 
 #include <mavlink/zikush/mavlink.h>
 #include <canmavlink_hal.h>
+#include <usart.h>
+#include <zikush_config.h>
 
-#include "zikush_config.h"
+void can_mavlink_transmit(mavlink_message_t * msg);
 
 /* counters */
 volatile uint8_t image_counter = 0;
@@ -275,27 +277,18 @@ void send_spectrum_photo(uint8_t * image_buffer_fast_1, uint8_t * image_buffer_f
 
 	mavlink_encapsulated_data_t encdata = {};
 	mavlink_message_t msg;
-	CANMAVLINK_TX_FRAME_T canframes[34];
 
 
 	/*We send both data_transmission_handshake and zikush_picture_header so it can be received by spectrum_viewer,
 	 * 	QGriund control and Grain MCC
 	 */
 	mavlink_msg_data_transmission_handshake_encode(0, ZIKUSH_CCU, &msg, &handshake);
-	uint8_t canframecount = canmavlink_msg_to_frames(canframes, &msg);
-	for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
-	{
-		hcan.pTxMsg = canframes + i; //DELICIOUS!!
-		HAL_CAN_Transmit(&hcan, 1000);
-	}
+	can_mavlink_transmit(&msg);
+	usart3_mavlink_transmit(&msg);
 
 	mavlink_msg_zikush_picture_header_encode(0, ZIKUSH_CCU, &msg, &picture_header);
-	canframecount = canmavlink_msg_to_frames(canframes, &msg);
-	for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
-	{
-		hcan.pTxMsg = canframes + i; //DELICIOUS!!
-		HAL_CAN_Transmit(&hcan, 1000);
-	}
+	can_mavlink_transmit(&msg);
+	usart3_mavlink_transmit(&msg);
 
 	uint16_t frame = 0;
 	uint8_t image = 0;
@@ -313,12 +306,8 @@ void send_spectrum_photo(uint8_t * image_buffer_fast_1, uint8_t * image_buffer_f
 		{
 			encdata.seqnr = frame;
 			mavlink_msg_encapsulated_data_encode(0, ZIKUSH_CCU, &msg, &encdata);
-			canframecount = canmavlink_msg_to_frames(canframes, &msg);
-			for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
-			{
-				hcan.pTxMsg = canframes + i; //DELICIOUS!!
-				HAL_CAN_Transmit(&hcan, 1000);
-			}
+			can_mavlink_transmit(&msg);
+			usart3_mavlink_transmit(&msg);
 
 			frame++;
 			HAL_Delay(2);
@@ -366,12 +355,8 @@ void send_spectrum_photo(uint8_t * image_buffer_fast_1, uint8_t * image_buffer_f
 
 	encdata.seqnr = frame;
 	mavlink_msg_encapsulated_data_encode(0, ZIKUSH_CCU, &msg, &encdata);
-	canframecount = canmavlink_msg_to_frames(canframes, &msg);
-	for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
-	{
-		hcan.pTxMsg = canframes + i; //DELICIOUS!!
-		HAL_CAN_Transmit(&hcan, 1000);
-	}
+	can_mavlink_transmit(&msg);
+	usart3_mavlink_transmit(&msg);
 }
 
 /**
@@ -489,7 +474,7 @@ void dcmi_it_init()
 	HAL_NVIC_EnableIRQ(DCMI_IRQn);
 
 	//Enable FRAME interrupt
-	DCMI->ICR |= DCMI_ICR_FRAME_ISC;
+	DCMI->IER |= DCMI_ICR_FRAME_ISC;
 }
 
 /**
@@ -512,13 +497,11 @@ void dcmi_dma_enable()
 {
 	/* Enable DMA2 stream 1 and DCMI interface then start image capture */
 	DMA2_Stream1->CR |= (uint32_t)DMA_SxCR_EN;
-	DCMI->CR |= (uint32_t)DCMI_CR_ENABLE;
-	DCMI->CR |= (uint32_t)DCMI_CR_CAPTURE;
 
 	HAL_DMAEx_MultiBufferStart(&hdma, DCMI_DR_ADDRESS, (uint32_t) dcmi_image_buffer_8bit_1, \
 			(uint32_t) dcmi_image_buffer_8bit_2, buffer_size);
 
-
+	DCMI->CR |= (uint32_t)DCMI_CR_ENABLE;
 	{ /* starting DCMI without even touching DMA (HAL doesn't have this, but it's mostly
 			copied from HAL_DCMI_Start_DMA) */
 		/* Process Locked */
@@ -590,7 +573,7 @@ void dcmi_clock_init()
 
 	/* GPIOC Configuration:  TIM3 CH3 (PC8)  */
 	GPIO_InitStructure.Pin = GPIO_PIN_8;
-	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
 	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 	GPIO_InitStructure.Pull = GPIO_PULLUP;
 	GPIO_InitStructure.Alternate = GPIO_AF2_TIM3;
@@ -607,14 +590,17 @@ void dcmi_clock_init()
 
 	/* PWM1 Mode configuration: Channel3 */
 	TIM_OCInitStructure.OCMode = TIM_OCMODE_PWM1;
-	TIM_OCInitStructure.OCPolarity = TIM_OCNPOLARITY_HIGH;
+	TIM_OCInitStructure.OCPolarity = TIM_OCPOLARITY_HIGH;
 	TIM_OCInitStructure.OCIdleState = TIM_OCIDLESTATE_SET;
 	TIM_OCInitStructure.Pulse = 2; // TIM_TimeBaseStructure.TIM_Period/2;
+	TIM_OCInitStructure.OCFastMode = TIM_OCFAST_DISABLE;
 
 	HAL_TIM_PWM_ConfigChannel(&htim, &TIM_OCInitStructure, TIM_CHANNEL_3);
+	TIM3->CR1 |= TIM_CR1_ARPE;
 
 	/* TIM3 enable counter */
-	HAL_TIM_Base_Start(&htim);
+	//HAL_TIM_Base_Start(&htim);
+	HAL_TIM_PWM_Start(&htim, TIM_CHANNEL_3);
 }
 
 /**
@@ -641,7 +627,7 @@ void dcmi_hw_init(void)
 	__GPIOE_CLK_ENABLE();
 
 	/* DCMI GPIO configuration */
-	gpio_init.Mode = GPIO_MODE_OUTPUT_PP;
+	gpio_init.Mode = GPIO_MODE_AF_PP;
 	gpio_init.Pull = GPIO_PULLUP;
 	gpio_init.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 	gpio_init.Alternate = GPIO_AF13_DCMI;
@@ -662,16 +648,19 @@ void dcmi_hw_init(void)
 	__I2C2_CLK_ENABLE();
 
 	/* Configure I2C2 GPIOs */
-	gpio_init.Mode = GPIO_MODE_OUTPUT_OD;
+	gpio_init.Mode = GPIO_MODE_AF_OD;
 	gpio_init.Pull = GPIO_NOPULL;
-	gpio_init.Speed = GPIO_SPEED_FREQ_LOW;
+	gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
 	gpio_init.Alternate = GPIO_AF4_I2C2;
 	gpio_init.Pin = GPIO_PIN_10 | GPIO_PIN_11;
+	HAL_GPIO_Init(GPIOB, &gpio_init);
 
 	hi2c2.Instance = I2C2;
 
 	/* I2C DeInit */
-	HAL_I2C_DeInit(&hi2c2);
+	//HAL_I2C_DeInit(&hi2c2);
+	__HAL_RCC_I2C2_FORCE_RESET();
+	__HAL_RCC_I2C2_RELEASE_RESET();
 
 	/* Enable the I2C peripheral */
 	hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;

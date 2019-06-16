@@ -9,9 +9,9 @@
 #include <stm32f4xx_hal_can.h>
 
 #include <dcmi.h>
-
 #include <mavlink/zikush/mavlink.h>
 #include <canmavlink_hal.h>
+#include <usart.h>
 
 #include "zikush_config.h"
 
@@ -126,6 +126,17 @@ void can_init()
 	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
 }
 
+void can_mavlink_transmit(mavlink_message_t * msg)
+{
+	CANMAVLINK_TX_FRAME_T canframes[34];
+	uint8_t canframecount = canmavlink_msg_to_frames(canframes, &msg);
+	for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
+	{
+		hcan.pTxMsg = canframes + i; //DELICIOUS!!
+		HAL_CAN_Transmit(&hcan, 1000);
+	}
+}
+
 void USB_LP_CAN1_RX0_IRQHandler(void)
 {
   /* USER CODE BEGIN USB_LP_CAN1_RX0_IRQn 0 */
@@ -187,10 +198,21 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
   /* USER CODE END USB_LP_CAN1_RX0_IRQn 1 */
 }
 
+void SysTick_Handler(void)
+{
+	HAL_IncTick();
+}
+
 int main(int argc, char* argv[])
 {
 	/* enable FPU on Cortex-M4F core */
 	SCB_CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2)); /* set CP10 Full Access and set CP11 Full Access */
+
+	SysTick_Config(SystemCoreClock / 1000);
+
+#ifdef CCU_TESTMODE
+	usart_init();
+#endif
 
 	enable_image_capture();
 	/* init and clear fast image buffers */
@@ -200,7 +222,7 @@ int main(int argc, char* argv[])
 		image_buffer_8bit_2[i] = 0;
 	}
 
-	can_init();
+	//can_init();
 
 	while(true)
 	{
@@ -214,6 +236,11 @@ int main(int argc, char* argv[])
 
 
 		HAL_Delay(200); //TODO Add transition into true sleep mode?
+
+#ifdef CCU_TESTMODE
+		spectrum_request = SPRQ_FULL;
+		HAL_Delay(800);
+#endif
 	}
 }
 
