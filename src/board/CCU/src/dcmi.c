@@ -129,11 +129,14 @@ static inline uint8_t _get_current_memory_target(DMA_Stream_TypeDef * stream)
  */
 void DMA2_Stream1_IRQHandler(void)
 {
+	volatile uint32_t dummy1 = DMA2->LISR;
 	/* transfer completed */
 	if (DMA2->LISR & DMA_LISR_TCIF1)
 	{
 		DMA2->LIFCR |= DMA_LIFCR_CTCIF1;
 		frame_counter++;
+
+		volatile uint32_t dummy = DMA2->LISR;
 
 		if (frame_counter >= 4)
 		{
@@ -225,7 +228,7 @@ void dma_copy_image_buffers(uint8_t ** current_image, uint8_t ** previous_image,
 
 	}
 
-	image_counter = 0;
+	image_counter -= 1;
 
 	/* copy image */
 	if (dcmi_image_buffer_unused == 1)
@@ -483,7 +486,7 @@ void dcmi_it_init()
 void dma_it_init()
 {
 	/* Enable the DMA global Interrupt */
-	HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 5, 2);
+	HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0, 0);
 	HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
 
 	// Enable HT and TC interrupts
@@ -496,50 +499,20 @@ void dma_it_init()
 void dcmi_dma_enable()
 {
 	/* Enable DMA2 stream 1 and DCMI interface then start image capture */
-	DMA2_Stream1->CR |= (uint32_t)DMA_SxCR_EN;
+	DMA2_Stream1->CR |= DMA_SxCR_EN;
 
-	HAL_DMAEx_MultiBufferStart(&hdma, DCMI_DR_ADDRESS, (uint32_t) dcmi_image_buffer_8bit_1, \
-			(uint32_t) dcmi_image_buffer_8bit_2, buffer_size);
-
-	DCMI->CR |= (uint32_t)DCMI_CR_ENABLE;
-	{ /* starting DCMI without even touching DMA (HAL doesn't have this, but it's mostly
-			copied from HAL_DCMI_Start_DMA) */
-		/* Process Locked */
-		hdcmi.Lock = HAL_LOCKED;
-
-		/* Lock the DCMI peripheral state */
-		hdcmi.State = HAL_DCMI_STATE_BUSY;
-
-		/* Enable DCMI by setting DCMIEN bit */
-		__HAL_DCMI_ENABLE(&hdcmi);
-
-		/* Configure the DCMI Mode */
-		hdcmi.Instance->CR &= ~(DCMI_CR_CM);
-		hdcmi.Instance->CR |=  (uint32_t)(DCMI_MODE_CONTINUOUS);
-
-		/* Reset transfer counters value */
-		hdcmi.XferCount = 0;
-		hdcmi.XferTransferNumber = 0;
-
-		/* Get the number of buffer */
-		while(hdcmi.XferSize > 0xFFFFU)
-		{
-			hdcmi.XferSize = (hdcmi.XferSize/2U);
-			hdcmi.XferCount = hdcmi.XferCount*2U;
-		}
-
-		/* Update DCMI counter  and transfer number*/
-		hdcmi.XferCount = (hdcmi.XferCount - 2U);
-		hdcmi.XferTransferNumber = hdcmi.XferCount;
-
-		/* Enable Capture */
-		hdcmi.Instance->CR |= DCMI_CR_CAPTURE;
-
-		/* Release Lock */
-		__HAL_UNLOCK(&hdcmi);
-	}
+	DCMI->CR &= ~(DCMI_CR_CM);
+	DCMI->CR |= (DCMI_MODE_CONTINUOUS);
+	DCMI->CR |= DCMI_CR_ENABLE;
+	DCMI->CR |= DCMI_CR_CAPTURE;
 
 	dma_it_init();
+
+	uint32_t dmadump[] = {DMA2_Stream1->CR, DMA2_Stream1->NDTR, DMA2_Stream1->PAR, DMA2_Stream1->M0AR, DMA2_Stream1->M1AR, DMA2_Stream1->FCR};
+	usart3_tx_ringbuffer_push(dmadump, 24);
+
+	uint32_t dcmidump[] = {DCMI->CR, DCMI->SR, DCMI->RISR, DCMI->IER, DCMI->MISR};
+	usart3_tx_ringbuffer_push(dcmidump, 20);
 }
 
 /**
@@ -548,6 +521,11 @@ void dcmi_dma_enable()
 void dcmi_dma_disable()
 {
 	/* Disable DMA2 stream 1 and DCMI interface then stop image capture */
+	DMA2_Stream1->CR &= ~(DMA_SxCR_HTIE | DMA_SxCR_TCIE);
+	HAL_NVIC_DisableIRQ(DMA2_Stream1_IRQn);
+
+	DMA2->LIFCR |= DMA_LIFCR_CTCIF1 | DMA_LIFCR_CHTIF1;
+
 	DMA2_Stream1->CR &= ~( (uint32_t)DMA_SxCR_EN );
 	DCMI->CR &= ~( (uint32_t)DCMI_CR_ENABLE );
 	DCMI->CR &= ~( (uint32_t)DCMI_CR_CAPTURE );
@@ -721,7 +699,7 @@ void dcmi_dma_init(uint16_t buffsize)
 	HAL_DMA_DeInit(&hdma);
 
 	hdma.Init.Direction = DMA_PERIPH_TO_MEMORY;
-	hdma.Init.PeriphInc = DMA_PINC_ENABLE;
+	hdma.Init.PeriphInc = DMA_PINC_DISABLE;
 	hdma.Init.MemInc = DMA_MINC_ENABLE;
 	hdma.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
 	hdma.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
@@ -735,4 +713,7 @@ void dcmi_dma_init(uint16_t buffsize)
 	buffer_size = buffsize / 4; // buffer size in date unit (word)
 
 	HAL_DMA_Init(&hdma);
+
+	HAL_DMAEx_MultiBufferStart(&hdma, DCMI_DR_ADDRESS, (uint32_t) dcmi_image_buffer_8bit_1, \
+				(uint32_t) dcmi_image_buffer_8bit_2, buffer_size);
 }

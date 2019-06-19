@@ -71,7 +71,7 @@ int usart2_tx_counter_write = 300;
 int usart2_rx_counter_read = 0;
 int usart2_rx_counter_write = 0;
 int usart3_tx_counter_read = 0;
-int usart3_tx_counter_write = 300;
+int usart3_tx_counter_write = 0;
 int usart3_rx_counter_read = 0;
 int usart3_rx_counter_write = 0;
 

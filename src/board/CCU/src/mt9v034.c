@@ -154,12 +154,12 @@ void mt9v034_context_configuration(void)
 	uint16_t row_noise_correction = 0x0000; // default
 	uint16_t test_data = 0x0000; // default
 
-	if(FLOAT_AS_BOOL(CCU_SPECTRUM_PARAM_IMAGE_ROW_NOISE_CORR) && !FLOAT_AS_BOOL(CCU_SPECTRUM_PARAM_IMAGE_TEST_PATTERN))
+	if(CCU_SPECTRUM_PARAM_IMAGE_ROW_NOISE_CORR && !CCU_SPECTRUM_PARAM_IMAGE_TEST_PATTERN)
 		row_noise_correction = 0x0101;
 	else
 		row_noise_correction = 0x0000;
 
-	if (FLOAT_AS_BOOL(CCU_SPECTRUM_PARAM_IMAGE_TEST_PATTERN))
+	if (CCU_SPECTRUM_PARAM_IMAGE_TEST_PATTERN)
 		test_data = 0x3000; //enable vertical gray shade pattern
 	else
 		test_data = 0x0000;
