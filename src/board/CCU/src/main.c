@@ -20,13 +20,6 @@
 #define SCB_CPACR (*((uint32_t*) (((0xE000E000UL) + 0x0D00UL) + 0x088)))
 #endif
 
-/* fast image buffers for calculations */
-uint8_t image_buffer_8bit_1[FULL_IMAGE_SIZE] __attribute__((section(".ccm")));
-uint8_t image_buffer_8bit_2[FULL_IMAGE_SIZE] __attribute__((section(".ccm")));
-uint8_t * current_image = image_buffer_8bit_1;
-uint8_t * previous_image = image_buffer_8bit_2;
-uint8_t buffer_reset_needed;
-
 // ----- main() ---------------------------------------------------------------
 // Sample pragmas to cope with warnings. Please note the related line at
 // the end of this function, used to pop the compiler diagnostics status.
@@ -55,21 +48,13 @@ void spectrum_take(bool sendphoto)
 {
 	dcmi_restart_calibration_routine();
 
-	/* waiting for first quarter of image */
-	while(get_frame_counter() < 2){}
-	dma_copy_image_buffers(&current_image, &previous_image, FULL_IMAGE_SIZE, 1);
-
-	/* waiting for second quarter of image */
-	while(get_frame_counter() < 3){}
-	dma_copy_image_buffers(&current_image, &previous_image, FULL_IMAGE_SIZE, 1);
-
-	/* waiting for all image parts */
-	while(get_frame_counter() < 4){}
+	/* waiting for all parts */
+	while(get_frame_counter() < 1){}
 
 	if(sendphoto)
-		send_spectrum_photo(previous_image, current_image);
+		send_spectrum_photo();
 
-	send_spectrum_data(previous_image, current_image);
+	//send_spectrum_data();
 }
 
 void can_init()
@@ -215,13 +200,6 @@ int main(int argc, char* argv[])
 #endif
 
 	enable_image_capture();
-	/* init and clear fast image buffers */
-	for (int i = 0; i < FULL_IMAGE_SIZE; i++)
-	{
-		image_buffer_8bit_1[i] = 0;
-		image_buffer_8bit_2[i] = 0;
-	}
-
 	//can_init();
 
 	while(true)
