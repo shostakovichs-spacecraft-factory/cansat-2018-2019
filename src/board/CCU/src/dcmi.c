@@ -64,7 +64,7 @@ volatile uint8_t dcmi_calibration_counter = 0;
 /* image buffers */
 uint8_t dcmi_image_buffer_8bit[FULL_IMAGE_SIZE * 4];
 
-uint16_t buffer_size;
+uint32_t buffer_size;
 
 /* extern variables */
 extern CAN_HandleTypeDef hcan;
@@ -82,7 +82,7 @@ void enable_image_capture(void)
 {
 	dcmi_clock_init();
 	dcmi_hw_init();
-	dcmi_dma_init(FULL_IMAGE_ROW_SIZE * FULL_IMAGE_COLUMN_SIZE);
+	dcmi_dma_init(FULL_IMAGE_ROW_SIZE * FULL_IMAGE_COLUMN_SIZE * 4);
 	mt9v034_context_configuration();
 	dcmi_dma_enable();
 }
@@ -126,6 +126,15 @@ void send_spectrum_photo() {
 
 	/*  transmit raw 8-bit image */
 	/* TODO image is too large for this transmission protocol (too much packets), but it works */
+	/*static int debcounter = 0;
+	if(debcounter < 5)
+	{
+		//memcpy(dcmi_image_buffer_8bit + (CCU_SPECTRUM_WIDTH * 62), dcmi_image_buffer_8bit + (CCU_SPECTRUM_WIDTH * 60), CCU_SPECTRUM_WIDTH);
+		memset(dcmi_image_buffer_8bit + (CCU_SPECTRUM_WIDTH * 60), 0, CCU_SPECTRUM_WIDTH);
+		memcpy(dcmi_image_buffer_8bit + (CCU_SPECTRUM_WIDTH * 62), dcmi_image_buffer_8bit + (CCU_SPECTRUM_WIDTH * 60), CCU_SPECTRUM_WIDTH);
+	}
+	debcounter++;
+	debcounter %= 10;*/
 
 	mavlink_data_transmission_handshake_t handshake = {
 		.type = MAVLINK_DATA_STREAM_IMG_RAW8U,
@@ -163,11 +172,10 @@ void send_spectrum_photo() {
 	uint16_t frame = 0;
 	uint8_t * frame_buffer = encdata.data;
 
-	for(int i = 0; i < FULL_IMAGE_SIZE; i += MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN)
+	for(uint32_t i = 0; i < (FULL_IMAGE_SIZE * 4); i += MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN)
 	{
 		int copylen = MIN(MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN, FULL_IMAGE_SIZE - i);
 		memcpy(frame_buffer, dcmi_image_buffer_8bit + i, copylen);
-		//memset(frame_buffer, 186, MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN);
 
 		encdata.seqnr = frame;
 		mavlink_msg_encapsulated_data_encode(0, ZIKUSH_CCU, &msg, &encdata);
@@ -457,7 +465,7 @@ void dcmi_hw_init(void)
   *
   * @param  buffer_size Buffer size in bytes
   */
-void dcmi_dma_init(uint16_t buffsize)
+void dcmi_dma_init(uint32_t buffsize)
 {
 	reset_frame_counter();
 

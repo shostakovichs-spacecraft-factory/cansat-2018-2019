@@ -51,7 +51,7 @@ uint8_t usart3_rx_ringbuffer_pop(void);
 /**
   * @brief  Push one byte to ringbuffer of USART3
   */
-uint8_t usart3_tx_ringbuffer_push(const uint8_t* ch, uint8_t len);
+uint8_t usart3_tx_ringbuffer_push(const uint8_t* ch, uint16_t len);
 
 /**
   * @brief  Push mavlink message to usart3 (for debug only)

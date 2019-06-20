@@ -12,9 +12,11 @@
 #define RXBUFFLEN 1024
 
 #define CSPIN	8
-#define BUSYPIN	6
-#define IRQPIN	5
-#define NRSTPIN	13
+#define BUSYPIN	27
+#define IRQPIN	17
+#define NRSTPIN	22
+#define RXENPIN	23
+#define TXENPIN	24
 
 void irqcallback(int gpio, int level, uint32_t tick, void * userdata);
 
@@ -54,6 +56,8 @@ int main(int argc, char ** argv)
 		.busy_pin = BUSYPIN,
 		.cs_pin = CSPIN,
 		.nrst_pin = NRSTPIN,
+		.rxen_pin = RXENPIN,
+		.txen_pin = TXENPIN,
 	};
 	sx1268_struct_init(&radio, &radio_specific, rxbuff, RXBUFFLEN, NULL, 0);
 

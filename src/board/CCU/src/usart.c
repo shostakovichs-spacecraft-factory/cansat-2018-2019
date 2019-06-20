@@ -47,7 +47,7 @@
 
 /* prototypes */
 uint8_t usart2_tx_ringbuffer_push(const uint8_t* ch, uint8_t len);
-uint8_t usart3_tx_ringbuffer_push(const uint8_t* ch, uint8_t len);
+uint8_t usart3_tx_ringbuffer_push(const uint8_t* ch, uint16_t len);
 int usart2_char_available(void);
 int usart3_char_available(void);
 uint8_t usart2_rx_ringbuffer_pop(void);
@@ -94,14 +94,14 @@ void usart3_mavlink_transmit(const mavlink_message_t * msg)
 /**
   * @brief  Push one byte to ringbuffer of USART3
   */
-uint8_t usart3_tx_ringbuffer_push(const uint8_t* ch, uint8_t len)
+uint8_t usart3_tx_ringbuffer_push(const uint8_t* ch, uint16_t len)
 {
 	huart3.Instance->CR1 &= ~(USART_CR1_TXEIE);
 
 	/* if there is free space in buffer */
 	if ((((usart3_tx_counter_read - usart3_tx_counter_write) - 1) + TXBUFFERSIZE) % TXBUFFERSIZE > len)
 	{
-		uint8_t i;
+		uint16_t i;
 		for (i = 0; i < len; i++)
 		{
 			usart3_tx_buffer[usart3_tx_counter_write] = ch[i];
@@ -223,7 +223,7 @@ void usart_init(void)
 	HAL_GPIO_Init(GPIOD, &GPIO_InitStructure);
 
 	/* USARTx configured as follow:
-		- BaudRate = 115200 baud
+		- BaudRate = 921600 baud
 		- Word Length = 8 Bits
 		- One Stop Bit
 		- No parity
@@ -236,7 +236,7 @@ void usart_init(void)
 	huart3.Init.StopBits = USART_STOPBITS_1;
 	huart3.Init.Parity = USART_PARITY_NONE;
 	huart3.Init.Mode = USART_MODE_RX | USART_MODE_TX;
-	huart3.Init.BaudRate = 115200;
+	huart3.Init.BaudRate = 921600;
 	huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
 	huart3.Init.OverSampling = UART_OVERSAMPLING_16;
 

@@ -16,6 +16,8 @@ typedef struct
 	unsigned cs_pin;
 	unsigned busy_pin;
 	unsigned nrst_pin;
+	unsigned txen_pin;
+	unsigned rxen_pin;
 	pthread_mutex_t mutex;
 }	sx1268_rpi_t;
 
@@ -71,8 +73,14 @@ inline uint8_t _readbusypin(sx1268_t * self)
 	return gpioRead( ((sx1268_rpi_t *) self->platform_specific)->busy_pin );
 }
 
-inline void _rxen_write(sx1268_t * self, bool state){return;}
-inline void _txen_write(sx1268_t * self, bool state){return;}
+inline void _rxen_write(sx1268_t * self, bool state)
+{
+	gpioWrite(((sx1268_rpi_t *) self->platform_specific)->rxen_pin, state);
+}
+inline void _txen_write(sx1268_t * self, bool state)
+{
+	gpioWrite(((sx1268_rpi_t *) self->platform_specific)->txen_pin, state);
+}
 
 inline void _nrst_reset(sx1268_t * self)
 {

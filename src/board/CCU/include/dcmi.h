@@ -62,7 +62,7 @@ void enable_image_capture(void);
 /* Init Functions */
 void dcmi_clock_init(void);
 void dcmi_hw_init(void);
-void dcmi_dma_init(uint16_t buffer_size);
+void dcmi_dma_init(uint32_t buffer_size);
 void dcmi_it_init(void);
 void dma_it_init(void);
 

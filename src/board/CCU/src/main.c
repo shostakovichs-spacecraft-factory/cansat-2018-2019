@@ -59,25 +59,24 @@ void spectrum_take(bool sendphoto)
 
 void can_init()
 {
+	__GPIOA_CLK_ENABLE();
+	__CAN1_CLK_ENABLE();
+
 	GPIO_InitTypeDef gpio_init =
 	{
-		.Mode = GPIO_MODE_AF_PP,
+		.Mode = GPIO_MODE_AF_OD,
 		.Alternate = GPIO_AF9_CAN1,
 		.Pull = GPIO_NOPULL,
 		.Speed = GPIO_SPEED_LOW,
-		.Pin = GPIO_PIN_12
+		.Pin = GPIO_PIN_12 | GPIO_PIN_11
 	};
 	HAL_GPIO_Init(GPIOA, &gpio_init);
 
-	gpio_init.Mode = GPIO_MODE_INPUT;
-	gpio_init.Pin = GPIO_PIN_11;
-	HAL_GPIO_Init(GPIOA, &gpio_init);
-
-	GPIOA->AFR[1] &= ~(0x0F << 12);
+	/*GPIOA->AFR[1] &= ~(0x0F << 12);
 	GPIOA->AFR[1] |= GPIO_AF9_CAN1 << 12;
 
 	GPIOA->MODER &= ~GPIO_MODER_MODER11;
-	GPIOA->MODER |= GPIO_MODER_MODER11_1;
+	GPIOA->MODER |= GPIO_MODER_MODER11_1;*/
 
 	hcan.Instance = CAN1;
 	hcan.Init.Prescaler = 466;
@@ -107,14 +106,12 @@ void can_init()
 
 	NVIC_EnableIRQ(CAN1_RX0_IRQn);
 	hcan.Instance->IER |= CAN_IER_FMPIE0;
-
-	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
 }
 
 void can_mavlink_transmit(mavlink_message_t * msg)
 {
 	CANMAVLINK_TX_FRAME_T canframes[34];
-	uint8_t canframecount = canmavlink_msg_to_frames(canframes, &msg);
+	uint8_t canframecount = canmavlink_msg_to_frames(canframes, msg);
 	for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
 	{
 		hcan.pTxMsg = canframes + i; //DELICIOUS!!
@@ -200,7 +197,10 @@ int main(int argc, char* argv[])
 #endif
 
 	enable_image_capture();
-	//can_init();
+	can_init();
+
+	mavlink_status_t *status = mavlink_get_channel_status(0);
+	status->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
 
 	while(true)
 	{
@@ -213,11 +213,11 @@ int main(int argc, char* argv[])
 		//TODO add cam requests processing
 
 
-		HAL_Delay(200); //TODO Add transition into true sleep mode?
+		//HAL_Delay(200); //TODO Add transition into true sleep mode?
 
 #ifdef CCU_TESTMODE
 		spectrum_request = SPRQ_FULL;
-		HAL_Delay(800);
+		//HAL_Delay(800);
 #endif
 	}
 }
