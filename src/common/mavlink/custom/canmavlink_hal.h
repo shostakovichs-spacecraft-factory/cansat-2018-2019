@@ -83,7 +83,7 @@ MAVLINK_HELPER uint8_t canmavlink_msg_to_frames(CANMAVLINK_TX_FRAME_T * frames, 
 
 		for(uint8_t i = 0; true;)
 		{
-			uint8_t framenum = i / CAN2_MAX_DLC + 1;
+			uint8_t framenum = DIVIDE_ROUND_UP(i, CAN2_MAX_DLC) + 1;
 			CANMAVLINK_TX_FRAME_T * currframe = frames + framenum;
 
 			uint8_t copylen = MIN(length - i, CAN2_MAX_DLC);

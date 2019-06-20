@@ -115,7 +115,7 @@ void can_mavlink_transmit(mavlink_message_t * msg)
 	for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
 	{
 		hcan.pTxMsg = canframes + i; //DELICIOUS!!
-		HAL_CAN_Transmit(&hcan, 1000);
+		HAL_CAN_Transmit(&hcan, 5);
 	}
 }
 
@@ -198,9 +198,6 @@ int main(int argc, char* argv[])
 
 	enable_image_capture();
 	can_init();
-
-	mavlink_status_t *status = mavlink_get_channel_status(0);
-	status->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
 
 	while(true)
 	{

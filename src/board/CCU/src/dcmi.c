@@ -124,6 +124,8 @@ uint32_t get_frame_counter(void){
  */
 void send_spectrum_photo() {
 
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1; //We do it there, cause channel status is a static variable, thus not system-wide
+
 	/*  transmit raw 8-bit image */
 	/* TODO image is too large for this transmission protocol (too much packets), but it works */
 	/*static int debcounter = 0;
