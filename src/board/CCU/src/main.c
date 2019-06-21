@@ -115,7 +115,7 @@ void can_mavlink_transmit(mavlink_message_t * msg)
 	for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
 	{
 		hcan.pTxMsg = canframes + i; //DELICIOUS!!
-		HAL_CAN_Transmit(&hcan, 5);
+		HAL_CAN_Transmit(&hcan, 100);
 	}
 }
 

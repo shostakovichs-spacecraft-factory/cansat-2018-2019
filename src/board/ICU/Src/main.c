@@ -60,7 +60,7 @@ SPI_HandleTypeDef hspi2;
 //"private" means defined by user, not CubeMX. They're, in fact, global
 sx1268_t radio;
 sx1268_stm32_t radio_specific;
-uint8_t radio_rxbuf[255], radio_txbuf[255];
+uint8_t radio_rxbuf[ICU_RADIO_RXBUFFLEN], radio_txbuf[ICU_RADIO_TXBUFFLEN];
 
 int16_t zikush_runsessnum = -1;
 /* USER CODE END PV */
@@ -80,7 +80,7 @@ static void MX_SDIO_SD_Init(void);
 
 void radio_init()
 {
-	sx1268_struct_init(&radio, &radio_specific, radio_rxbuf, 255, radio_txbuf, 255);
+	sx1268_struct_init(&radio, &radio_specific, radio_rxbuf, ICU_RADIO_RXBUFFLEN, radio_txbuf, ICU_RADIO_TXBUFFLEN);
 	radio_specific.bus = &hspi2;
 	radio_specific.busy_port = RADIO_BUSY_GPIO_Port;
 	radio_specific.busy_pin = RADIO_BUSY_Pin;
@@ -200,6 +200,8 @@ int main(void)
 
 		//router_route(&msg);
 
+		HAL_Delay(80);
+
 		mavlink_scaled_pressure_t pressure =
 		{
 		    .press_abs = 100.0f,
@@ -209,7 +211,7 @@ int main(void)
 		};
 		mavlink_msg_scaled_pressure_encode(0, ZIKUSH_ICU, &msg, &pressure);
 
-		router_route(&msg);
+		//router_route(&msg);
 
 		HAL_Delay(1000);
     /* USER CODE END WHILE */

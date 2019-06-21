@@ -9,7 +9,7 @@
 #include <pigpio.h>
 #include <sx1268.h>
 
-#define RXBUFFLEN 1024
+#define RXBUFFLEN (1024 * 100)
 
 #define CSPIN	8
 #define BUSYPIN	27
@@ -83,11 +83,11 @@ int main(int argc, char ** argv)
 		{
 			int rxlen = RXLEN(radio);
 			sx1268_status_t status = sx1268_receive(&radio, tmpbuff, rxlen);
-			printf("stat: %d   rxlen: %d\n", status, rxlen);
 			int res = sendto(sock, tmpbuff, rxlen, 0, addr->ai_addr, addr->ai_addrlen);
-			printf("res: %d\n", res);
+			//puts(tmpbuff);
+			printf("Forwarded %d bytes\n", rxlen);
 		}
-		usleep(10000);
+		usleep(1000);
 	}
 
 

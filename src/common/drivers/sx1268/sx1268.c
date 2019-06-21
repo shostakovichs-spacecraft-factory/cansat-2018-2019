@@ -409,7 +409,8 @@ static sx1268_status_t _fifo_write(sx1268_fifo_t * fifo, uint8_t * data, int len
 	fifo->head = (fifo->head + copylen) % fifo->length;
 
 	memcpy(fifo->mem + fifo->head, data + copylen, len - copylen);
-	fifo->head += (len - copylen) % fifo->length;
+	fifo->head += (len - copylen);
+	fifo->head %= fifo->length;
 
 	fifo->empty = false;
 
@@ -479,6 +480,7 @@ static void _dotx(sx1268_t * self, uint8_t * buff, int len)
 	_cmd_GetStatus(self, &status);
 	_waitbusy(self, TIMEOUT);
 	_cmd_SetTX(self, 64000); //1 second timeout
+	_waitbusy(self, TIMEOUT);
 }
 
 
@@ -524,6 +526,9 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 	_cmd_SetDIO3AsTCXOCtrl(self, 0x01, 320); //'magic' values from mbed driver
 
 	_waitbusy(self, TIMEOUT);
+	_cmd_SetDIO2AsRfSwitchCtrl(self, true);
+
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
 
 	_waitbusy(self, TIMEOUT);
@@ -548,10 +553,10 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 	_cmd_GetStatus(self, &status);
 
 	sx1268_modparams_gfsk_t modparams;
-	uint32_t br = 32 * 32000000 / 4800;
+	uint32_t br = 32 * 32000000 / 30000;
 	UINT24_T_FORM(br, modparams.br0, modparams.br1, modparams.br2);
 	UINT24_T_FORM(1024, modparams.Fdev0, modparams.Fdev1, modparams.Fdev2);
-	modparams.Bandwidth = 0x1D;
+	modparams.Bandwidth = 0x09;
 	modparams.PulseShape = 0x09;
 	_waitbusy(self, TIMEOUT);
 	_cmd_SetModulationParams(self, (uint8_t *) &modparams);
@@ -604,7 +609,7 @@ sx1268_status_t sx1268_send(sx1268_t * self, uint8_t * data, int len)
 {
 	_critical_enter(self);
 
-	if( _readbusypin(self) )
+	if( _readbusypin(self) | !self->fifo_tx.empty )
 	{
 		sx1268_status_t retval = _fifo_write(&self->fifo_tx, data, len);
 		_critical_exit(self);
@@ -697,10 +702,12 @@ void sx1268_event(sx1268_t * self)
 	}
 
 	else
+	{
 		_waitbusy(self, TIMEOUT);
 		_cmd_SetRX(self, 0);
 		_txen_write(self, false);
 		_rxen_write(self, true);
+	}
 
 	_critical_exit(self);
 }

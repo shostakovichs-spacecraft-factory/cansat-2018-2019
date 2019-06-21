@@ -19,7 +19,10 @@ typedef struct
 	uint16_t cs_pin;	//Push-Pull
 
 	GPIO_TypeDef * busy_port;
-	uint16_t busy_pin;	//Push-Pull
+	uint16_t busy_pin;	//Input
+
+	GPIO_TypeDef * dio2_port;
+	uint16_t dio2_pin;	//Input
 
 	GPIO_TypeDef * nrst_port;
 	uint16_t nrst_pin;	//Open Drain
@@ -81,6 +84,12 @@ static uint8_t _readbusypin(sx1268_t * self)
 {
 	return HAL_GPIO_ReadPin( ( (sx1268_stm32_t *) self->platform_specific )->busy_port, \
 				( (sx1268_stm32_t *) self->platform_specific )->busy_pin);
+}
+
+static uint8_t _readbusypin(sx1268_t * self)
+{
+	return HAL_GPIO_ReadPin( ( (sx1268_stm32_t *) self->platform_specific )->dio2_port, \
+				( (sx1268_stm32_t *) self->platform_specific )->dio2_pin);
 }
 
 static void _nrst_reset(sx1268_t * self)

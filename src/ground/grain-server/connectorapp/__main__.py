@@ -10,7 +10,7 @@ from pymavlink.dialects.v20.zikush import MAVLink_heartbeat_message, MAVLink_sca
     MAVLink_scaled_pressure2_message, MAVLink_encapsulated_data_message,\
     MAVLink_zikush_state_message, MAVLink_zikush_power_state_message, MAVLink_zikush_sunsensor_message, \
     MAVLink_zikush_humidity_message, MAVLink_zikush_picture_header_message, MAVLink_zikush_spectrum_intensity_header_message, \
-    MAVLink_zikush_spectrum_intensity_encapsulated_data_message
+    MAVLink_zikush_spectrum_intensity_encapsulated_data_message, MAVLink_bad_data
 
 from .redis_store import redis_store
 
@@ -95,6 +95,9 @@ def main(argv):
         msg = mav.recv_match(blocking=True)
         _log.debug("got message %s", msg)
 
+        if not isinstance(msg, MAVLink_bad_data):
+            print(msg)
+
         if isinstance(msg, MAVLink_heartbeat_message):
             HeartbeatHandler(msg)
 
@@ -127,7 +130,8 @@ def main(argv):
             or isinstance(msg, MAVLink_encapsulated_data_message) \
             or isinstance(msg, MAVLink_zikush_spectrum_intensity_encapsulated_data_message):
             """ Handling multiframe transfers """
-            stream_aggregator.accept_message(msg)
+            #stream_aggregator.accept_message(msg)
+            pass
 
 
 if __name__ == "__main__":

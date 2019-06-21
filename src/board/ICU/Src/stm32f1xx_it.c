@@ -211,6 +211,8 @@ void SysTick_Handler(void)
 void USB_LP_CAN1_RX0_IRQHandler(void)
 {
   /* USER CODE BEGIN USB_LP_CAN1_RX0_IRQn 0 */
+	static volatile int counter = 0;
+	counter++;
 	volatile canmavlink_RX_frame_t frame;
 	static volatile mavlink_message_t msg;
 	static volatile mavlink_status_t status;

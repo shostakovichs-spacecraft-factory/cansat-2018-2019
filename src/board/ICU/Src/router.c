@@ -90,7 +90,7 @@ router_status_t router_send_CAN(mavlink_message_t * msg)
 
 router_status_t router_send_radio(mavlink_message_t * msg)
 {
-	uint8_t framebuff[256];
+	uint8_t framebuff[MAVLINK_MAX_PACKET_LEN];
 	uint16_t len = mavlink_msg_to_send_buffer(framebuff, msg);
 	sx1268_status_t status = sx1268_send(&radio, framebuff, len);
 
