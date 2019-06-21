@@ -105,16 +105,20 @@ void mag_calib_calibrate_lsm303c(struct lsm303c_handler_s *handler, int n, uint3
 	////////////////////////////////////
 	//Find koefs of equation of second order surface (ellipse)
 	////////////////////////////////
+	const int count = 9;
 	matrix_make_identity(&mag_calib_soft);
 	matrix_make_zero(&mag_calib_hard);
-	Matrixf A = matrix_create(n, 9);
-	Matrixf b = matrix_create(n, 1);
+	Matrixf AA = matrix_create(n, 9);
+	Matrixf A = matrix_create(count, 9);
+	Matrixf b = matrix_create(count, 1);
 	Matrixf At_A = matrix_create(9, 9);
-	Matrixf At = matrix_create(n, 9);
+	Matrixf At = matrix_create(count, 9);
 	Matrixf At_b = matrix_create(9, 1);
 	Matrixf x = matrix_create(9, 1);
+	Matrixf xx = matrix_create(9, 1);
 
-	for(int i = 0; i < n; i++)
+	matrix_make_zero(&x);
+	for(int i = 0; i < count; i++)
 	{
 		*matrix_at(&b, i, 0) = 1;
 	}
@@ -131,9 +135,9 @@ void mag_calib_calibrate_lsm303c(struct lsm303c_handler_s *handler, int n, uint3
 
 		for(int i = 0; i < 3; i++)
 		{
-			*matrix_at(&A, k, i) = dd[i] * dd[i];
-			*matrix_at(&A, k, 3 + i) = dd[i] * dd[(i + 1) % 3];
-			*matrix_at(&A, k, 6 + i) = dd[i];
+			*matrix_at(&AA, k, i) = dd[i] * dd[i];
+			*matrix_at(&AA, k, 3 + i) = dd[i] * dd[(i + 1) % 3];
+			*matrix_at(&AA, k, 6 + i) = dd[i];
 
 		}
 
@@ -141,19 +145,36 @@ void mag_calib_calibrate_lsm303c(struct lsm303c_handler_s *handler, int n, uint3
 		while(HAL_GetTick() - st < wait_ms);
 	}
 
-	matrix_copy(&A, &At, 0);
-	matrix_transpose(&At);
+	int shift = n / count;
+	for(int k = 0; k < shift; k++)
+	{
+		for(int i = 0; i < count; i++)
+		{
+			for(int j = 0; j < 9; j++)
+			{
+				*matrix_at(&A, i, j) = *matrix_at(&AA, i * shift, j);
+			}
+		}
 
-	matrix_multiplicate(&At, &A, &At_A);
-	//matrix_print(&At_A);
-	matrix_inverse(&At_A);
-	//matrix_print(&At_A);
+		matrix_copy(&A, &At, 1);
+		matrix_transpose(&At);
 
-	matrix_multiplicate(&At, &b, &At_b);
-	matrix_multiplicate(&At_A, &At_b, &x);
+		matrix_multiplicate(&At, &A, &At_A);
+		//matrix_print(&At_A);
+		matrix_inverse(&At_A);
+		//matrix_print(&At_A);
+
+		matrix_multiplicate(&At, &b, &At_b);
+		matrix_multiplicate(&At_A, &At_b, &xx);
+
+		matrix_add(&x, &xx);
+		matrix_print(&xx);
+
+	}
+	matrix_print(&x);
+	matrix_mulNumber(&x, 1 / (float)shift);
 
 	matrix_print(&x);
-
 	matrix_delete(&A);
 	matrix_delete(&At_A);
 	matrix_delete(&At_b);
@@ -192,6 +213,8 @@ void mag_calib_calibrate_lsm303c(struct lsm303c_handler_s *handler, int n, uint3
 
 	Matrixf A_trans = matrix_create(3, 3);
 	matrix_make_identity(&A_trans);
+
+	matrix_print(&A);
 	for(int k = 0; k < (int)(N); k++)
 	{
 		int imax = 0, jmax = 1;
@@ -213,10 +236,11 @@ void mag_calib_calibrate_lsm303c(struct lsm303c_handler_s *handler, int n, uint3
 		float c, s;
 		_mag_mat_make_ij_zero(&A, imax, jmax, &c, &s);
 		_mag_mat_rot_right(&A_trans, imax, jmax, c, s);
-		//matrix_print(&A);
+		matrix_print(&A);
 
 	}
 
+	matrix_print(&A_trans);
 	//////////////////////////////////////////////
 	// Make it more circle
 	//////////////////////////////////////////////

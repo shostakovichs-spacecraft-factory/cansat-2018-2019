@@ -17,6 +17,7 @@
 #include <math.h>
 #include "madgwick/MadgwickAHRS.h"
 #include "madgwick/ahrs.h"
+#include "camera/camera_interface.h"
 
 #include "thread.h"
 
@@ -118,6 +119,7 @@ void toEulerAngle(quaternion_t *q, double *roll, double *pitch, double *yaw)
 int main()
 {
 
+	trace_printf("\n\nHello world!!!\n");
 	__initialize_hardware();
 	//uint32_t t1 = HAL_GetTick();
 	//int *arr = malloc(sizeof(*arr) * 30000);
@@ -127,10 +129,51 @@ int main()
 	//SystemCoreClockUpdate();
 	__GPIOB_CLK_ENABLE();
 	__GPIOA_CLK_ENABLE();
+	__GPIOC_CLK_ENABLE();
 
 	__I2C1_CLK_ENABLE();
 	__CAN1_CLK_ENABLE();
 
+	__USART3_CLK_ENABLE();
+	MY_UART huart;
+	uart_pin_rx_init(GPIOC, GPIO_PIN_11);
+	uart_pin_tx_init(GPIOC, GPIO_PIN_10);
+	uart_config_default(&huart.huart);
+	huart.huart.Instance = USART3;
+	uart_init(&huart);
+
+	HAL_Delay(3000);
+	CAMERA hcam;
+	camera_init(&hcam, &huart);
+
+	camera_reset(&hcam);
+	HAL_Delay(3000);
+	camera_set_image_size(&hcam, VC0706_640x480);
+	trace_printf("\nTake picture\n");
+	camera_restore_picture(&hcam);
+	HAL_Delay(1000);
+	camera_take_picture(&hcam);
+
+
+	const size_t buf_size = 1;
+	uint8_t buffer[buf_size];
+	for(int i = 0; i < buf_size; i++)
+		buffer[i] = 0;
+	HAL_Delay(1000);
+	while(!camera_is_all_image_loaded(&hcam))
+	{
+
+		int length = camera_read_picture(&hcam, buffer, buf_size);
+		trace_write((char*)buffer, length);
+		HAL_Delay(100);
+	}
+	camera_restore_picture(&hcam);
+
+	return 0;
+}
+
+void madgwick_test()
+{
 	SPI_HandleTypeDef hspi;
 	spi_config_default(&hspi);
 	hspi.Instance = SPI1;
@@ -165,7 +208,7 @@ int main()
 	HAL_Delay(5000);
 	mag_calib_init();
 	trace_printf("%s\n", "Begin mag calibration");
-	mag_calib_calibrate_lsm303c(&hlsm3, 500, 20);
+	//mag_calib_calibrate_lsm303c(&hlsm3, 27, 400);
 	trace_printf("%s\n", "End mag calibration");
 	HAL_Delay(5000);
 
@@ -252,9 +295,6 @@ int main()
 
 		time_prev = time_now;
 	}
-
-
-	return 0;
 }
 
 //
