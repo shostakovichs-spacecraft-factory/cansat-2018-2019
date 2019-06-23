@@ -86,7 +86,7 @@ static uint8_t _readbusypin(sx1268_t * self)
 				( (sx1268_stm32_t *) self->platform_specific )->busy_pin);
 }
 
-static uint8_t _readbusypin(sx1268_t * self)
+static uint8_t _readdio2pin(sx1268_t * self)
 {
 	return HAL_GPIO_ReadPin( ( (sx1268_stm32_t *) self->platform_specific )->dio2_port, \
 				( (sx1268_stm32_t *) self->platform_specific )->dio2_pin);

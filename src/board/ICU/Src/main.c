@@ -84,6 +84,8 @@ void radio_init()
 	radio_specific.bus = &hspi2;
 	radio_specific.busy_port = RADIO_BUSY_GPIO_Port;
 	radio_specific.busy_pin = RADIO_BUSY_Pin;
+	radio_specific.dio2_port = RADIO_DIO2_GPIO_Port;
+	radio_specific.dio2_pin = RADIO_DIO2_Pin;
 	radio_specific.cs_port = RADIO_NSS_GPIO_Port;
 	radio_specific.cs_pin = RADIO_NSS_Pin;
 	radio_specific.nrst_port = RADIO_NRST_GPIO_Port;
@@ -395,6 +397,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(RADIO_BUSY_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : RADIO_DIO2_Pin */ //FIXME redefine with STM32Cube, or throw him away
+  GPIO_InitStruct.Pin = RADIO_DIO2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(RADIO_DIO2_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pins : RADIO_TXEN_Pin RADIO_RXEN_Pin */
   GPIO_InitStruct.Pin = RADIO_TXEN_Pin|RADIO_RXEN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -423,7 +431,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(RADIO_IRQ_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }

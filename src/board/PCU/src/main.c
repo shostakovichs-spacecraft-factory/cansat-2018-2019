@@ -51,11 +51,17 @@ int main()
  {
 	SysTick_Config(SystemCoreClock / 1000);
 
-	i2c_init_bus1();
+	powerswitch_init();
+
+	i2c_init_bus2();
 
 	_ina_init(&ina_icu, PCU_INA_ICU_ADDR);
 	_ina_init(&ina_scu, PCU_INA_SCU_ADDR);
 	_ina_init(&ina_ccu, PCU_INA_CCU_ADDR);
+
+	canlink_init();
+
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
 
 	uint16_t cyclenum = 0;
 	mavlink_message_t msg;

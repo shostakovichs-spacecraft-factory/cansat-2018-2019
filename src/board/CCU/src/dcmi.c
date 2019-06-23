@@ -184,7 +184,7 @@ void send_spectrum_photo() {
 		can_mavlink_transmit(&msg);
 		usart3_mavlink_transmit(&msg);
 
-		HAL_Delay(500);
+		HAL_Delay(100);
 
 		frame++;
 	}

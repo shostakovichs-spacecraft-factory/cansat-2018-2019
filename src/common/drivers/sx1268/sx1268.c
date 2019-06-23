@@ -460,6 +460,12 @@ static inline void _waitbusy(sx1268_t * self, int timeout_ms)
 		timeout_ms--; //TODO proper timeout handling
 }
 
+static inline void _waittxbusy(sx1268_t * self, int timeout_ms)
+{
+	while(_readdio2pin(self))
+		timeout_ms--; //TODO proper timeout handling
+}
+
 static void _dotx(sx1268_t * self, uint8_t * buff, int len)
 {
 	volatile uint8_t status;
@@ -526,9 +532,6 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 	_cmd_SetDIO3AsTCXOCtrl(self, 0x01, 320); //'magic' values from mbed driver
 
 	_waitbusy(self, TIMEOUT);
-	_cmd_SetDIO2AsRfSwitchCtrl(self, true);
-
-	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
 
 	_waitbusy(self, TIMEOUT);
@@ -584,6 +587,9 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 	_cmd_SetDioIrqParams(self, TXRXDONEANDTIMEOUT, TXRXDONEANDTIMEOUT, 0, 0);
 
 	_waitbusy(self, TIMEOUT);
+	_cmd_SetDIO2AsRfSwitchCtrl(self, true);
+
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
 
 	_waitbusy(self, TIMEOUT);
@@ -619,6 +625,8 @@ sx1268_status_t sx1268_send(sx1268_t * self, uint8_t * data, int len)
 	uint8_t status;
 	_cmd_GetStatus(self, &status);
 	_waitbusy(self, TIMEOUT);
+
+	_waittxbusy(self, TIMEOUT);
 
 	if(STATUS_CHIPMODE(status) != STATUS_CHIPMODE_STBY_RC)
 		_cmd_SetStandby(self, false);
@@ -660,6 +668,8 @@ void sx1268_event(sx1268_t * self)
 
 	_critical_enter(self);
 
+	_waittxbusy(self, TIMEOUT);
+
 	_waitbusy(self, TIMEOUT);
 	_cmd_GetIrqStatus(self, &status, &irqstatus);
 
@@ -690,6 +700,10 @@ void sx1268_event(sx1268_t * self)
 
 	if(!self->fifo_tx.empty)
 	{
+		_critical_exit(self);
+		HAL_Delay(70);
+		_critical_exit(self);
+
 		_rxen_write(self, false);
 		_txen_write(self, true);
 

@@ -2,13 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a29cf80a-6178-4680-ae34-78975dde51bc" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../../board/CCU/src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/CCU/src/main.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../board/ICU/Src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/Src/main.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../board/ICU/Src/router.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/Src/router.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../board/ICU/Src/stm32f1xx_it.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/Src/stm32f1xx_it.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../common/zikush_config.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../common/zikush_config.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../bombidary-radio/src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/../bombidary-radio/src/main.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/connectorapp/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/connectorapp/__main__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -320,7 +314,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-3" y="0" width="1926" height="1083" extended-state="6" />
+    <frame x="-3" y="0" width="1926" height="1083" extended-state="7" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.86467487" visible="true" weight="0.24907652" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />

@@ -17,7 +17,7 @@
 static int _ina_init(ina219_t * self, ina219_i2c_addr_t addr) {
 	int error = 0;
 
-	ina219_init(self, I2C1, addr);
+	ina219_init(self, I2C2, addr);
 
 	error = ina219_sw_reset(self);
 	// подождем после резета

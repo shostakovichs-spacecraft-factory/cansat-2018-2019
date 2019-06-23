@@ -7,13 +7,14 @@
 
 #include <stdbool.h>
 #include <stm32f10x_can.h>
-#include <cmsis/cmsis_armcc.h>
 
 #include <mavlink/zikush/mavlink.h>
 #include <canmavlink.h>
 
 #include <zikush_config.h>
 #include "canlink.h"
+
+extern volatile uint32_t global_ms;
 
 bool canlink_init(void)
 {
@@ -22,13 +23,13 @@ bool canlink_init(void)
 
 	GPIO_InitTypeDef gpioinit =
 	{
-		.GPIO_Pin = 11,
+		.GPIO_Pin = GPIO_Pin_11,
 		.GPIO_Mode = GPIO_Mode_IN_FLOATING,
 		.GPIO_Speed = GPIO_Speed_10MHz
 	};
 	GPIO_Init(GPIOA, &gpioinit);
 
-	gpioinit.GPIO_Pin = 12;
+	gpioinit.GPIO_Pin = GPIO_Pin_12;
 	gpioinit.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_Init(GPIOA, &gpioinit);
 
@@ -50,12 +51,20 @@ bool canlink_init(void)
 
 	CAN_FilterInitTypeDef canfilter =
 	{
-
+		.CAN_FilterMaskIdHigh = 0,
+		.CAN_FilterMaskIdLow = 0,
+		.CAN_FilterMode = CAN_FilterMode_IdMask,
+		.CAN_FilterActivation = ENABLE,
+		.CAN_FilterFIFOAssignment = CAN_Filter_FIFO0,
+		.CAN_FilterScale = CAN_FilterScale_16bit,
+		.CAN_FilterNumber = 0,
 	};
 	CAN_FilterInit(&canfilter);
 
 	CAN_ITConfig(CAN1, CAN_IT_FMP0, ENABLE);
 	NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
+
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
 
 	return true;
 }
@@ -65,7 +74,7 @@ void canlink_send(mavlink_message_t * msg)
 	__disable_irq();
 
 	static CanTxMsg frames[34];
-	uint8_t framecount = canmavlink_msg_to_frames(frames, &msg);
+	uint8_t framecount = canmavlink_msg_to_frames(frames, msg);
 
 	for(int i = 0; i < framecount; i++) //FIXME rewrite with IRQs
 	{
@@ -86,6 +95,8 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 	static volatile mavlink_message_t msg;
 	static volatile mavlink_status_t status;
 
+	mavlink_zikush_cmd_powerbus_t powercmd;
+
 	CAN_Receive(CAN1, CAN_FIFO0, &frame);
 
 	volatile uint8_t result = canmavlink_parse_frame(&frame, &msg, &status);
@@ -103,7 +114,6 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 			break;
 
 		case MAVLINK_MSG_ID_ZIKUSH_CMD_POWERBUS:
-			mavlink_zikush_cmd_powerbus_t powercmd;
 			mavlink_msg_zikush_cmd_powerbus_decode(&msg, &powercmd);
 
 			powerswitch_set(powercmd.bus, powercmd.state);
