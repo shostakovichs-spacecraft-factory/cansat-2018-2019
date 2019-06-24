@@ -348,9 +348,9 @@ int camera_take_picture(CAMERA *cam)
 		return 1;
 	}
 
-	camera_load_image_size(cam);
 
-	return 0;
+
+	return camera_load_image_size(cam);
 }
 
 int camera_is_all_image_loaded(CAMERA* cam)
