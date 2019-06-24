@@ -56,10 +56,10 @@ int main(int argc, char* argv[])
 
 	can_init_structure.CAN_NART = ENABLE;
 	can_init_structure.CAN_SJW = CAN_SJW_1tq;
-	can_init_structure.CAN_BS1 = CAN_BS1_4tq;
-	can_init_structure.CAN_BS2 = CAN_BS2_4tq;
+	can_init_structure.CAN_BS1 = CAN_BS1_5tq;
+	can_init_structure.CAN_BS2 = CAN_BS2_2tq;
 	can_init_structure.CAN_Prescaler = 16 * 25;
-	can_init_structure.CAN_Mode = CAN_Mode_LoopBack;
+	can_init_structure.CAN_Mode = CAN_Mode_Normal;
 
 	CAN_FilterInitTypeDef can_filter =
 	{

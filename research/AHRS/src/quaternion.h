@@ -27,6 +27,8 @@ quaternion_t quat_getInverted(quaternion_t * a);
 quaternion_t quat_mulByQuat(quaternion_t * a, quaternion_t * b);
 quaternion_t quat_mulByVec(quaternion_t * a, vector_t * b);
 vector_t vec_rotate(vector_t * vect, quaternion_t * rotation);
+void vec_normalize(vector_t *vec);
+
 
 void quat_add(quaternion_t *left, quaternion_t *right);
 void quat_sub(quaternion_t *left, quaternion_t *right);

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Grain MCC for Bombus</title>
+
+    {% block styles %}
+    {% assets "bs_css" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}"/>
+    {% endassets %}
+    {% assets "main_css" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}"/>
+    {% endassets %}
+
+    <style>
+        #header {
+            margin-top:10px;
+        }
+
+        .margin-bottom {
+            margin-bottom:20px;
+        }
+
+        #footer {
+            border-top-style:double;
+            border-width: 3px;
+        }
+    </style>
+    {% endblock %}
+
+
+</head>
+<body>
+<nav class="navbar navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="/">
+        <img src="/static/Bombus.gif" style="max-height:40px" href="/" alt="BOMBUS">
+        MISSION CONTROL CENTRE
+    </a>
+
+    {% block navbared %}
+    {% endblock %}
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="/overview">Overview</a>
+                <a class="nav-link" href="/plots">Plots</a>
+            </li>
+
+            <div id="login_form">
+                <form name="login" action="">
+                  <fieldset>
+                    <label for="totpcode" id="totpcode_label">TOTP code</label>
+                    <input type="text" name="totpcode" id="totpcode" size="30" value="" class="text-input" />
+                    <label class="error" for="totpcode" id="name_error">This field is required.</label>
+
+                    <br />
+                    <input type="submit" name="submit" class="button" id="submit_btn" value="Send" />
+                  </fieldset>
+                </form>
+            </div>
+        </ul>
+    </div>
+
+</nav>
+
+<img src="{{ url_for("data.background_img") }}" style="position:fixed; width:100%; height:auto;">
+
+<div class="container-fluid min-height-100vh under-header whitebg">
+    {% block content %}{% endblock %}
+
+    <div id="footer" class="row" style="text-align:right">
+        <div class="col">
+            <p>Shostakovichs SCF. 2019.</p>
+            <p>Vasilly.Prokopyev, Antonloh, Arina, Kirs67, SeresHotes</p>
+            <p><a href="https://github.com/shostakovichs-spacecraft-factory/">Team github</a></p>
+        </div>
+    </div>
+</div>
+
+
+{% block js %}
+{% assets "jq_js" %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+{% assets "bs_js" %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+{% endblock %}
+
+</body>
+</html>
+
+
+
+

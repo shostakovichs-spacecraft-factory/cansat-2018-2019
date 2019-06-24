@@ -7,6 +7,7 @@
 
 #include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "sx1268.h"
 
@@ -381,51 +382,57 @@ static inline sx1268_status_t _cmd_GetStatus(sx1268_t * self, uint8_t * status)
 static inline sx1268_status_t _cmd_GetRxBufferStatus(sx1268_t * self, uint8_t * Status, uint8_t * PayloadLengthRx, uint8_t * RxStartBufferPointer)
 {
 	uint8_t buff[3];
-	return _cmd(self, 0x13, buff, 3);
+	sx1268_status_t retval = _cmd(self, 0x13, buff, 3);
 
 	*Status = buff[0];
 	*PayloadLengthRx = buff[1];
 	*RxStartBufferPointer = buff[2];
+
+	return retval;
 }
 
 
-#define FIFO_FREESPACE(FIFO) ((FIFO->tail - FIFO->head) % FIFO->length)
+#define FIFO_FREESPACE(FIFO) ((FIFO->tail - FIFO->head) % (FIFO->length))
 #define FIFO_USEDSPACE(FIFO) ((FIFO->head - FIFO->tail) % (FIFO->length))
 
 static sx1268_status_t _fifo_write(sx1268_fifo_t * fifo, uint8_t * data, int len)
 {
-	if(FIFO_FREESPACE(fifo) < len & !fifo->empty)
+	//printf("\n%d %d %d %d %d %d\n", fifo->head, fifo->tail, fifo->length, fifo->empty, FIFO_FREESPACE(fifo), FIFO_USEDSPACE(fifo));
+	if((FIFO_FREESPACE(fifo) < len) && !fifo->empty)
+	{
+		printf("errbuffsize\n");
 		return SX1268_ERR_BUFSIZE;
+	}
 
 	int copylen = MIN(fifo->length - fifo->head, len);
 	memcpy(fifo->mem + fifo->head, data, copylen);
 	fifo->head = (fifo->head + copylen) % fifo->length;
 
 	memcpy(fifo->mem + fifo->head, data + copylen, len - copylen);
-	fifo->head += (len - copylen) % fifo->length;
+	fifo->head += (len - copylen);
+	fifo->head %= fifo->length;
 
 	fifo->empty = false;
+
+	//printf("%d %d %d %d %d %d %d\n", copylen, fifo->head, fifo->tail, fifo->length, fifo->empty, FIFO_FREESPACE(fifo), FIFO_USEDSPACE(fifo));
 	return SX1268_OK;
 }
 
 static sx1268_status_t _fifo_read(sx1268_fifo_t * fifo, uint8_t * data, int len)
 {
-	if(!fifo->empty)
-	{
-		if(fifo->length < len)
-			return SX1268_ERR_BUFSIZE;
-	}
-	else if(FIFO_USEDSPACE(fifo) < len)
+	if(FIFO_USEDSPACE(fifo) < len || fifo->empty)
 		return SX1268_ERR_BUFSIZE;
 
-	int copylen = MIN(fifo->length - fifo->head, len);
-	memcpy(fifo->mem + fifo->head, data, copylen);
-	fifo->head = (fifo->head + copylen) % fifo->length;
+	int copylen = MIN(fifo->length - fifo->tail, len);
+	memcpy(data, fifo->mem + fifo->tail, copylen);
+	fifo->tail = (fifo->tail + copylen) % fifo->length;
 
-	memcpy(fifo->mem + fifo->head, data + copylen, len - copylen);
-	fifo->head += (len - copylen) % fifo->length;
+	memcpy(data + copylen, fifo->mem + fifo->tail, len - copylen);
+	fifo->tail += (len - copylen) % fifo->length;
 
-	fifo->empty = false;
+	if(FIFO_USEDSPACE(fifo) == 0)
+		fifo->empty = true;
+
 	return SX1268_OK;
 }
 
@@ -447,117 +454,210 @@ static void _sendpackparams(sx1268_t * self, uint8_t PayloadLength) //yeees, it'
 	_cmd_SetPacketParams(self, (uint8_t *) &packparams);
 }
 
+static inline void _waitbusy(sx1268_t * self, int timeout_ms)
+{
+	while(_readbusypin(self))
+		timeout_ms--; //TODO proper timeout handling
+}
+
+static inline void _waittxbusy(sx1268_t * self, int timeout_ms)
+{
+	while(_readdio2pin(self))
+		timeout_ms--; //TODO proper timeout handling
+}
+
 static void _dotx(sx1268_t * self, uint8_t * buff, int len)
 {
 	volatile uint8_t status;
 	_cmd_SetTxParams(self, POWER_LOW_HIGHEST, RAMPTIME_200U);
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
+	_waitbusy(self, TIMEOUT);
 	_cmd_SetBufferBaseAddress(self, 0, 0);
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
+	_waitbusy(self, TIMEOUT);
 	_cmd_WriteBuffer(self, 0, buff, len);
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
+	_waitbusy(self, TIMEOUT);
 	_sendpackparams(self, len);
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
+	_waitbusy(self, TIMEOUT);
 	_cmd_SetTX(self, 64000); //1 second timeout
-	_cmd_GetStatus(self, &status);
+	_waitbusy(self, TIMEOUT);
 }
 
 
 
 /* Main functions */
-void sx1268_struct_init(sx1268_t * self, uint8_t * rxbuff, int rxbufflen, uint8_t * txbuff, int txbufflen)
+void sx1268_struct_init(sx1268_t * self, void * platform_specific, uint8_t * rxbuff, int rxbufflen, uint8_t * txbuff, int txbufflen)
 {
 	self->fifo_rx.mem = rxbuff;
 	self->fifo_rx.length = rxbufflen;
 	self->fifo_rx.head = 0;
 	self->fifo_rx.tail = 0;
 	self->fifo_rx.empty = true;
+	self->fifo_rx.locked = false;
 
 	self->fifo_tx.mem = txbuff;
 	self->fifo_tx.length = txbufflen;
 	self->fifo_tx.head = 0;
 	self->fifo_tx.tail = 0;
 	self->fifo_tx.empty = true;
+	self->fifo_tx.locked = false;
+
+	self->platform_specific = platform_specific;
 }
 
 sx1268_status_t sx1268_init(sx1268_t * self)
 {
 	volatile uint8_t status;
+
+	_nrst_reset(self);
+	_rxen_write(self, false);
+	_txen_write(self, false);
+
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
 
+	_waitbusy(self, TIMEOUT);
 	_cmd_SetStandby(self, false);
 
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
 
+	_waitbusy(self, TIMEOUT);
 	_cmd_SetDIO3AsTCXOCtrl(self, 0x01, 320); //'magic' values from mbed driver
-	_cmd_GetStatus(self, &status);
-	_cmd_Calibrate(self, 0x7F); //also mbed magic
-	_cmd_SetDIO2AsRfSwitchCtrl(self, true);
-	_cmd_CalibrateImage(self, 0x6B, 0x6F); //430-440 MHz, according to datasheet
-	_cmd_GetStatus(self, &status);
-	_cmd_SetRfFrequency(self, RFFREQ_CALC(433000000));
+
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
 
-	_cmd_SetPacketType(self, false); //set gfsk
+	_waitbusy(self, TIMEOUT);
+	_cmd_Calibrate(self, 0x7F); //also mbed magic
+
+	_waitbusy(self, TIMEOUT);
+	_cmd_CalibrateImage(self, 0x6B, 0x6F); //430-440 MHz, according to datasheet
+
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
+
+	_waitbusy(self, TIMEOUT);
+	_cmd_SetRfFrequency(self, RFFREQ_CALC(433000000));
+
+	_waitbusy(self, TIMEOUT);
+	_cmd_GetStatus(self, &status);
+
+	_waitbusy(self, TIMEOUT);
+	_cmd_SetPacketType(self, false); //set gfsk
+
+	_waitbusy(self, TIMEOUT);
+	_cmd_GetStatus(self, &status);
+
 	sx1268_modparams_gfsk_t modparams;
-	uint32_t br = 32 * 32000000 / 4800;
+	uint32_t br = 32 * 32000000 / 30000;
 	UINT24_T_FORM(br, modparams.br0, modparams.br1, modparams.br2);
 	UINT24_T_FORM(1024, modparams.Fdev0, modparams.Fdev1, modparams.Fdev2);
-	modparams.Bandwidth = 0x1D;
+	modparams.Bandwidth = 0x09;
 	modparams.PulseShape = 0x09;
+	_waitbusy(self, TIMEOUT);
 	_cmd_SetModulationParams(self, (uint8_t *) &modparams);
+
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
 
+	_waitbusy(self, TIMEOUT);
 	_sendpackparams(self, 255);
+
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
 
 	uint8_t syncstring[] = "  antonloh";
 	syncstring[0] = 0x06;
 	syncstring[1] = 0xC0;
+	_waitbusy(self, TIMEOUT);
 	_cmd_WriteRegister_burst(self, syncstring, 10);
+
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
 
 	uint16_t TXRXDONEANDTIMEOUT = (1 << 0) | (1 << 1) | (1 << 9);
+	_waitbusy(self, TIMEOUT);
 	_cmd_SetDioIrqParams(self, TXRXDONEANDTIMEOUT, TXRXDONEANDTIMEOUT, 0, 0);
+
+	_waitbusy(self, TIMEOUT);
+	_cmd_SetDIO2AsRfSwitchCtrl(self, true);
+
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
 
+	_waitbusy(self, TIMEOUT);
 	_cmd_SetBufferBaseAddress(self, 0, 0);
-	_cmd_SetRX(self, 0xFFFFFFFF);
+
+	_waitbusy(self, TIMEOUT);
+	_cmd_GetStatus(self, &status);
+
+	_waitbusy(self, TIMEOUT);
+	_cmd_SetRX(self, 0);
+	_txen_write(self, false);
+	_rxen_write(self, true);
+
+	_waitbusy(self, TIMEOUT);
+	_cmd_GetStatus(self, &status);
+
+	_critical_init(self);
 
 	return SX1268_OK; //TODO
 }
 
 sx1268_status_t sx1268_send(sx1268_t * self, uint8_t * data, int len)
 {
-	if( _readbusypin(self) )
+	_critical_enter(self);
+
+	if( _readbusypin(self) | !self->fifo_tx.empty )
 	{
-		return _fifo_write(&self->fifo_tx, data, len);
+		sx1268_status_t retval = _fifo_write(&self->fifo_tx, data, len);
+		_critical_exit(self);
+		return retval;
 	}
 
 	uint8_t status;
 	_cmd_GetStatus(self, &status);
+	_waitbusy(self, TIMEOUT);
+
+	_waittxbusy(self, TIMEOUT);
 
 	if(STATUS_CHIPMODE(status) != STATUS_CHIPMODE_STBY_RC)
 		_cmd_SetStandby(self, false);
 
+	_rxen_write(self, false);
+	_txen_write(self, true);
 	_dotx(self, data, MIN(len, 255));
-	_cmd_GetStatus(self, &status);
 
 	if(len > 255) //we can send only 255 bytes in one packet, so everything except should be saved to fifo
 	{
 		_fifo_write(&self->fifo_tx, data + 255, len - 255);
 	}
 
+	_critical_exit(self);
+
 	return SX1268_OK;
 }
 
 sx1268_status_t sx1268_receive(sx1268_t * self, uint8_t * data, int len)
 {
-	if(FIFO_USEDSPACE((&self->fifo_rx)) < len)
-		return SX1268_ERR_BUFSIZE;
+	sx1268_status_t retval;
 
-	return _fifo_read(&self->fifo_rx, data, len);
+	_critical_enter(self);
+
+	if(FIFO_USEDSPACE((&self->fifo_rx)) < len)
+		retval = SX1268_ERR_BUFSIZE;
+	else
+		retval = _fifo_read(&self->fifo_rx, data, len);
+
+	_critical_exit(self);
+	return retval;
 }
 
 void sx1268_event(sx1268_t * self)
@@ -565,30 +665,63 @@ void sx1268_event(sx1268_t * self)
 	volatile uint16_t irqstatus;
 	volatile uint8_t status;
 	uint8_t buff[256];
+
+	_critical_enter(self);
+
+	_waittxbusy(self, TIMEOUT);
+
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetIrqStatus(self, &status, &irqstatus);
+
+	//printf("%d %d\n", status, irqstatus);
+
+	_waitbusy(self, TIMEOUT);
 	_cmd_ClearIrqStatus(self, irqstatus);
 
 	if(irqstatus & IRQFLAG_RXDONE)
 	{
-		if(STATUS_COMMAND(status) == STATUS_COMMAND_AVAIL)
-		{
-			uint8_t start, len;
-			_cmd_GetRxBufferStatus(self, &status, &start, &len);
-			_cmd_ReadBuffer(self, start, buff, len);
-			_fifo_write(&self->fifo_rx, buff, len);
-			_cmd_SetBufferBaseAddress(self, 0, 0);
-		}
+		uint8_t start, len;
+
+		_waitbusy(self, TIMEOUT);
+		_cmd_GetRxBufferStatus(self, &status, &len, &start);
+
+		//printf("%d %d\n", start, len);
+
+		_waitbusy(self, TIMEOUT);
+		_cmd_ReadBuffer(self, start, buff, len);
+
+		//printf(buff);
+
+		_fifo_write(&self->fifo_rx, buff, len);
+
+		_waitbusy(self, TIMEOUT);
+		_cmd_SetBufferBaseAddress(self, 0, 0);
 	}
 
 	if(!self->fifo_tx.empty)
 	{
+		_critical_exit(self);
+		HAL_Delay(70);
+		_critical_exit(self);
+
+		_rxen_write(self, false);
+		_txen_write(self, true);
+
 		int len = FIFO_USEDSPACE((&self->fifo_tx));
 		len = MIN(len, 255);
 
 		_fifo_read(&self->fifo_tx, buff, len);
+		_waitbusy(self, TIMEOUT);
 		_dotx(self, buff, len);
 	}
 
 	else
-		_cmd_SetRX(self, 0xFFFFFFFF);
+	{
+		_waitbusy(self, TIMEOUT);
+		_cmd_SetRX(self, 0);
+		_txen_write(self, false);
+		_rxen_write(self, true);
+	}
+
+	_critical_exit(self);
 }

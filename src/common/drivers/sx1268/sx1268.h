@@ -13,18 +13,13 @@
 
 #define TIMEOUT 10000 //Timeout for SPI operations, ms
 
-#ifdef SX1268_STM32
-#include "sx1268_stm32.h"
-#elif defined SX1268_RPI
-#include "sx1268_rpi.h"
-#endif
-
-#define RXLEN(SELF)	(self.fifo_rx.length)
+#define RXLEN(SELF)	((SELF.fifo_rx.head - SELF.fifo_rx.tail) % (SELF.fifo_rx.length))
 
 typedef struct
 {
+	volatile bool locked;
 	uint8_t * mem;
-	int length, head, tail;
+	unsigned int length, head, tail;
 	bool empty;
 } sx1268_fifo_t;
 
@@ -36,11 +31,18 @@ typedef struct
 
 typedef enum
 {
-	SX1268_OK,
+	SX1268_OK = 0,
 	SX1268_TIMEOUT,
 	SX1268_BUSY,
 	SX1268_ERR_BUFSIZE,
+	SX1268_ERROR, //general/other error
 } sx1268_status_t;
+
+#ifdef SX1268_STM32
+#include "sx1268_stm32.h"
+#elif defined SX1268_RPI
+#include "sx1268_rpi.h"
+#endif
 
 //Inits all descriptor fields as they should be by default
 void sx1268_struct_init(sx1268_t * self, void * platform_specific, uint8_t * rxbuff, int rxbufflen, uint8_t * txbuff, int txbufflen);

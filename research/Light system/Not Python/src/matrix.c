@@ -260,6 +260,7 @@ int matrix_inverse(Matrixf *matrix)
 			//matrix_print(matrix);
 		}
 	}
+	matrix_print(matrix);
 	for (int i = matrix->width - 1; i >= 0; i--)
 	{
 		matrix_mulRowNum(&result, i, 1 / *matrix_at(matrix, i, i));

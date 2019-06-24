@@ -191,6 +191,14 @@ vector_t vec_zero()
 	return vec_init(0,0,0);
 }
 
+void vec_normalize(vector_t *vec)
+{
+	float v = vec->x * vec->x + vec->y * vec->y + vec->z * vec->z;
+	vec->x /= v;
+	vec->y /= v;
+	vec->z /= v;
+}
+
 void quat_print(quaternion_t *a)
 {
 	printf("%2.3lf %2.3lf %2.3lf %2.3lf\n", a->w, a->x, a->y, a->z);

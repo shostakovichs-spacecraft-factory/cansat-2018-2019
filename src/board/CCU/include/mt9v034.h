@@ -124,9 +124,9 @@
  * COLUMN_SIZE * BINNING_COLUMN <= MAX_IMAGE_HEIGHT
  */
 
-#define FULL_IMAGE_SIZE (188*120)
-#define FULL_IMAGE_ROW_SIZE (188)
-#define FULL_IMAGE_COLUMN_SIZE (120)
+#define FULL_IMAGE_ROW_SIZE (CCU_SPECTRUM_WIDTH / 2)
+#define FULL_IMAGE_COLUMN_SIZE (CCU_SPECTRUM_HEIGHT / 2)
+#define FULL_IMAGE_SIZE (FULL_IMAGE_ROW_SIZE * FULL_IMAGE_COLUMN_SIZE)
 
 /* Typedefs */
 
@@ -145,7 +145,7 @@ void mt9v034_context_configuration(void);
 /**
   * @brief  Changes sensor context based on settings
   */
-void mt9v034_set_context(void);
+void mt9v034_set_context(mt9v034_context_t context);
 
 uint16_t mt9v034_ReadReg16(uint8_t address);
 uint8_t mt9v034_WriteReg16(uint16_t address, uint16_t Data);

@@ -1,15 +1,15 @@
 {
     "author": {
-        "email": "strange.snork@gmail.com",
-        "name": "Ivan Ivanov"
+        "email": "ikruzov@bk.ru",
+        "name": "Anton Chernov"
     },
     "description": {
         "EN": "EAGLE default 2 layer CAM job."
     },
-    "output_type": "zip",
+    "output_type": "directory",
     "outputs": [
         {
-            "filename_prefix": "CAMOutputs",
+            "filename_prefix": "CAMOutputs/DrillFiles",
             "format_specifier": {
                 "decimal": 3,
                 "integer": 3
@@ -22,7 +22,7 @@
                         "PTH": true,
                         "VIA": true
                     },
-                    "filename_format": "%DRILLPREFIX/drl.drd",
+                    "filename_format": "%DRILLPREFIX/drills.xln",
                     "layers": {
                         "from": 1,
                         "to": 16
@@ -33,7 +33,7 @@
             ]
         },
         {
-            "filename_prefix": "CAMOutputs",
+            "filename_prefix": "CAMOutputs/GerberFiles",
             "format_specifier": {
                 "decimal": 4,
                 "integer": 3
@@ -49,7 +49,7 @@
                         "layer_details": "mixed",
                         "layer_type": "top"
                     },
-                    "filename_format": "%PREFIX/top.cmp",
+                    "filename_format": "%PREFIX/copper_top.gbr",
                     "layers": [
                         1,
                         17,
@@ -68,7 +68,7 @@
                         "layer_details": "mixed",
                         "layer_type": "bottom"
                     },
-                    "filename_format": "%PREFIX/bot.sol",
+                    "filename_format": "%PREFIX/copper_bottom.gbr",
                     "layers": [
                         16,
                         17,
@@ -80,13 +80,28 @@
                     "type": "gerber_layer"
                 },
                 {
+                    "board_outline": true,
+                    "config": {
+                        "file_function": "Profile",
+                        "plating": "non-plated"
+                    },
+                    "filename_format": "%PREFIX/profile.gbr",
+                    "layers": [
+                        20,
+                        45
+                    ],
+                    "milling": true,
+                    "polarity": "positive",
+                    "type": "gerber_layer"
+                },
+                {
                     "board_outline": false,
                     "config": {
                         "file_function": "Soldermask",
                         "index": 1,
                         "layer_type": "top"
                     },
-                    "filename_format": "%PREFIX/mt.stc",
+                    "filename_format": "%PREFIX/soldermask_top.gbr",
                     "layers": [
                         29
                     ],
@@ -101,7 +116,7 @@
                         "index": 1,
                         "layer_type": "bottom"
                     },
-                    "filename_format": "%PREFIX/mb.sts",
+                    "filename_format": "%PREFIX/soldermask_bottom.gbr",
                     "layers": [
                         30
                     ],
@@ -112,48 +127,11 @@
                 {
                     "board_outline": false,
                     "config": {
-                        "file_function": "Paste",
-                        "layer_type": "top"
-                    },
-                    "filename_format": "%PREFIX/ct.gbc",
-                    "layers": [
-                        31
-                    ],
-                    "milling": false,
-                    "name": "Solderpaste Top",
-                    "polarity": "positive",
-                    "type": "gerber_layer"
-                },
-                {
-                    "board_outline": false,
-                    "config": {
-                        "file_function": "Paste",
-                        "layer_type": "bottom"
-                    },
-                    "filename_format": "%PREFIX/bt.gbc",
-                    "layers": [
-                        32
-                    ],
-                    "milling": false,
-                    "name": "Solderpaste Bottom",
-                    "polarity": "positive",
-                    "type": "gerber_layer"
-                },
-                {
-                    "advanced_options": {
-                        "mirror": false,
-                        "offset_x": 0,
-                        "offset_y": 0,
-                        "rotate": false,
-                        "upside_down": false
-                    },
-                    "board_outline": false,
-                    "config": {
                         "file_function": "Legend",
                         "index": 1,
                         "layer_type": "top"
                     },
-                    "filename_format": "%PREFIX/st.plc",
+                    "filename_format": "%PREFIX/silkscreen_top.gbr",
                     "layers": [
                         21,
                         25
@@ -170,36 +148,13 @@
                         "index": 1,
                         "layer_type": "bottom"
                     },
-                    "filename_format": "%PREFIX/bt.pls",
+                    "filename_format": "%PREFIX/silkscreen_bottom.gbr",
                     "layers": [
                         22,
                         26
                     ],
                     "milling": false,
                     "name": "Silkscreen Bottom",
-                    "polarity": "positive",
-                    "type": "gerber_layer"
-                },
-                {
-                    "advanced_options": {
-                        "mirror": false,
-                        "offset_x": 0,
-                        "offset_y": 0,
-                        "rotate": false,
-                        "upside_down": false
-                    },
-                    "board_outline": false,
-                    "config": {
-                        "file_function": "Profile",
-                        "plating": "non-plated"
-                    },
-                    "filename_format": "%PREFIX/brd.gbr",
-                    "layers": [
-                        20,
-                        45
-                    ],
-                    "milling": false,
-                    "name": "Profile",
                     "polarity": "positive",
                     "type": "gerber_layer"
                 }
@@ -213,7 +168,7 @@
             ]
         }
     ],
-    "timestamp": "2019-01-16T01:30:59",
+    "timestamp": "2019-05-17T16:06:16",
     "type": "EAGLE CAM job",
     "units": "metric",
     "version": "9.2.0"
