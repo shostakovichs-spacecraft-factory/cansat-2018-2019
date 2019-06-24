@@ -46,12 +46,12 @@ function updatePlot(chartObject) {
         }
         chartObject.chart.update();
         chartObject.latestUpdateTime = data.latestUpdateTime;
-    });
 
-    chartObject.timeoutContext.setTimeout(
-        function() { updatePlot(chartObject); },
-        updatePeriodMs
-    );
+        chartObject.timeoutContext.setTimeout(
+            function() { updatePlot(chartObject); },
+            updatePeriodMs
+        );
+    });
 }
 
 

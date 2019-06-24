@@ -409,7 +409,8 @@ static sx1268_status_t _fifo_write(sx1268_fifo_t * fifo, uint8_t * data, int len
 	fifo->head = (fifo->head + copylen) % fifo->length;
 
 	memcpy(fifo->mem + fifo->head, data + copylen, len - copylen);
-	fifo->head += (len - copylen) % fifo->length;
+	fifo->head += (len - copylen);
+	fifo->head %= fifo->length;
 
 	fifo->empty = false;
 
@@ -459,6 +460,12 @@ static inline void _waitbusy(sx1268_t * self, int timeout_ms)
 		timeout_ms--; //TODO proper timeout handling
 }
 
+static inline void _waittxbusy(sx1268_t * self, int timeout_ms)
+{
+	while(_readdio2pin(self))
+		timeout_ms--; //TODO proper timeout handling
+}
+
 static void _dotx(sx1268_t * self, uint8_t * buff, int len)
 {
 	volatile uint8_t status;
@@ -479,6 +486,7 @@ static void _dotx(sx1268_t * self, uint8_t * buff, int len)
 	_cmd_GetStatus(self, &status);
 	_waitbusy(self, TIMEOUT);
 	_cmd_SetTX(self, 64000); //1 second timeout
+	_waitbusy(self, TIMEOUT);
 }
 
 
@@ -508,8 +516,10 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 	volatile uint8_t status;
 
 	_nrst_reset(self);
+	_rxen_write(self, false);
+	_txen_write(self, false);
 
-	//_waitbusy(self, TIMEOUT);
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
 
 	_waitbusy(self, TIMEOUT);
@@ -546,10 +556,10 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 	_cmd_GetStatus(self, &status);
 
 	sx1268_modparams_gfsk_t modparams;
-	uint32_t br = 32 * 32000000 / 4800;
+	uint32_t br = 32 * 32000000 / 30000;
 	UINT24_T_FORM(br, modparams.br0, modparams.br1, modparams.br2);
 	UINT24_T_FORM(1024, modparams.Fdev0, modparams.Fdev1, modparams.Fdev2);
-	modparams.Bandwidth = 0x1D;
+	modparams.Bandwidth = 0x09;
 	modparams.PulseShape = 0x09;
 	_waitbusy(self, TIMEOUT);
 	_cmd_SetModulationParams(self, (uint8_t *) &modparams);
@@ -577,6 +587,9 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 	_cmd_SetDioIrqParams(self, TXRXDONEANDTIMEOUT, TXRXDONEANDTIMEOUT, 0, 0);
 
 	_waitbusy(self, TIMEOUT);
+	_cmd_SetDIO2AsRfSwitchCtrl(self, true);
+
+	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
 
 	_waitbusy(self, TIMEOUT);
@@ -587,6 +600,8 @@ sx1268_status_t sx1268_init(sx1268_t * self)
 
 	_waitbusy(self, TIMEOUT);
 	_cmd_SetRX(self, 0);
+	_txen_write(self, false);
+	_rxen_write(self, true);
 
 	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
@@ -600,7 +615,7 @@ sx1268_status_t sx1268_send(sx1268_t * self, uint8_t * data, int len)
 {
 	_critical_enter(self);
 
-	if( _readbusypin(self) )
+	if( _readbusypin(self) | !self->fifo_tx.empty )
 	{
 		sx1268_status_t retval = _fifo_write(&self->fifo_tx, data, len);
 		_critical_exit(self);
@@ -611,9 +626,13 @@ sx1268_status_t sx1268_send(sx1268_t * self, uint8_t * data, int len)
 	_cmd_GetStatus(self, &status);
 	_waitbusy(self, TIMEOUT);
 
+	_waittxbusy(self, TIMEOUT);
+
 	if(STATUS_CHIPMODE(status) != STATUS_CHIPMODE_STBY_RC)
 		_cmd_SetStandby(self, false);
 
+	_rxen_write(self, false);
+	_txen_write(self, true);
 	_dotx(self, data, MIN(len, 255));
 
 	if(len > 255) //we can send only 255 bytes in one packet, so everything except should be saved to fifo
@@ -649,6 +668,8 @@ void sx1268_event(sx1268_t * self)
 
 	_critical_enter(self);
 
+	_waittxbusy(self, TIMEOUT);
+
 	_waitbusy(self, TIMEOUT);
 	_cmd_GetIrqStatus(self, &status, &irqstatus);
 
@@ -679,6 +700,13 @@ void sx1268_event(sx1268_t * self)
 
 	if(!self->fifo_tx.empty)
 	{
+		_critical_exit(self);
+		HAL_Delay(70);
+		_critical_exit(self);
+
+		_rxen_write(self, false);
+		_txen_write(self, true);
+
 		int len = FIFO_USEDSPACE((&self->fifo_tx));
 		len = MIN(len, 255);
 
@@ -688,8 +716,12 @@ void sx1268_event(sx1268_t * self)
 	}
 
 	else
+	{
 		_waitbusy(self, TIMEOUT);
 		_cmd_SetRX(self, 0);
+		_txen_write(self, false);
+		_rxen_write(self, true);
+	}
 
 	_critical_exit(self);
 }

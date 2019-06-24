@@ -150,10 +150,17 @@ class StreamAggregator:
                 seqnr = msg.seqnr
                 if seqnr < self.picture_index_we_wait_for:
                     pass
+
                 elif seqnr > self.picture_index_we_wait_for:
-                    self.picture_listener.state = "IDLE"
+                    lostpixelscount = 253 * (seqnr - self.picture_index_we_wait_for)
+                    self.picture_listener.accept_data(data=[0] * lostpixelscount, seqnr=self.picture_index_we_wait_for)
+                    self.picture_listener.accept_data(data=msg.data, seqnr=seqnr)
+
+                    self.picture_index_we_wait_for = seqnr + 1
+
                 elif seqnr == self.picture_index_we_wait_for:
                     self.picture_listener.accept_data(data=msg.data, seqnr=seqnr)
+
                     self.picture_index_we_wait_for += 1
 
         if self.spectrum_listener.state == "IDLE":  # ждем заголовка
@@ -169,10 +176,17 @@ class StreamAggregator:
                 seqnr = msg.seqnr
                 if seqnr < self.spectrum_index_we_wait_for:
                     pass
+
                 elif seqnr > self.spectrum_index_we_wait_for:
-                    self.spectrum_listener.state = "IDLE"
+                    lostrecordscount = 126 * (seqnr - self.spectrum_index_we_wait_for)
+                    self.spectrum_listener.accept_data(data=[0] * lostrecordscount, seqnr=self.spectrum_index_we_wait_for)
+                    self.spectrum_listener.accept_data(data=msg.data, seqnr=seqnr)
+
+                    self.spectrum_index_we_wait_for = seqnr + 1
+
                 elif seqnr == self.spectrum_index_we_wait_for:
                     self.spectrum_listener.accept_data(data=msg.data, seqnr=seqnr)
+
                     self.spectrum_index_we_wait_for += 1
 
 

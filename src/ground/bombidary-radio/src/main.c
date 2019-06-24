@@ -9,12 +9,14 @@
 #include <pigpio.h>
 #include <sx1268.h>
 
-#define RXBUFFLEN 1024
+#define RXBUFFLEN (1024 * 100)
 
 #define CSPIN	8
-#define BUSYPIN	6
-#define IRQPIN	5
-#define NRSTPIN	13
+#define BUSYPIN	27
+#define IRQPIN	17
+#define NRSTPIN	22
+#define RXENPIN	23
+#define TXENPIN	24
 
 void irqcallback(int gpio, int level, uint32_t tick, void * userdata);
 
@@ -54,13 +56,15 @@ int main(int argc, char ** argv)
 		.busy_pin = BUSYPIN,
 		.cs_pin = CSPIN,
 		.nrst_pin = NRSTPIN,
+		.rxen_pin = RXENPIN,
+		.txen_pin = TXENPIN,
 	};
 	sx1268_struct_init(&radio, &radio_specific, rxbuff, RXBUFFLEN, NULL, 0);
 
 	sx1268_init(&radio);
 
 	const char* hostname="172.16.164.208";
-	const char* portname="3000";
+	const char* portname="11000";
 	struct addrinfo hints;
 	memset(&hints,0,sizeof(hints));
 	hints.ai_family=AF_UNSPEC;
@@ -79,11 +83,11 @@ int main(int argc, char ** argv)
 		{
 			int rxlen = RXLEN(radio);
 			sx1268_status_t status = sx1268_receive(&radio, tmpbuff, rxlen);
-			printf("stat: %d   rxlen: %d\n", status, rxlen);
 			int res = sendto(sock, tmpbuff, rxlen, 0, addr->ai_addr, addr->ai_addrlen);
-			printf("res: %d\n", res);
+			//puts(tmpbuff);
+			printf("Forwarded %d bytes\n", rxlen);
 		}
-		usleep(10000);
+		usleep(1000);
 	}
 
 

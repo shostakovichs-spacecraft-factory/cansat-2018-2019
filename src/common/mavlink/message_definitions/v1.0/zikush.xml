@@ -20,6 +20,25 @@
 			</entry>
     	</enum>
 
+    	<enum name="ZIKUSH_POWERBUS">
+			<description>Enumeration of onboard controllers (used for compid)</description>
+			<entry value="0" name="ZIKUSH_POWERBUS_ICU">
+				<description>Powerbus of the Interface control unit</description>
+			</entry>
+			<entry value="1" name="ZIKUSH_POWERBUS_SCU">
+	        	<description>Powerbus of the Sensors control unit</description>
+			</entry>
+			<entry value="2" name="ZIKUSH_POWERBUS_CCU">
+				<description>Powerbus of the Camera control unit</description>
+			</entry>
+			<entry value="3" name="ZIKUSH_POWERBUS_AMP">
+	        	<description>Powerbus of the radio's amplifier</description>
+			</entry>
+			<entry value="4" name="ZIKUSH_POWERBUS_HEATER">
+	        	<description>Powerbus of the heater</description>
+			</entry>
+    	</enum>
+
     	<enum name="ZIKUSH_STATUSFLAGS">
 			<description>Enumeration on status and error flags. Should be used as bitfield number.</description>
 			<entry value="0" name="ZIKUSH_STATUSFLAGS_INIT_OK">
@@ -28,7 +47,7 @@
 			<entry value="1" name="ZIKUSH_STATUSFLAGS_LIFTOFF">
 				<description></description>
 			</entry>
-			<entry value="2" name="ZIKUSH_STATUSFLAGS_EXECUTING_MISSIONц">
+			<entry value="2" name="ZIKUSH_STATUSFLAGS_EXECUTING_MISSION">
 				<description></description>
 			</entry>
 			<entry value="3" name="ZIKUSH_STATUSFLAGS_FALLING">
@@ -55,22 +74,34 @@
 	</enums>
 
     <messages>
-		<message id="150" name="ZIKUSH_CMD_POWER">
+    	<message id="150" name="ZIKUSH_CMD_PREFLIGHTRESET">
+			<description>Starts new flight session</description>
+			<field type="uint8_t" name="dummy">Cause it's needed for proper generation</field>
+		</message>
+
+    	<message id="151" name="ZIKUSH_CMD_POWEROFF">
+			<description>Shutdown the probe</description>
+			<field type="uint8_t" name="dummy">Cause it's needed for proper generation</field>
+		</message>
+
+		<message id="152" name="ZIKUSH_CMD_POWERBUS">
 			<description>Set the state of the power bus</description>
 			<field type="uint8_t" name="bus">Index of CU assotiated with bus</field>
 			<field type="int8_t" name="state">Should the power be provided</field>
 		</message>
 
-		<message id="151" name="ZIKUSH_CMD_TAKE_SPECTRE">
-			<description>Set the state of the power bus</description>
-			<field type="uint16_t" name="width">Sample width</field>
-			<field type="uint16_t" name="heigth">Sample heigth</field>
+		<message id="153" name="ZIKUSH_CMD_TAKE_SPECTRUM">
+			<description>Take spectrum sample</description>
+			<field type="uint8_t" name="x_start">Sampled area start on x axis</field>
+			<field type="uint8_t" name="x_end">Sampled area end on x axis</field>
+			<field type="uint8_t" name="y_start">Sampled area start on y axis</field>
+			<field type="uint8_t" name="y_end">Sampled area end on y axis</field>
 			<field type="uint8_t" name="send_picture">Should the picture be sent?</field>
 		</message>
 
-		<message id="152" name="ZIKUSH_CMD_TAKE_PHOTO">
+		<message id="154" name="ZIKUSH_CMD_TAKE_PHOTO">
 			<description>Set the state of the power bus</description>
-			<field type="uint16_t" name="width">Picture width</field>
+			<field type="uint16_t" name="width">Picture width FIXME Do we need it? Can the camera be reconfigured on-the-fly?</field>
 			<field type="uint16_t" name="heigth">Picutre heigth</field>
 			<field type="uint8_t" name="camid">0 - nadir, 1 - zenith</field>
 		</message>
@@ -82,14 +113,26 @@
 
 		<message id="161" name="ZIKUSH_POWER_STATE">
 			<description>Current state of the power buses</description>
-			<field type="int8_t" name="buses_state">Indicates power buses state (bitfield)</field>
+			<field type="uint32_t" name="time_boot_ms">Timestamp (time since system boot)</field>
+			<field type="uint8_t" name="buses_state">Indicates power buses state (bitfield)</field>
 			<field type="float" name="icu_current" units="A">Measured current on ICU bus</field>
+			<field type="float" name="icu_power" units="W">Power usage on ICU bus</field>
 			<field type="float" name="scu_current" units="A">Measured current on SCU bus</field>
+			<field type="float" name="scu_power" units="W">Power usage on SCU bus</field>
 			<field type="float" name="ccu_current" units="A">Measured current on CCU bus</field>
-			<field type="float" name="bat_drained" units="Ah">Amount of energy drained from battery after reset</field>
+			<field type="float" name="ccu_power" units="W">Power usage on ICU bus</field>
+
 		</message>
 
-		<message id="162" name="ZIKUSH_SUNSENSOR">
+		<message id="162" name="ZIKUSH_POWER_CONSUMED">
+			<description>Current state of the power buses</description>
+			<field type="uint32_t" name="time_boot_ms">Timestamp (time since system boot)</field>
+			<field type="float" name="icu_consumed" units="J">Amount of energy drained for ICU bus after reset</field>
+			<field type="float" name="scu_consumed" units="J">Amount of energy drained for SCU bus after reset</field>
+			<field type="float" name="ccu_consumed" units="J">Amount of energy drained for CCU bus after reset</field>
+		</message>
+
+		<message id="163" name="ZIKUSH_SUNSENSOR">
 			<description></description>
 			<field type="uint32_t" name="time_boot_ms">Timestamp (time since system boot)</field>
 			<field type="int16_t" name="x">X component of the unit vector</field>
@@ -97,19 +140,19 @@
 			<field type="int16_t" name="z">Z component of the unit vector</field>
 		</message>
 
-		<message id="163" name="ZIKUSH_SUNSENSOR_RAW">
+		<message id="164" name="ZIKUSH_SUNSENSOR_RAW">
 			<description></description>
 			<field type="uint32_t" name="time_boot_ms">Timestamp (time since system boot)</field>
 			<field type="uint16_t[8]" name="values">Values measured directly from ADC</field>
 		</message>
 
-		<message id="164" name="ZIKUSH_HUMIDITY">
+		<message id="165" name="ZIKUSH_HUMIDITY">
 			<description></description>
 			<field type="uint32_t" name="time_boot_ms">Timestamp (time since system boot)</field>
 			<field type="float" name="humidity" units="%">Measured relative humidity</field>
 		</message>
 
-		<message id="165" name="ZIKUSH_PICTURE_HEADER">
+		<message id="166" name="ZIKUSH_PICTURE_HEADER">
             <description>Header for spectrum picture</description>
             <field type="uint32_t" name="time_boot_ms" units="ms">Timestamp (milliseconds since system boot)</field>
             <field type="uint8_t" name="camid">ID of the cam (value of enum ZIKUSH_CAM)</field>
@@ -118,7 +161,7 @@
             <field type="uint16_t" name="packets">number of packets beeing sent</field>
         </message>
         
-        <message id="166" name="ZIKUSH_SPECTRUM_INTENSITY_HEADER">
+        <message id="167" name="ZIKUSH_SPECTRUM_INTENSITY_HEADER">
             <description>Header for intensity transmission</description>
             <field type="uint32_t" name="time_boot_ms" units="ms">Timestamp (milliseconds since system boot)</field>
             <field type="uint16_t" name="y_upleft_crop">Y-coordinate from which we crop the picture for transfer</field> 
@@ -126,7 +169,7 @@
             <field type="uint16_t" name="packets">number of packets beeing sent (set on ACK only)</field>
         </message>
         
-        <message id="167" name="ZIKUSH_SPECTRUM_INTENSITY_ENCAPSULATED_DATA">
+        <message id="168" name="ZIKUSH_SPECTRUM_INTENSITY_ENCAPSULATED_DATA">
             <description>Encapsulated data message for spectrum intensity transmission</description>
             <field type="uint16_t" name="seqnr">sequence number (starting with 0 on every transmission)</field>
             <field type="uint16_t[126]" name="data">intensities</field>

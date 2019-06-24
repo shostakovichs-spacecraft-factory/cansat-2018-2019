@@ -46,6 +46,14 @@
 
 extern I2C_HandleTypeDef hi2c2;
 
+inline bool FLOAT_AS_BOOL(float f)
+{
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+  return (f != 0.0f);
+#pragma GCC diagnostic pop
+}
+
 /**
   * @brief  Configures the mt9v034 camera with two context (binning 4 and binning 2).
   */
@@ -146,12 +154,12 @@ void mt9v034_context_configuration(void)
 	uint16_t row_noise_correction = 0x0000; // default
 	uint16_t test_data = 0x0000; // default
 
-	if(FLOAT_AS_BOOL(CCU_SPECTRUM_PARAM_IMAGE_ROW_NOISE_CORR) && !FLOAT_AS_BOOL(CCU_SPECTRUM_PARAM_IMAGE_TEST_PATTERN))
+	if(CCU_SPECTRUM_PARAM_IMAGE_ROW_NOISE_CORR && !CCU_SPECTRUM_PARAM_IMAGE_TEST_PATTERN)
 		row_noise_correction = 0x0101;
 	else
 		row_noise_correction = 0x0000;
 
-	if (FLOAT_AS_BOOL(CCU_SPECTRUM_PARAM_IMAGE_TEST_PATTERN))
+	if (CCU_SPECTRUM_PARAM_IMAGE_TEST_PATTERN)
 		test_data = 0x3000; //enable vertical gray shade pattern
 	else
 		test_data = 0x0000;
@@ -244,7 +252,7 @@ void mt9v034_set_context(mt9v034_context_t context)
   * @retval 0x00 if write operation is OK.
   *       0xFF if timeout condition occured (device not connected or bus error).
   */
-inline uint8_t mt9v034_WriteReg(uint16_t Addr, uint8_t Data)
+uint8_t mt9v034_WriteReg(uint16_t Addr, uint8_t Data)
 {
 	// FIXME check adress and add proper error handling
 	return HAL_I2C_Mem_Write(&hi2c2, mt9v034_DEVICE_WRITE_ADDRESS, Addr, I2C_MEMADD_SIZE_8BIT, &Data, 1, TIMEOUT_MAX);
@@ -255,8 +263,9 @@ inline uint8_t mt9v034_WriteReg(uint16_t Addr, uint8_t Data)
   */
 uint8_t mt9v034_WriteReg16(uint16_t address, uint16_t Data)
 {
+	Data = ( (Data&0xFF) << 8) | ( (Data >> 8) & 0xFF);
 	// FIXME check endianness, address and add proper error handling
-	return HAL_I2C_Mem_Write(&hi2c2, mt9v034_DEVICE_WRITE_ADDRESS, address, I2C_MEMADD_SIZE_8BIT, &Data, 1, TIMEOUT_MAX);
+	return HAL_I2C_Mem_Write(&hi2c2, mt9v034_DEVICE_WRITE_ADDRESS, address, I2C_MEMADD_SIZE_8BIT, &Data, 2, TIMEOUT_MAX);
 }
 
 /**
@@ -269,7 +278,7 @@ uint8_t mt9v034_ReadReg(uint16_t Addr)
 	uint8_t data = 0;
 	HAL_StatusTypeDef status;
 
-	status = HAL_I2C_Mem_Read(&hi2c2, mt9v034_DEVICE_WRITE_ADDRESS, Addr, I2C_MEMADD_SIZE_8BIT, &data, 1, TIMEOUT_MAX);
+	status = HAL_I2C_Mem_Read(&hi2c2, mt9v034_DEVICE_READ_ADDRESS, Addr, I2C_MEMADD_SIZE_8BIT, &data, 1, TIMEOUT_MAX);
 	if(status != HAL_OK)
 		return 0xFF;
 
@@ -281,12 +290,14 @@ uint8_t mt9v034_ReadReg(uint16_t Addr)
   */
 uint16_t mt9v034_ReadReg16(uint8_t address)
 {
-	uint8_t data = 0;
+	uint16_t data = 0;
 	HAL_StatusTypeDef status;
 
-	status = HAL_I2C_Mem_Read(&hi2c2, mt9v034_DEVICE_WRITE_ADDRESS, address, I2C_MEMADD_SIZE_8BIT, &data, 2, TIMEOUT_MAX);
+	status = HAL_I2C_Mem_Read(&hi2c2, mt9v034_DEVICE_READ_ADDRESS, address, I2C_MEMADD_SIZE_8BIT, &data, 2, TIMEOUT_MAX);
 	if(status != HAL_OK)
 		return 0xFFFF;
+
+	data = ( (data&0xFF) << 8) | ( (data >> 8) & 0xFF);
 
 	return data;
 }

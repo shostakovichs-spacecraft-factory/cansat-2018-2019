@@ -1,7 +1,7 @@
 {
     "author": {
-        "email": "support.eagle@autodesk.com",
-        "name": "Autodesk EAGLE"
+        "email": "ikruzov@bk.ru",
+        "name": "Anton Chernov"
     },
     "description": {
         "EN": "EAGLE default 2 layer CAM job."
@@ -52,8 +52,9 @@
                     "filename_format": "%PREFIX/copper_top.gbr",
                     "layers": [
                         1,
+                        17,
                         18,
-                        17
+                        20
                     ],
                     "name": "Top Copper",
                     "polarity": "positive",
@@ -71,7 +72,8 @@
                     "layers": [
                         16,
                         17,
-                        18
+                        18,
+                        20
                     ],
                     "name": "Bottom Copper",
                     "polarity": "positive",
@@ -85,6 +87,8 @@
                     },
                     "filename_format": "%PREFIX/profile.gbr",
                     "layers": [
+                        20,
+                        45
                     ],
                     "milling": true,
                     "polarity": "positive",
@@ -164,7 +168,7 @@
             ]
         }
     ],
-    "timestamp": "2018-09-15T00:00:00",
+    "timestamp": "2019-05-17T16:06:16",
     "type": "EAGLE CAM job",
     "units": "metric",
     "version": "9.2.0"

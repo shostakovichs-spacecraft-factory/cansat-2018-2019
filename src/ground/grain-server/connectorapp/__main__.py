@@ -10,7 +10,7 @@ from pymavlink.dialects.v20.zikush import MAVLink_heartbeat_message, MAVLink_sca
     MAVLink_scaled_pressure2_message, MAVLink_encapsulated_data_message,\
     MAVLink_zikush_state_message, MAVLink_zikush_power_state_message, MAVLink_zikush_sunsensor_message, \
     MAVLink_zikush_humidity_message, MAVLink_zikush_picture_header_message, MAVLink_zikush_spectrum_intensity_header_message, \
-    MAVLink_zikush_spectrum_intensity_encapsulated_data_message
+    MAVLink_zikush_spectrum_intensity_encapsulated_data_message, MAVLink_bad_data
 
 from .redis_store import redis_store
 
@@ -24,7 +24,7 @@ from .streams_sink import StreamAggregator, SpectrumAcceptor, PictureSaver
 
 _log = logging.getLogger(__name__)
 _config = get_config()
-_putback = _config["MAV_PLOT_DATA_PBACK"]
+_putback = _config["CONN_PLOT_DATA_PBACK"]
 
 
 def update_zset(set_name, message):
@@ -38,7 +38,7 @@ def update_zset(set_name, message):
     dmsg = message.to_dict()
     jmsg = json.dumps(dmsg)
 
-    p.zadd(set_name, timestamp, jmsg)
+    p.zadd(set_name, {jmsg: timestamp} )
     p.execute()
 
     # Теперь удаляем из zrange все что старше, чем позволяет наши pback из конфига
@@ -65,27 +65,38 @@ def HeartbeatHandler(msg):
 
 
 def main(argv):
-    logging.basicConfig(stream=sys.stdout, level=_config["MAV_LOG_LEVEL"])
+    logging.basicConfig(stream=sys.stdout, level=_config["CONN_LOG_LEVEL"])
 
-    _log.info("Запускаюсь. Слушаю url: %s" % _config["MAV_LISTEN_URL"])
-    connection = mavutil.mavlink_connection(_config["MAV_LISTEN_URL"])
+    _log.info("Запускаюсь. Слушаю url: %s" % _config["CONN_LISTEN_URL"])
+    connection = mavutil.mavlink_connection(_config["CONN_LISTEN_URL"])
     mav = connection
 
     now = datetime.utcnow().isoformat()
     logfile = "/opt/logs/%s_mavlink_app.mav" % now
-    mav.setup_logfile(logfile)
-    _log.error("mavlog setted up %s" % logfile)
+    try:
+        mav.setup_logfile(logfile)
+    except FileNotFoundError:
+        print("Cannot setup logfile", logfile)
+    else:
+        _log.error("mavlog setted up %s" % logfile)
 
     connectorapp_path = os.path.dirname(os.path.abspath(__file__)) # Path to ...../grain_server/connectorapp
     grain_path = os.path.dirname(connectorapp_path)
-    filename_template = grain_path + '/webapp/tmp/img/%d.png'
+    spectrumpicture_filename_template = grain_path + '/webapp/tmp/img/spectrum/%d.png'
+    nadirpicture_filename_template = grain_path + '/webapp/tmp/img/nadir/%d.png'
+    zenithpicture_filename_template = grain_path + '/webapp/tmp/img/zenith/%d.png'
 
     stream_aggregator = StreamAggregator(spectrum_acceptor=SpectrumRedisSaver(),
-                                           picture_acceptor=PictureSaver(filename_template=filename_template))
+                        picture_acceptor_spectrum=PictureSaver(filename_template=spectrumpicture_filename_template),
+                        picture_acceptor_nadir = PictureSaver(filename_template=nadirpicture_filename_template),
+                        picture_acceptor_zenith = PictureSaver(filename_template=zenithpicture_filename_template)),
 
     while True:
         msg = mav.recv_match(blocking=True)
         _log.debug("got message %s", msg)
+
+        if not isinstance(msg, MAVLink_bad_data):
+            print(msg)
 
         if isinstance(msg, MAVLink_heartbeat_message):
             HeartbeatHandler(msg)
@@ -119,7 +130,8 @@ def main(argv):
             or isinstance(msg, MAVLink_encapsulated_data_message) \
             or isinstance(msg, MAVLink_zikush_spectrum_intensity_encapsulated_data_message):
             """ Handling multiframe transfers """
-            stream_aggregator.accept_message(msg)
+            #stream_aggregator.accept_message(msg)
+            pass
 
 
 if __name__ == "__main__":

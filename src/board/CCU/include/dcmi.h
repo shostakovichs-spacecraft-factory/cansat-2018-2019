@@ -45,9 +45,14 @@
 void dma_copy_image_buffers(uint8_t ** current_image, uint8_t ** previous_image, uint16_t buffer_size, uint8_t image_step);
 
 /**
- * @brief Send calibration image with MAVLINK over USB
+ * @brief Send spectrum image with MAVLINK over USB
  */
-void send_calibration_image(uint8_t ** image_buffer_fast_1, uint8_t ** image_buffer_fast_2);
+void send_spectrum_photo();
+
+/**
+ * @brief Send spectrum data with MAVLINK over CAN
+ */
+void send_spectrum_data();
 
 /**
  * @brief Initialize DCMI DMA and enable image capturing
@@ -57,7 +62,7 @@ void enable_image_capture(void);
 /* Init Functions */
 void dcmi_clock_init(void);
 void dcmi_hw_init(void);
-void dcmi_dma_init(uint16_t buffer_size);
+void dcmi_dma_init(uint32_t buffer_size);
 void dcmi_it_init(void);
 void dma_it_init(void);
 

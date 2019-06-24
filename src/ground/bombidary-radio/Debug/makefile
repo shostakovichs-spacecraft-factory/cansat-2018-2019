@@ -30,7 +30,7 @@ all: bombidary-radio
 bombidary-radio: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross GCC Linker'
-	arm-raspbian-linux-gnueabihf-gcc -L"/home/kirs/rpi-dev/sysroot//lib/arm-linux-gnueabihf" -L"/home/kirs/rpi-dev/sysroot//usr/local/lib" --sysroot=/home/kirs/rpi-dev/sysroot/ -Wl,--sysroot=/home/kirs/rpi-dev/sysroot/ -march=armv6 -mfloat-abi=hard -mfpu=vfp -marm -Xlinker -pthread -o "bombidary-radio" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-raspbian-linux-gnueabihf-gcc -L"/home/kirs/development/rpi-dev/sysroot//lib/arm-linux-gnueabihf" -L"/home/kirs/development/rpi-dev/sysroot//usr/local/lib" --sysroot=/home/kirs/development/rpi-dev/sysroot/ -Wl,--sysroot=/home/kirs/development/rpi-dev/sysroot/ -march=armv6 -mfloat-abi=hard -mfpu=vfp -marm -Xlinker -pthread -o "bombidary-radio" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

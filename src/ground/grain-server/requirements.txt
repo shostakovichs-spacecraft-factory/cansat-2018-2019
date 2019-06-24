@@ -4,4 +4,7 @@ Flask-Redis==0.3.0
 redis==3.2.1
 Flask-Login
 pyotp
+future
+lxml
+
 #pymavlink==2.2.8 #should be customly built

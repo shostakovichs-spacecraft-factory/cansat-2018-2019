@@ -12,10 +12,10 @@
 
 typedef enum
 {
-	ROUTER_OK,
-	ROUTER_NOBUFF,
-	ROUTER_TIMEOUT,
-	ROUTER_MALFUNCTION,
+	ROUTER_OK = 0,
+	ROUTER_NOBUFF = 1,
+	ROUTER_TIMEOUT = 2,
+	ROUTER_MALFUNCTION = 4,
 } router_status_t;
 
 router_status_t router_send_CAN(mavlink_message_t * msg);
