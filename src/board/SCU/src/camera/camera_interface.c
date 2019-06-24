@@ -27,8 +27,8 @@
 
 #define VC0706_STOPCURRENTFRAME 0x0
 #define VC0706_STOPNEXTFRAME 0x1
-#define VC0706_RESUMEFRAME 0x3
-#define VC0706_STEPFRAME 0x2
+#define VC0706_RESUMEFRAME 0x2
+#define VC0706_STEPFRAME 0x3
 
 
 #define VC0706_MOTIONCONTROL 0x0
@@ -47,7 +47,7 @@
 
 #define VC0706_IMAGE_SIZE_ADDRESS 0x0019
 
-#define CAMERA_TIMEOUT 100
+#define CAMERA_TIMEOUT 10000
 #ifdef PRINT_RESPONSE
 void print_buffer(uint8_t *buffer, size_t size)
 {
@@ -123,7 +123,7 @@ ssize_t send_command(CAMERA *cam, uint8_t cmd, uint8_t *args, uint8_t argn)
 
 		if(is_ok < 0)
 			return is_ok;
-		else if(is_ok != sizeof(arr))
+		else if(is_ok != (int)sizeof(arr))
 			return -1;
 
 		sent += is_ok;
@@ -182,7 +182,7 @@ ssize_t read_response(CAMERA *cam, uint8_t *buffer, size_t size, uint32_t timeou
 }
 
 
-int is_response_ok(CAMERA *cam, uint8_t *buffer, size_t size, uint8_t command)
+int is_response_ok(CAMERA *cam, uint8_t *buffer, uint8_t command)
 {
 	if(buffer[0] == 0x76 && buffer[1] == cam->serial_num && buffer[2] == command && buffer[3] == 0)
 	{
@@ -191,7 +191,8 @@ int is_response_ok(CAMERA *cam, uint8_t *buffer, size_t size, uint8_t command)
 	return 0;
 }
 
-int run_command(CAMERA *cam, uint8_t command, uint8_t *args, uint8_t argn, size_t reply_size, int flush_flag)
+int camera_run_command(CAMERA *cam, uint8_t command, uint8_t *args, uint8_t argn,
+		uint8_t *reply, size_t count, int flush_flag)
 {
 	if(flush_flag)
 		skip_response(cam, 100, 1000);
@@ -204,36 +205,18 @@ int run_command(CAMERA *cam, uint8_t command, uint8_t *args, uint8_t argn, size_
 		printf("Error: can't send command\n");
 		return -1;
 	}
-
-	size_t length;
-
-	if(reply_size == 4 || reply_size == 5)
+	uint8_t *arr = reply;
+	uint8_t pff[4];
+	for(int i = 0; i < 4; i++)
+		pff[i] = 0;
+	if(!reply || count < 4)
 	{
-		length = 0;
+		arr = pff;
+		count = 4;
 	}
-	else if(reply_size <= 3)
-	{
-		printf("Error: invalid reply_size in run_command. Should be >= 4\n");
-		return -10;
-	}
-	else
-	{
-		length = reply_size - 4;
-		reply_size = 4;
-	}
+	read_response(cam, arr, count, CAMERA_TIMEOUT);
 
-	uint8_t response[5];
-	ssize_t readed = read_response(cam, response, reply_size, CAMERADELAY);
-
-	skip_response(cam, length, CAMERADELAY);
-
-	if(readed != reply_size)
-	{
-		printf("Epic error: cam sends something strange (run_command)\n");
-		return -2;
-	}
-
-	if(!is_response_ok(cam, response, reply_size, command))
+	if(!is_response_ok(cam, arr, command))
 	{
 		printf("Error: cam error. Cam sends error or it sends something strange\n");
 		return -3;
@@ -245,7 +228,7 @@ int run_command(CAMERA *cam, uint8_t command, uint8_t *args, uint8_t argn, size_
 
 int camera_frame_buff_ctrl(CAMERA *cam, uint8_t command) {
 	uint8_t args[] = {0x1, command};
-	return run_command(cam, VC0706_FBUF_CTRL, args, sizeof(args), 5, 1);
+	return camera_run_command(cam, VC0706_FBUF_CTRL, args, sizeof(args), 0, 0, 1);
 }
 
 int camera_write_data(CAMERA *cam, uint16_t address, uint8_t *data, uint8_t count)
@@ -263,7 +246,7 @@ int camera_write_data(CAMERA *cam, uint16_t address, uint8_t *data, uint8_t coun
 		args[4 + i] = data[i];
 	}
 
-	return run_command(cam, VC0706_WRITE_DATA, args, sizeof(args), 5, 1);
+	return camera_run_command(cam, VC0706_WRITE_DATA, args, sizeof(args), 0, 0, 1);
 }
 
 int camera_set_image_size(CAMERA *cam, uint8_t size)
@@ -279,7 +262,7 @@ void camera_reset_image(CAMERA *cam)
 
 int camera_reset(CAMERA *cam)
 {
-	int a = run_command(cam, VC0706_RESET, NULL, 0, 4, 1);
+	int a = camera_run_command(cam, VC0706_RESET, NULL, 0, 0, 0, 1);
 	skip_response(cam, 100, 100);
 	return a;
 }
@@ -296,15 +279,27 @@ int camera_stop(CAMERA *cam)
 	return res;
 }
 
-ssize_t camera_get_image_buffer_size(CAMERA *cam)
+int camera_load_image_size(CAMERA *cam)
 {
+	uint8_t reply[9];
 	uint8_t args[] = {0x1, 0x0};
-	return run_command(cam, VC0706_GET_FBUF_LEN, args, sizeof(args), 4, 1);
+	int rc = camera_run_command(cam, VC0706_GET_FBUF_LEN, args, sizeof(args), reply, 9, 1);
+	cam->image_size = reply[5] << 24 | reply[6] << 16 | reply[7] << 8 | reply[8];
+	return rc;
 }
-
-ssize_t camera_read_picture(CAMERA *cam, uint8_t *buffer, camera_type size)
+int camera_prepare_to_read(CAMERA *cam)
+{
+	skip_response(cam, 100, 100);
+	return 0;
+}
+size_t camera_read_picture(CAMERA *cam, uint8_t *buffer, size_t size)
 {
 
+	if(size <= 10)
+	{
+		trace_printf("ERROR: too small buffer size\n");
+	}
+	size -= 10;
 	if(size > cam->image_size - cam->frame_ptr)
 	{
 		size = cam->image_size - cam->frame_ptr;
@@ -312,22 +307,17 @@ ssize_t camera_read_picture(CAMERA *cam, uint8_t *buffer, camera_type size)
 	uint8_t args[] = {0x0, 0x0F,
 	                  0, 0, cam->frame_ptr >> 8, cam->frame_ptr & 0xFF,
 	                  0, 0, size >> 8, size & 0xFF,
-	                  0, 0x0F
+	                  0, 0x00
 					};
 
-	if(run_command(cam, VC0706_READ_FBUF, args, sizeof(args), 5, 0))
+
+	if(camera_run_command(cam, VC0706_READ_FBUF, args, sizeof(args), buffer, size + 10, 0))
 		perror("can't run command: read buffer");
 
-	ssize_t len = read_response(cam, buffer, size, 100);
 
-	len += skip_response(cam, 5, CAMERADELAY) - 5;
+	cam->frame_ptr += size;
 
-	if(len != size)
-		perror("bad response: read buffer");
-
-	cam->frame_ptr += len;
-
-	return len;
+	return size;
 }
 
 int camera_init(CAMERA *hcam, MY_UART *huart)
@@ -349,19 +339,6 @@ void camera_deinit(CAMERA *cam)
 	free(cam);
 }
 
-camera_type camera_get_image_size(CAMERA *cam)
-{
-	if(cam->image_size <= 0)
-	{
-		uint8_t buffer[5];
-
-		camera_get_image_buffer_size(cam);
-		read_response(cam, buffer, 5, CAMERADELAY);
-
-		cam->image_size = (buffer[1] << 24) + (buffer[2] << 16) + (buffer[3] << 8) + buffer[4];
-	}
-	return cam->image_size;
-}
 
 int camera_take_picture(CAMERA *cam)
 {
@@ -371,7 +348,7 @@ int camera_take_picture(CAMERA *cam)
 		return 1;
 	}
 
-	camera_get_image_size(cam);
+	camera_load_image_size(cam);
 
 	return 0;
 }

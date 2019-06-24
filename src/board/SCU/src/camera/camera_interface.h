@@ -30,7 +30,7 @@ int camera_init(CAMERA *hcam, MY_UART *huart);
 
 void camera_deinit(CAMERA *cam);
 
-ssize_t camera_read_picture(CAMERA *cam, uint8_t *buffer, camera_type size);
+size_t camera_read_picture(CAMERA *cam, uint8_t *buffer, size_t size);
 
 int camera_restore_picture(CAMERA *cam);
 
@@ -42,9 +42,13 @@ int camera_reset(CAMERA *cam);
 
 int camera_load_and_save_picture(CAMERA *cam, FILE *file);
 
-camera_type camera_get_image_size(CAMERA *cam);
+int camera_load_image_size(CAMERA *cam);
+
+int camera_prepare_to_read(CAMERA *cam);
 
 int camera_set_image_size(CAMERA *cam, uint8_t size);
 
+int camera_run_command(CAMERA *cam, uint8_t command, uint8_t *args, uint8_t argn,
+		uint8_t *reply, size_t count, int flush_flag);
 
 #endif
