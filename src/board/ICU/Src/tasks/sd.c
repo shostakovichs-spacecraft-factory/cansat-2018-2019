@@ -19,14 +19,52 @@ static void sd_startlog(void);
 
 void sd_task (void *pvParameters)
 {
+	static int8_t _extfilenum = -1, _intfilenum = -1;
+	static FIL	_extfile = {0}, _intfile = {0};
+	static FIL * currentfile;
+	static int8_t * currentfilenum;
+	static uint8_t buf[MAVLINK_MAX_PACKET_LEN];
+	static mavlink_message_t msg;
+
+	MX_SDIO_SD_Init();
+	MX_FATFS_Init();
+
+	sd_startlog();
 
 	while(1)
 	{
-		MX_SDIO_SD_Init();
-		MX_FATFS_Init();
+		xQueueReceive(sd_queue_handle, &msg, 0xFFFFFFFF);
 
-		sd_startlog();
+		if(msg.sysid == 0) //internal
+			{ currentfile = &_intfile; currentfilenum = &_intfilenum;}
 
+		else //external
+			{ currentfile = &_extfile; currentfilenum = &_extfilenum;}
+
+
+		if(currentfile->fs == NULL || currentfile->fsize > ICU_SD_MAXFILELEN)
+		{
+			*currentfilenum += 1;
+
+			if(currentfile->fs != NULL)
+			{
+				f_sync(currentfile);
+				f_close(currentfile);
+			}
+
+			char filename[ICU_SD_MAXFILENAMELEN];
+			sprintf(filename, ICU_SD_TELFILENAMEFMT, zikush_runsessnum, msg.sysid==0?"int":"ext", *currentfilenum);
+
+			f_open(currentfile, filename, FA_CREATE_NEW | FA_WRITE);
+		}
+
+		uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);
+		UINT infactwritten;
+
+		FRESULT result = f_write(currentfile, buf, len, &infactwritten);
+		//if(result != FR_OK || infactwritten != len)
+
+		result = f_sync(currentfile);
 	}
 
 	vTaskDelete(NULL);

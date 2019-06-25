@@ -17,14 +17,51 @@ static void MX_CAN_Init();
 static void can_init();
 
 
+static StaticQueue_t _rxqueue;
+static CANMAVLINK_RX_FRAME_T _rxbuff[ICU_CAN_RXBUFFSIZE];
+QueueHandle_t	_rxqueue_handle;
+
+
 void can_task (void *pvParameters)
 {
+	CANMAVLINK_RX_FRAME_T receivedframe;
+	mavlink_message_t msg;
+
 	MX_CAN_Init();
 	can_init();
 
+	_rxqueue_handle = xQueueCreateStatic(ICU_CAN_RXBUFFSIZE, sizeof(CANMAVLINK_RX_FRAME_T), (uint8_t *)_rxbuff, &_rxqueue);
+
 	while(1)
 	{
+		xTaskNotifyWait(0, 0, NULL, 0xFFFFFFFF);
 
+		while( xQueueReceive(_rxqueue_handle, &receivedframe, 0) != errQUEUE_EMPTY )
+		{
+			static mavlink_status_t status;
+
+			uint8_t result = canmavlink_parse_frame(&receivedframe, &msg, &status);
+
+			if(result == MAVLINK_FRAMING_OK)
+				router_route(&msg, 1000 * portTICK_RATE_MS);
+		}
+
+		while( xQueueReceive(can_queue_handle,&msg, 0) != errQUEUE_EMPTY )
+		{
+			canmavlink_TX_frame_t framebuff[34];
+			uint8_t framecount = canmavlink_msg_to_frames(framebuff, &msg);
+
+			for(int i = 0; i < framecount; i++)
+			{
+				uint32_t mailbox;
+				HAL_CAN_AddTxMessage(&hcan, &( framebuff[i].Header ), framebuff[i].Data, &mailbox);
+
+				bool pending;
+				do {
+					pending = HAL_CAN_IsTxMessagePending(&hcan, mailbox); //TODO consider yielding here, but notice that for proper canmavlink functionality messages should come serially
+				} while(pending);
+			}
+		}
 	}
 
 	vTaskDelete(NULL);
@@ -55,20 +92,14 @@ static void can_init()
   */
 void USB_LP_CAN1_RX0_IRQHandler(void)
 {
-	/*static volatile int counter = 0;
-	counter++;
-	volatile canmavlink_RX_frame_t frame;
-	static volatile mavlink_message_t msg;
-	static volatile mavlink_status_t status;
+	CANMAVLINK_RX_FRAME_T receivedframe;
+	BaseType_t callcontextswitch = false;
 
-	HAL_CAN_GetRxMessage(&hcan, 0, &( frame.Header ), frame.Data);
+	while( (uxQueueSpacesAvailable(_rxqueue_handle) != 0) &&\
+			(HAL_CAN_GetRxMessage(&hcan, 0, &( receivedframe.Header ), receivedframe.Data) == HAL_OK) )
+		xQueueSendToBackFromISR(can_queue_handle, &receivedframe, &callcontextswitch);
 
-	volatile uint8_t result = canmavlink_parse_frame(&frame, &msg, &status);
-
-	if(result == MAVLINK_FRAMING_OK)
-		router_route(&msg, 1000 * portTICK_RATE_MS);*/
-
-	return;
+	portEND_SWITCHING_ISR(callcontextswitch);
 }
 
 //Those functions has been fetched from CubeMX generated code

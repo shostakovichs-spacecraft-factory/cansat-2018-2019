@@ -116,7 +116,7 @@ uint8_t _readbusypin(sx1268_t * self);
 
 
 /* Functions, representing vaious commands */
-static inline sx1268_status_t _cmd_SetSleep(sx1268_t * self, uint8_t sleepConfig)
+static inline __attribute__((unused)) sx1268_status_t _cmd_SetSleep(sx1268_t * self, uint8_t sleepConfig)
 {
 	return _cmd(self, 0x84, &sleepConfig, 1);
 }
@@ -128,13 +128,13 @@ static inline sx1268_status_t _cmd_SetStandby(sx1268_t * self, uint8_t standbyCo
 }
 
 
-static inline sx1268_status_t _cmd_SetFS(sx1268_t * self)
+static inline __attribute__((unused)) sx1268_status_t _cmd_SetFS(sx1268_t * self)
 {
 	return _cmd(self, 0xC1, NULL, 0);
 }
 
 
-static inline sx1268_status_t _cmd_SetTX(sx1268_t * self, uint32_t timeout)
+static inline __attribute__((unused)) sx1268_status_t _cmd_SetTX(sx1268_t * self, uint32_t timeout)
 {
 	uint8_t buff[3];
 	buff[0] = (timeout >> 16) & 0xFF;
@@ -154,13 +154,13 @@ static inline sx1268_status_t _cmd_SetRX(sx1268_t * self, uint32_t timeout)
 }
 
 
-static inline sx1268_status_t _cmd_StopTimerOnPreamble(sx1268_t * self, bool enable)
+static inline __attribute__((unused)) sx1268_status_t _cmd_StopTimerOnPreamble(sx1268_t * self, bool enable)
 {
 	return _cmd(self, 0x9F, (uint8_t *)&enable, 1); //FIXME pay attention to endianness
 }
 
 
-static inline sx1268_status_t _cmd_SetRxDutyCycle(sx1268_t * self, uint32_t rxPeriod, uint32_t sleepPeriod)
+static inline __attribute__((unused)) sx1268_status_t _cmd_SetRxDutyCycle(sx1268_t * self, uint32_t rxPeriod, uint32_t sleepPeriod)
 {
 	uint8_t buff[6];
 	buff[0] = (rxPeriod >> 16) & 0xFF;
@@ -173,31 +173,31 @@ static inline sx1268_status_t _cmd_SetRxDutyCycle(sx1268_t * self, uint32_t rxPe
 }
 
 
-static inline sx1268_status_t _cmd_SetCad(sx1268_t * self)
+static inline __attribute__((unused)) sx1268_status_t _cmd_SetCad(sx1268_t * self)
 {
 	return _cmd(self, 0xC5, NULL, 0);
 }
 
 
-static inline sx1268_status_t _cmd_SetTxContinuousWave(sx1268_t * self)
+static inline __attribute__((unused)) sx1268_status_t _cmd_SetTxContinuousWave(sx1268_t * self)
 {
 	return _cmd(self, 0xD1, NULL, 0);
 }
 
 
-static inline sx1268_status_t _cmd_SetTxInfinitePreamble(sx1268_t * self)
+static inline __attribute__((unused)) sx1268_status_t _cmd_SetTxInfinitePreamble(sx1268_t * self)
 {
 	return _cmd(self, 0xD2, NULL, 0);
 }
 
 
-static inline sx1268_status_t _cmd_SetRegulatorMode(sx1268_t * self, bool useDCDC)
+static inline __attribute__((unused)) sx1268_status_t _cmd_SetRegulatorMode(sx1268_t * self, bool useDCDC)
 {
 	return _cmd(self, 0x96, (uint8_t *)&useDCDC, 1);
 }
 
 
-static inline sx1268_status_t _cmd_Calibrate(sx1268_t * self, uint8_t calibParam)
+static inline __attribute__((unused)) sx1268_status_t _cmd_Calibrate(sx1268_t * self, uint8_t calibParam)
 {
 	return _cmd(self, 0x89, &calibParam, 1);
 }
@@ -212,7 +212,7 @@ static inline sx1268_status_t _cmd_CalibrateImage(sx1268_t * self, uint8_t freg1
 }
 
 
-static inline sx1268_status_t _cmd_SetPaConfig(sx1268_t * self, uint8_t paDutyCycle, uint8_t hpMax)
+static inline __attribute__((unused)) sx1268_status_t _cmd_SetPaConfig(sx1268_t * self, uint8_t paDutyCycle, uint8_t hpMax)
 {
 	uint8_t buff[4];
 	buff[0] = paDutyCycle;
@@ -223,13 +223,13 @@ static inline sx1268_status_t _cmd_SetPaConfig(sx1268_t * self, uint8_t paDutyCy
 }
 
 
-static inline sx1268_status_t _cmd_SetRxTxFallbackMode(sx1268_t * self, uint8_t fallbackMode)
+static inline __attribute__((unused)) sx1268_status_t _cmd_SetRxTxFallbackMode(sx1268_t * self, uint8_t fallbackMode)
 {
 	return _cmd(self, 0x93, &fallbackMode, 1);
 }
 
 
-static inline sx1268_status_t _cmd_WriteRegister_single(sx1268_t * self, uint16_t addr, uint8_t data)
+static inline __attribute__((unused)) sx1268_status_t _cmd_WriteRegister_single(sx1268_t * self, uint16_t addr, uint8_t data)
 {
 	uint8_t buff[3];
 	buff[0] = (addr >> 8) & 0xFF;
@@ -239,7 +239,7 @@ static inline sx1268_status_t _cmd_WriteRegister_single(sx1268_t * self, uint16_
 }
 
 
-static inline sx1268_status_t _cmd_ReadRegister_single(sx1268_t * self, uint16_t addr, uint8_t * data)
+static inline __attribute__((unused)) sx1268_status_t _cmd_ReadRegister_single(sx1268_t * self, uint16_t addr, uint8_t * data)
 {
 	uint8_t buff[3];
 	buff[0] = (addr >> 8) & 0xFF;
@@ -257,7 +257,7 @@ static inline sx1268_status_t _cmd_WriteRegister_burst(sx1268_t * self,	uint8_t 
 
 
 //NOTE: address should be already in the first elements of data (16 bit, MSB first)
-static inline sx1268_status_t _cmd_ReadRegister_burst(sx1268_t * self,	uint8_t * data, uint8_t length)
+static inline __attribute__((unused)) sx1268_status_t _cmd_ReadRegister_burst(sx1268_t * self,	uint8_t * data, uint8_t length)
 {
 	return _cmd(self, 0x1D, data, length);
 }
@@ -334,7 +334,7 @@ static inline sx1268_status_t _cmd_SetPacketType(sx1268_t * self, bool LoRa)
 }
 
 
-static inline sx1268_status_t _cmd_GetPacketType(sx1268_t * self, bool * LoRa)
+static inline __attribute__((unused)) sx1268_status_t _cmd_GetPacketType(sx1268_t * self, bool * LoRa)
 {
 	uint8_t buff[2];
 	sx1268_status_t retval = _cmd(self, 0x11, buff, 2);
@@ -468,7 +468,7 @@ static inline void _waittxbusy(sx1268_t * self, int timeout_ms)
 
 static void _dotx(sx1268_t * self, uint8_t * buff, int len)
 {
-	volatile uint8_t status;
+	uint8_t status;
 	_cmd_SetTxParams(self, POWER_LOW_HIGHEST, RAMPTIME_200U);
 	_waitbusy(self, TIMEOUT);
 	_cmd_GetStatus(self, &status);
@@ -513,7 +513,7 @@ void sx1268_struct_init(sx1268_t * self, void * platform_specific, uint8_t * rxb
 
 sx1268_status_t sx1268_init(sx1268_t * self)
 {
-	volatile uint8_t status;
+	uint8_t status;
 
 	_nrst_reset(self);
 	_rxen_write(self, false);
@@ -662,8 +662,8 @@ sx1268_status_t sx1268_receive(sx1268_t * self, uint8_t * data, int len)
 
 void sx1268_event(sx1268_t * self)
 {
-	volatile uint16_t irqstatus;
-	volatile uint8_t status;
+	uint16_t irqstatus;
+	uint8_t status;
 	uint8_t buff[256];
 
 	_critical_enter(self);

@@ -11,7 +11,12 @@
 volatile int16_t zikush_runsessnum = -1;
 
 
-void ICU_task (void *pvParameters);
+void heartbeat_task(void *pvParameters);
+static StaticTask_t heartbeat_task_tcb;
+static StackType_t heartbeat_stack[configMINIMAL_STACK_SIZE];
+TaskHandle_t heartbeat_task_handle;
+
+void ICU_task(void *pvParameters);
 static StaticTask_t ICU_task_tcb;
 static StackType_t ICU_stack[ICU_TASKS_ICU_STACKSIZE];
 static StaticQueue_t ICU_task_queue;
@@ -19,23 +24,23 @@ static mavlink_message_t ICU_task_queue_buffer[ICU_TASKS_ICU_QUEUE_SIZE];
 TaskHandle_t ICU_task_handle;
 QueueHandle_t	ICU_queue_handle;
 
-void can_task (void *pvParameters);
+void can_task(void *pvParameters);
 static StaticTask_t can_task_tcb;
 static StackType_t can_stack[ICU_TASKS_CAN_STACKSIZE];
 static StaticQueue_t can_task_queue;
 static mavlink_message_t can_task_queue_buffer[ICU_TASKS_ICU_QUEUE_SIZE];
-TaskHandle_t radio_task_handle;
-QueueHandle_t	radio_queue_handle;
+TaskHandle_t can_task_handle;
+QueueHandle_t	can_queue_handle;
 
-void sd_task (void *pvParameters);
+void sd_task(void *pvParameters);
 static StaticTask_t sd_task_tcb;
 static StackType_t sd_stack[ICU_TASKS_SD_STACKSIZE];
 static StaticQueue_t sd_task_queue;
 static mavlink_message_t sd_task_queue_buffer[ICU_TASKS_ICU_QUEUE_SIZE];
-TaskHandle_t radio_task_handle;
-QueueHandle_t	radio_queue_handle;
+TaskHandle_t sd_task_handle;
+QueueHandle_t	sd_queue_handle;
 
-void radio_task (void *pvParameters);
+void radio_task(void *pvParameters);
 static StaticTask_t radio_task_tcb;
 static StackType_t radio_stack[ICU_TASKS_RADIO_STACKSIZE];
 static StaticQueue_t radio_task_queue;
@@ -54,41 +59,27 @@ int main(void)
 	SystemClock_Config();
 	MX_GPIO_Init();
 
+	heartbeat_task_handle = xTaskCreateStatic(heartbeat_task, (const char *)"heartbeat", configMINIMAL_STACK_SIZE, NULL, \
+										1, heartbeat_stack, &heartbeat_task_tcb);
+
 	ICU_task_handle = xTaskCreateStatic(ICU_task, (const char *)"ICU", ICU_TASKS_ICU_STACKSIZE, NULL, \
 										ICU_TASKS_ICU_TASKPRIORITY, ICU_stack, &ICU_task_tcb);
 	ICU_queue_handle = xQueueCreateStatic(ICU_TASKS_ICU_QUEUE_SIZE, sizeof(mavlink_message_t), (uint8_t *)ICU_task_queue_buffer, &ICU_task_queue);
 
+	can_task_handle = xTaskCreateStatic(can_task, (const char *)"can", ICU_TASKS_CAN_STACKSIZE, NULL, \
+										ICU_TASKS_CAN_TASKPRIORITY, can_stack, &can_task_tcb);
+	can_queue_handle = xQueueCreateStatic(ICU_TASKS_CAN_QUEUE_SIZE, sizeof(mavlink_message_t), (uint8_t *)can_task_queue_buffer, &can_task_queue);
+
+	sd_task_handle = xTaskCreateStatic(sd_task, (const char *)"sd", ICU_TASKS_SD_STACKSIZE, NULL, \
+										ICU_TASKS_SD_TASKPRIORITY, sd_stack, &sd_task_tcb);
+	sd_queue_handle = xQueueCreateStatic(ICU_TASKS_SD_QUEUE_SIZE, sizeof(mavlink_message_t), (uint8_t *)sd_task_queue_buffer, &sd_task_queue);
+
+	radio_task_handle = xTaskCreateStatic(radio_task, (const char *)"radio", ICU_TASKS_RADIO_STACKSIZE, NULL, \
+									   ICU_TASKS_RADIO_TASKPRIORITY, radio_stack, &radio_task_tcb);
+	radio_queue_handle = xQueueCreateStatic(ICU_TASKS_RADIO_QUEUE_SIZE, sizeof(mavlink_message_t), (uint8_t *)radio_task_queue_buffer, &radio_task_queue);
+
+
 	vTaskStartScheduler();
-
-	while(1)
-	{
-		mavlink_message_t msg;
-		mavlink_heartbeat_t heartbeat =
-		{
-			.type = MAV_TYPE_FREE_BALLOON,
-			.autopilot = MAV_AUTOPILOT_INVALID,
-			.base_mode = MAV_MODE_FLAG_TEST_ENABLED,
-			.system_status = MAV_STATE_ACTIVE
-		};
-		mavlink_msg_heartbeat_encode(0, ZIKUSH_ICU, &msg, &heartbeat);
-
-		//router_route(&msg);
-
-		HAL_Delay(80);
-
-		mavlink_scaled_pressure_t pressure =
-		{
-			.press_abs = 100.0f,
-			.press_diff = 0,
-			.temperature = 2213,
-			.time_boot_ms = HAL_GetTick(),
-		};
-		mavlink_msg_scaled_pressure_encode(0, ZIKUSH_ICU, &msg, &pressure);
-
-		//router_route(&msg);
-
-		HAL_Delay(1000);
-	}
 }
 
 void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize)

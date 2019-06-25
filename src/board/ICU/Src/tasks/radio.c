@@ -25,14 +25,32 @@ static void radio_init(void);
 
 void radio_task (void *pvParameters)
 {
+	static uint8_t framebuff[MAVLINK_MAX_PACKET_LEN];
+	static mavlink_message_t msg;
+	static uint32_t notifications = 0;
+
+	MX_SPI2_Init();
+	MX_GPIO_Init();
+
+	radio_init();
 
 	while(1)
 	{
-		MX_SPI2_Init();
-		MX_GPIO_Init();
+		xTaskNotifyWait(0, RADIO_NOTIFICATION_SEND|RADIO_NOTIFICATION_EVT, &notifications, 0xFFFFFFFF);
 
-		radio_init();
+		if(notifications & RADIO_NOTIFICATION_EVT)
+			sx1268_event(&radio);
 
+		if(notifications & RADIO_NOTIFICATION_SEND)
+		{
+			while( xQueueReceive(radio_queue_handle, &msg, 0) != errQUEUE_EMPTY )
+			{
+				uint16_t len = mavlink_msg_to_send_buffer(framebuff, &msg);
+				sx1268_send(&radio, framebuff, len);
+
+				sx1268_event(&radio);
+			}
+		}
 	}
 
 	vTaskDelete(NULL);
@@ -66,7 +84,7 @@ void EXTI15_10_IRQHandler(void)
 	if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_15) != RESET)
 	{
 		__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_15);
-		sx1268_event(&radio);
+		xTaskNotify(radio_task_handle, RADIO_NOTIFICATION_EVT, eSetBits);
 	}
 
 	return;
