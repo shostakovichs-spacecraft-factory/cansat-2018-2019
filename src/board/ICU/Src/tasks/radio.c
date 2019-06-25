@@ -8,7 +8,9 @@
 #include <main.h>
 
 #include <sx1268.h>
-#include <string.h>
+
+
+static SPI_HandleTypeDef hspi2;
 
 
 static sx1268_t radio;
@@ -16,7 +18,8 @@ static sx1268_stm32_t radio_specific;
 static uint8_t radio_rxbuf[ICU_RADIO_RXBUFFLEN], radio_txbuf[ICU_RADIO_TXBUFFLEN];
 
 
-static void MX_SPI2_Init(void)
+static void MX_SPI2_Init(void);
+static void MX_GPIO_Init(void);
 static void radio_init(void);
 
 
@@ -25,7 +28,8 @@ void radio_task (void *pvParameters)
 
 	while(1)
 	{
-		MX_SDIO_SD_Init();
+		MX_SPI2_Init();
+		MX_GPIO_Init();
 
 		radio_init();
 
@@ -54,6 +58,19 @@ static void radio_init(void)
 	sx1268_init(&radio);
 }
 
+/**
+  * @brief This function handles EXTI line[15:10] interrupts.
+  */
+void EXTI15_10_IRQHandler(void)
+{
+	if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_15) != RESET)
+	{
+		__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_15);
+		sx1268_event(&radio);
+	}
+
+	return;
+}
 
 //Those functions has been fetched from CubeMX generated code
 /**

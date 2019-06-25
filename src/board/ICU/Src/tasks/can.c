@@ -13,11 +13,13 @@
 static CAN_HandleTypeDef hcan;
 
 
-void can_init();
+static void MX_CAN_Init();
+static void can_init();
 
 
 void can_task (void *pvParameters)
 {
+	MX_CAN_Init();
 	can_init();
 
 	while(1)
@@ -28,7 +30,7 @@ void can_task (void *pvParameters)
 	vTaskDelete(NULL);
 }
 
-void can_init()
+static void can_init()
 {
 	HAL_CAN_Start(&hcan);
 
@@ -46,8 +48,27 @@ void can_init()
 	HAL_CAN_ConfigFilter(&hcan, &filter);
 
 	hcan.Instance->IER |= CAN_IER_FMPIE0;
+}
 
+/**
+  * @brief This function handles USB low priority or CAN RX0 interrupts.
+  */
+void USB_LP_CAN1_RX0_IRQHandler(void)
+{
+	/*static volatile int counter = 0;
+	counter++;
+	volatile canmavlink_RX_frame_t frame;
+	static volatile mavlink_message_t msg;
+	static volatile mavlink_status_t status;
 
+	HAL_CAN_GetRxMessage(&hcan, 0, &( frame.Header ), frame.Data);
+
+	volatile uint8_t result = canmavlink_parse_frame(&frame, &msg, &status);
+
+	if(result == MAVLINK_FRAMING_OK)
+		router_route(&msg, 1000 * portTICK_RATE_MS);*/
+
+	return;
 }
 
 //Those functions has been fetched from CubeMX generated code

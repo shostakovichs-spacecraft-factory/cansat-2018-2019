@@ -14,7 +14,7 @@ SD_HandleTypeDef hsd;
 
 
 static void MX_SDIO_SD_Init(void);
-static void sd_init();
+static void sd_startlog(void);
 
 
 void sd_task (void *pvParameters)
@@ -32,7 +32,7 @@ void sd_task (void *pvParameters)
 	vTaskDelete(NULL);
 }
 
-static void sd_startlog()
+static void sd_startlog(void)
 {
 	FRESULT fileworkresult;
 	char filename[ICU_SD_MAXFILENAMELEN];

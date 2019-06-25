@@ -15,7 +15,7 @@ void ICU_task (void *pvParameters);
 static StaticTask_t ICU_task_tcb;
 static StackType_t ICU_stack[ICU_TASKS_ICU_STACKSIZE];
 static StaticQueue_t ICU_task_queue;
-static
+static mavlink_message_t ICU_task_queue_buffer[ICU_TASKS_ICU_QUEUE_SIZE];
 TaskHandle_t ICU_task_handle;
 QueueHandle_t	ICU_queue_handle;
 
@@ -23,6 +23,7 @@ void can_task (void *pvParameters);
 static StaticTask_t can_task_tcb;
 static StackType_t can_stack[ICU_TASKS_CAN_STACKSIZE];
 static StaticQueue_t can_task_queue;
+static mavlink_message_t can_task_queue_buffer[ICU_TASKS_ICU_QUEUE_SIZE];
 TaskHandle_t radio_task_handle;
 QueueHandle_t	radio_queue_handle;
 
@@ -30,6 +31,7 @@ void sd_task (void *pvParameters);
 static StaticTask_t sd_task_tcb;
 static StackType_t sd_stack[ICU_TASKS_SD_STACKSIZE];
 static StaticQueue_t sd_task_queue;
+static mavlink_message_t sd_task_queue_buffer[ICU_TASKS_ICU_QUEUE_SIZE];
 TaskHandle_t radio_task_handle;
 QueueHandle_t	radio_queue_handle;
 
@@ -37,6 +39,7 @@ void radio_task (void *pvParameters);
 static StaticTask_t radio_task_tcb;
 static StackType_t radio_stack[ICU_TASKS_RADIO_STACKSIZE];
 static StaticQueue_t radio_task_queue;
+static mavlink_message_t radio_task_queue_buffer[ICU_TASKS_ICU_QUEUE_SIZE];
 TaskHandle_t radio_task_handle;
 QueueHandle_t	radio_queue_handle;
 
@@ -53,8 +56,9 @@ int main(void)
 
 	ICU_task_handle = xTaskCreateStatic(ICU_task, (const char *)"ICU", ICU_TASKS_ICU_STACKSIZE, NULL, \
 										ICU_TASKS_ICU_TASKPRIORITY, ICU_stack, &ICU_task_tcb);
-	ICU_queue_handle = xQueueCreateStatic(ICU_TASKS_ICU_QUEUE_SIZE, sizeof(mavlink_message_t), );
+	ICU_queue_handle = xQueueCreateStatic(ICU_TASKS_ICU_QUEUE_SIZE, sizeof(mavlink_message_t), (uint8_t *)ICU_task_queue_buffer, &ICU_task_queue);
 
+	vTaskStartScheduler();
 
 	while(1)
 	{
@@ -85,6 +89,16 @@ int main(void)
 
 		HAL_Delay(1000);
 	}
+}
+
+void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize)
+{
+	static StaticTask_t idle_task_tcb;
+	static StackType_t idle_stack[configMINIMAL_STACK_SIZE];
+
+	*ppxIdleTaskTCBBuffer = &idle_task_tcb;
+	*ppxIdleTaskStackBuffer = idle_stack;
+	*pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
 }
 
 /**

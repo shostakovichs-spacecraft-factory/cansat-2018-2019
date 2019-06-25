@@ -4,19 +4,19 @@
 /* Params for ICU */
 #define ICU_TASKS_ICU_STACKSIZE	512
 #define ICU_TASKS_ICU_TASKPRIORITY	1
-#define ICU_TASKS_ICU_QUEUE_SIZE	560
+#define ICU_TASKS_ICU_QUEUE_SIZE	3 //defined in sizes of mavlink_msg_t
 
 #define ICU_TASKS_CAN_STACKSIZE	512
 #define ICU_TASKS_CAN_TASKPRIORITY	0
-#define ICU_TASKS_CAN_QUEUE_SIZE	560
+#define ICU_TASKS_CAN_QUEUE_SIZE	3 //defined in sizes of mavlink_msg_t
 
 #define ICU_TASKS_SD_STACKSIZE	512
 #define ICU_TASKS_SD_TASKPRIORITY	2
-#define ICU_TASKS_SD_QUEUE_SIZE	560
+#define ICU_TASKS_SD_QUEUE_SIZE	3 //defined in sizes of mavlink_msg_t
 
 #define ICU_TASKS_RADIO_STACKSIZE	512
 #define ICU_TASKS_RADIO_TASKPRIORITY	0
-#define ICU_TASKS_RADIO_QUEUE_SIZE	560
+#define ICU_TASKS_RADIO_QUEUE_SIZE	3 //defined in sizes of mavlink_msg_t
 
 
 #define ICU_SD_SESSFOLDERNAMEFMT	"0:/zikush/sess%04d"
