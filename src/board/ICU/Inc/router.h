@@ -8,6 +8,8 @@
 #ifndef ROUTER_H_
 #define ROUTER_H_
 
+#include <FreeRTOS.h>
+
 #include <mavlink/zikush/mavlink.h>
 
 typedef enum
@@ -22,6 +24,6 @@ router_status_t router_send_CAN(mavlink_message_t * msg);
 router_status_t router_send_radio(mavlink_message_t * msg);
 router_status_t router_send_IRIDIUM(mavlink_message_t * msg);
 
-router_status_t router_route(mavlink_message_t * msg);
+router_status_t router_route(mavlink_message_t * msg, TickType_t xTicksToWait);
 
 #endif /* ROUTER_H_ */
