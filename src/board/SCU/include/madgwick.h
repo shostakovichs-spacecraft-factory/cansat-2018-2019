@@ -8,7 +8,7 @@
 #ifndef MADGWICK_H_
 #define MADGWICK_H_
 
-#include "../matrix.h"
+#include "matrix.h"
 #include "quaternion.h"
 
 //Calculates noise error in orientation based on vector approaching (see gradient method)

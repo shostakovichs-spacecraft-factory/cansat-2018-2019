@@ -8,7 +8,7 @@
 #ifndef MADGWICK_QUATERNION_H_
 #define MADGWICK_QUATERNION_H_
 
-#include "../matrix.h"
+#include "matrix.h"
 
 typedef struct {
 	double x, y, z;
