@@ -1,13 +1,13 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "stm32f1xx_hal.h"
 
+#include <mavlink/zikush/mavlink.h>
 #include <zikush_config.h>
+
+
+extern volatile int16_t zikush_runsessnum;
 
 void Error_Handler(void);
 
@@ -29,8 +29,5 @@ void Error_Handler(void);
 #define LEDPIN_Pin GPIO_PIN_6
 #define LEDPIN_GPIO_Port GPIOB
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* __MAIN_H */

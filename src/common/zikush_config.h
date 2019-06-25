@@ -2,6 +2,23 @@
 #define ZIKUSH_CONFIG
 
 /* Params for ICU */
+#define ICU_TASKS_ICU_STACKSIZE	512
+#define ICU_TASKS_ICU_TASKPRIORITY	1
+#define ICU_TASKS_ICU_QUEUE_SIZE	560
+
+#define ICU_TASKS_CAN_STACKSIZE	512
+#define ICU_TASKS_CAN_TASKPRIORITY	0
+#define ICU_TASKS_CAN_QUEUE_SIZE	560
+
+#define ICU_TASKS_SD_STACKSIZE	512
+#define ICU_TASKS_SD_TASKPRIORITY	2
+#define ICU_TASKS_SD_QUEUE_SIZE	560
+
+#define ICU_TASKS_RADIO_STACKSIZE	512
+#define ICU_TASKS_RADIO_TASKPRIORITY	0
+#define ICU_TASKS_RADIO_QUEUE_SIZE	560
+
+
 #define ICU_SD_SESSFOLDERNAMEFMT	"0:/zikush/sess%04d"
 #define ICU_SD_SESSNUMBOUNDARY	10000
 
@@ -14,6 +31,7 @@
 #define ICU_RADIO_TXBUFFLEN	30720
 
 #define ICU_CAN_RXBUFFLEN	2048
+
 
 
 /* Params for PCU */
@@ -29,6 +47,8 @@
 
 #define PCU_CAN_TIMEOUT_MS	100
 
+
+
 /* Params for CCU */
 #define CCU_SPECTRUM_WIDTH	376
 #define CCU_SPECTRUM_HEIGHT	240
@@ -39,6 +59,7 @@
 #define CCU_SPECTRUM_X_END		376
 
 #define CCU_TESTMODE	//Take picture every second and enable UART output
+
 
 // params directly from Flow config. Better explanation could be found in datasheet
 // TODO maybe we should implement on-the-fly parameters change?
