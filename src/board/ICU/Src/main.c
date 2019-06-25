@@ -61,6 +61,8 @@ SPI_HandleTypeDef hspi2;
 sx1268_t radio;
 sx1268_stm32_t radio_specific;
 uint8_t radio_rxbuf[ICU_RADIO_RXBUFFLEN], radio_txbuf[ICU_RADIO_TXBUFFLEN];
+uint8_t can_rxbuf[ICU_CAN_RXBUFFLEN];
+sx1268_fifo_t can_rxfifo = {.empty = true, .head = 0, .tail = 0, .length = ICU_CAN_RXBUFFLEN, .mem = can_rxbuf, .locked = false}; //грустно но вкусно
 
 int16_t zikush_runsessnum = -1;
 /* USER CODE END PV */
@@ -141,7 +143,7 @@ void can_init()
 
 	hcan.Instance->IER |= CAN_IER_FMPIE0;
 
-	//mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 }
 
 /* USER CODE END 0 */
@@ -276,7 +278,7 @@ static void MX_CAN_Init(void)
 
   /* USER CODE END CAN_Init 1 */
   hcan.Instance = CAN1;
-  hcan.Init.Prescaler = 400;
+  hcan.Init.Prescaler = 100;
   hcan.Init.Mode = CAN_MODE_NORMAL;
   hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan.Init.TimeSeg1 = CAN_BS1_5TQ;

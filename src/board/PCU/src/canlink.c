@@ -35,7 +35,7 @@ bool canlink_init(void)
 
 	CAN_InitTypeDef caninit =
 	{
-		.CAN_Prescaler = 400, //FIXME redefine
+		.CAN_Prescaler = 100, //FIXME redefine
 		.CAN_Mode = CAN_OperatingMode_Normal,
 		.CAN_SJW = CAN_SJW_1tq,
 		.CAN_BS1 = CAN_BS1_5tq,

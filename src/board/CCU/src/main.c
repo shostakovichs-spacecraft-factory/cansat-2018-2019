@@ -72,12 +72,6 @@ void can_init()
 	};
 	HAL_GPIO_Init(GPIOA, &gpio_init);
 
-	/*GPIOA->AFR[1] &= ~(0x0F << 12);
-	GPIOA->AFR[1] |= GPIO_AF9_CAN1 << 12;
-
-	GPIOA->MODER &= ~GPIO_MODER_MODER11;
-	GPIOA->MODER |= GPIO_MODER_MODER11_1;*/
-
 	hcan.Instance = CAN1;
 	hcan.Init.Prescaler = 466;
 	hcan.Init.Mode = CAN_MODE_NORMAL;
