@@ -149,7 +149,7 @@ static bool _table_ICU(mavlink_message_t * msg)
 
 router_status_t router_route(mavlink_message_t * msg)
 {
-	router_status_t status;
+	router_status_t status = ROUTER_OK;
 
 	if(_table_SD(msg))
 		status |= router_send_SD(msg);
