@@ -3,15 +3,10 @@
 
 #include <stm32f1xx_hal_can.h>
 
-#include "sx1268.h"
-
 #include <mavlink/zikush/mavlink.h>
 #include <canmavlink_hal.h>
 
 #include <router.h>
-
-extern CAN_HandleTypeDef hcan;
-extern sx1268_t radio;
 
 /******************************************************************************/
 /*           Cortex-M3 Processor Interruption and Exception Handlers          */ 
@@ -64,6 +59,8 @@ void UsageFault_Handler(void)
 void DebugMon_Handler(void)
 {}
 
+void xPortSysTickHandler( void ); //FreeRTOS SysTickHandler
+
 /**
   * @brief This function handles System tick timer.
   */
@@ -71,5 +68,5 @@ void SysTick_Handler(void)
 {
 	HAL_IncTick();
 
-	FreeRTOS_SysTick_Handler();
+	xPortSysTickHandler();
 }

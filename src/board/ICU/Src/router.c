@@ -6,111 +6,56 @@
  */
 #include <stdbool.h>
 
-#include "stm32f1xx_hal.h"
+#include <FreeRTOS.h>
+#include <FreeRTOS/queue.h>
 
 #include <mavlink/zikush/mavlink.h>
 #include <canmavlink_hal.h>
 
-#include <sx1268.h>
-#include <fatfs.h>
-
 #include <router.h>
 
+#include <main.h>
 #include <zikush_config.h>
 
-extern CAN_HandleTypeDef hcan;
-extern sx1268_t radio;
-extern int16_t zikush_runsessnum;
+extern QueueHandle_t	ICU_queue_handle;
+extern QueueHandle_t	can_queue_handle;
+extern QueueHandle_t	sd_queue_handle;
+extern QueueHandle_t	radio_queue_handle;
 
-static int8_t _SD_extfilenum = -1, _SD_intfilenum = -1;
-static FIL	_extfile = {0}, _intfile = {0};
+static bool _table_ICU(mavlink_message_t * msg);
+static bool _table_CAN(mavlink_message_t * msg);
+static bool _table_SD(mavlink_message_t * msg);
+static bool _table_radio(mavlink_message_t * msg);
+static bool _table_Iridium(mavlink_message_t * msg);
 
-router_status_t router_send_SD(mavlink_message_t * msg)
+router_status_t router_route(mavlink_message_t * msg, TickType_t xTicksToWait)
 {
-	FIL * currentfile;
-	int8_t * currentfilenum;
-	char filename_sourcepart[4];
+	if(_table_SD(msg))
+		xQueueSendToBack(sd_queue_handle, msg, xTicksToWait);
 
-	if(msg->sysid == 0) //internal
-		{ currentfile = &_intfile; currentfilenum = &_SD_intfilenum; sprintf(filename_sourcepart, "int"); }
+	if(_table_ICU(msg))
+		xQueueSendToBack(ICU_queue_handle, msg, xTicksToWait);
 
-	else //external
-		{ currentfile = &_extfile; currentfilenum = &_SD_extfilenum; sprintf(filename_sourcepart, "ext"); }
-
-
-	if(currentfile->fs == NULL || currentfile->fsize > ICU_SD_MAXFILELEN)
+	if(_table_CAN(msg))
 	{
-		*currentfilenum += 1;
-
-		if(currentfile->fs != NULL)
-		{
-			f_sync(currentfile);
-			f_close(currentfile);
-		}
-
-		char filename[ICU_SD_MAXFILENAMELEN];
-		sprintf(filename, ICU_SD_TELFILENAMEFMT, zikush_runsessnum, filename_sourcepart, *currentfilenum);
-
-		f_open(currentfile, filename, FA_CREATE_NEW | FA_WRITE);
+		xQueueSendToBack(can_queue_handle, msg, xTicksToWait);
+		xTaskNotifyGive(can_task_handle);
 	}
 
-	uint8_t buf[MAVLINK_MAX_PACKET_LEN];
-	uint16_t len = mavlink_msg_to_send_buffer(buf, msg);
-	UINT infactwritten;
+	if(_table_radio(msg))
+	{
+		xQueueSendToBack(radio_queue_handle, msg, xTicksToWait);
+		xTaskNotify(radio_task_handle, RADIO_NOTIFICATION_SEND, eSetBits);
+	}
 
-	FRESULT result = f_write(currentfile, buf, len, &infactwritten);
-	if(result != FR_OK || infactwritten != len)
-		return ROUTER_MALFUNCTION;
-
-	result = f_sync(currentfile);
-	if(result != FR_OK)
-		return ROUTER_MALFUNCTION;
+	if(_table_Iridium(msg))
+		return ROUTER_MALFUNCTION; //FIXME add IRIDIUM sending
 
 	return ROUTER_OK;
 }
 
-router_status_t router_send_CAN(mavlink_message_t * msg)
-{
-	canmavlink_TX_frame_t framebuff[34];
-	uint8_t framecount = canmavlink_msg_to_frames(framebuff, msg);
 
-	for(int i = 0; i < framecount; i++) //FIXME rewrite with IRQs
-	{
-		uint32_t mb;
-		HAL_CAN_AddTxMessage(&hcan, &( framebuff[i].Header ), framebuff[i].Data, &mb);
-
-		bool pending;
-		do {
-			pending = HAL_CAN_IsTxMessagePending(&hcan, mb);
-		} while(pending);
-	}
-
-	return ROUTER_OK;
-}
-
-router_status_t router_send_radio(mavlink_message_t * msg)
-{
-	uint8_t framebuff[MAVLINK_MAX_PACKET_LEN];
-	uint16_t len = mavlink_msg_to_send_buffer(framebuff, msg);
-	sx1268_status_t status = sx1268_send(&radio, framebuff, len);
-
-	if(status == SX1268_OK)
-		return ROUTER_OK;
-	if(status == SX1268_ERR_BUFSIZE)
-		return ROUTER_NOBUFF;
-	if(status == SX1268_TIMEOUT)
-		return ROUTER_TIMEOUT;
-	if(status == SX1268_BUSY || status == SX1268_ERROR)
-		return ROUTER_MALFUNCTION;
-
-	return ROUTER_MALFUNCTION;
-}
-
-router_status_t router_send_IRIDIUM(mavlink_message_t * msg)
-{
-	return ROUTER_MALFUNCTION; //FIXME add true IRIDIUM code
-}
-
+/*Routing 'tables'*/
 static bool _table_SD(mavlink_message_t * msg)
 {
 	return msg != NULL;
@@ -145,27 +90,4 @@ static bool _table_Iridium(mavlink_message_t * msg)
 static bool _table_ICU(mavlink_message_t * msg)
 {
 	return false;
-}
-
-router_status_t router_route(mavlink_message_t * msg)
-{
-	router_status_t status = ROUTER_OK;
-
-	if(_table_SD(msg))
-		status |= router_send_SD(msg);
-
-	if(_table_ICU(msg))
-		//TODO some internal func
-		return ROUTER_MALFUNCTION;
-
-	if(_table_CAN(msg))
-		status |= router_send_CAN(msg);
-
-	if(_table_radio(msg))
-		status |= router_send_radio(msg);
-
-	if(_table_Iridium(msg))
-		return ROUTER_MALFUNCTION; //FIXME add IRIDIUM sending
-
-	return ROUTER_OK;
 }

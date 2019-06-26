@@ -1,13 +1,31 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
+#include <FreeRTOS.h>
+#include <queue.h>
+
 #include "stm32f1xx_hal.h"
 
 #include <mavlink/zikush/mavlink.h>
+#include <router.h>
+
 #include <zikush_config.h>
 
 
 extern volatile int16_t zikush_runsessnum;
+
+extern TaskHandle_t heartbeat_task_handle;
+extern TaskHandle_t ICU_task_handle;
+extern QueueHandle_t	ICU_queue_handle;
+extern TaskHandle_t can_task_handle;
+extern QueueHandle_t	can_queue_handle;
+extern TaskHandle_t sd_task_handle;
+extern QueueHandle_t	sd_queue_handle;
+extern TaskHandle_t radio_task_handle;
+extern QueueHandle_t	radio_queue_handle;
+
+#define RADIO_NOTIFICATION_SEND	(1<<0)
+#define RADIO_NOTIFICATION_EVT	(1<<1)
 
 void Error_Handler(void);
 
