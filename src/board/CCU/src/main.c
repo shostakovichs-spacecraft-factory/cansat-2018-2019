@@ -64,7 +64,7 @@ void can_init()
 
 	GPIO_InitTypeDef gpio_init =
 	{
-		.Mode = GPIO_MODE_AF_OD,
+		.Mode = GPIO_MODE_AF_PP,
 		.Alternate = GPIO_AF9_CAN1,
 		.Pull = GPIO_NOPULL,
 		.Speed = GPIO_SPEED_LOW,

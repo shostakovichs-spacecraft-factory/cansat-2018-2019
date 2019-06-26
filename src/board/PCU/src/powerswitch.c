@@ -26,7 +26,7 @@ void powerswitch_init(void)
 
 	GPIO_InitTypeDef gpioinit =
 	{
-		.GPIO_Mode = GPIO_Mode_Out_OD,
+		.GPIO_Mode = GPIO_Mode_Out_PP,
 		.GPIO_Pin = POWERSWITCH_ICU_PIN | POWERSWITCH_SCU_PIN | POWERSWITCH_CCU_PIN | POWERSWITCH_AMP_PIN \
 							| POWERSWITCH_HEATER_PIN | POWERSWITCH_SHUTDOWN_PIN,
 		.GPIO_Speed = GPIO_Speed_2MHz

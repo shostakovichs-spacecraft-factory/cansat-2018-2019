@@ -12,7 +12,7 @@ void ICU_task (void *pvParameters)
 {
 	while(1)
 	{
-
+		vTaskDelay(5000 * portTICK_RATE_MS);
 	}
 
 	vTaskDelete(NULL);

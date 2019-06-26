@@ -35,7 +35,7 @@ bool canlink_init(void)
 
 	CAN_InitTypeDef caninit =
 	{
-		.CAN_Prescaler = 100, //FIXME redefine
+		.CAN_Prescaler = 117, //so ~360 kHz
 		.CAN_Mode = CAN_OperatingMode_Normal,
 		.CAN_SJW = CAN_SJW_1tq,
 		.CAN_BS1 = CAN_BS1_5tq,
@@ -76,14 +76,15 @@ void canlink_send(mavlink_message_t * msg)
 	static CanTxMsg frames[34];
 	uint8_t framecount = canmavlink_msg_to_frames(frames, msg);
 
-	for(int i = 0; i < framecount; i++) //FIXME rewrite with IRQs
+	for(int i = 0; i < framecount; i++)
 	{
-		uint32_t starttime = global_ms;
-		uint8_t mailbox;
+		uint32_t mailbox;
+		mailbox = CAN_Transmit(CAN1, frames + i);
 
+		uint8_t pending;
 		do {
-			mailbox = CAN_Transmit(CAN1, frames + i);
-		} while(mailbox == CAN_TxStatus_NoMailBox && (global_ms - starttime) < PCU_CAN_TIMEOUT_MS);
+			pending = CAN_TransmitStatus(CAN1, mailbox);//TODO consider yielding here, but notice that for proper canmavlink functionality messages should come in an uninterrupted series
+		} while(pending == CAN_TxStatus_Pending);
 	}
 
 	__enable_irq();
