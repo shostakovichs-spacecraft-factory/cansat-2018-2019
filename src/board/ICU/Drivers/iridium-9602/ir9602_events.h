@@ -99,7 +99,7 @@ typedef enum
 typedef struct
 {
 	int code;
-} ir9602_evt_errocde_t;
+} ir9602_evt_errcode_t;
 
 // ===========================================================================
 // ===========================================================================
@@ -148,7 +148,7 @@ typedef struct
 	{
 		ir9602_evt_hardfault_t hardfault;
 		ir9602_evt_ciev_t ciev;
-		ir9602_evt_errocde_t errcode;
+		ir9602_evt_errcode_t errcode;
 		ir9602_evt_sbdi_t sbdi;
 	} arg;
 } ir9602_evt_t;
