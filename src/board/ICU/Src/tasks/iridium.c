@@ -125,6 +125,9 @@ static void _hw_init(void)
 
 	__HAL_UART_ENABLE_IT(&_ir_user_struct.uart, UART_IT_ERR);
 	__HAL_UART_ENABLE_IT(&_ir_user_struct.uart, UART_IT_RXNE);
+
+	HAL_NVIC_SetPriority(USART1_IRQn, ICU_IR_UART_RX_IT_PRIO, 0);
+	HAL_NVIC_EnableIRQ(USART1_IRQn);
 }
 
 
