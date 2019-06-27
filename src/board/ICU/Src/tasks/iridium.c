@@ -15,6 +15,10 @@ typedef struct
 {
 	// Статусные поля таска
 	uint8_t signal_power;
+	uint8_t sbdwb_errors;
+	uint8_t sbdi_errors;
+	uint8_t mo_sent;
+	uint8_t mt_rcvd;
 
 	UART_HandleTypeDef uart;
 
@@ -24,8 +28,8 @@ typedef struct
 	StaticQueue_t rx_queue_object;
 	uint8_t rx_buffer[ICU_IR_UART_RX_BUFFER_SIZE];
 
-	size_t tx_carret;
-	uint8_t tx_accum[ICU_IR_TX_ACCUMULATOR_SIZE];
+	uint8_t accum[ICU_IR_TX_ACCUMULATOR_SIZE];
+	uint16_t accum_carret;
 } ir9602_user_struct_t;
 
 static ir9602_user_struct_t _ir_user_struct;
@@ -124,34 +128,117 @@ static void _hw_init(void)
 }
 
 
+static int mavmsg_len(const mavlink_message_t * msg)
+{
+	uint8_t signature_len, header_len;
+	uint8_t length = msg->len;
+
+	if (msg->magic == MAVLINK_STX_MAVLINK1) {
+		signature_len = 0;
+		header_len = MAVLINK_CORE_HEADER_MAVLINK1_LEN;
+	} else {
+		length = _mav_trim_payload(_MAV_PAYLOAD(msg), length);
+		header_len = MAVLINK_CORE_HEADER_LEN;
+		signature_len = (msg->incompat_flags & MAVLINK_IFLAG_SIGNED)?MAVLINK_SIGNATURE_BLOCK_LEN:0;
+	}
+	return header_len + 1 + 2 + (uint16_t)length + (uint16_t)signature_len;
+}
+
+
+static int _perform_sbd(ir9602_t * ir, const uint8_t * data, int datasize)
+{
+	ir9602_user_struct_t * const user = (ir9602_user_struct_t*)&ir->user_arg;
+
+	int rc;
+	{
+		ir9602_evt_errcode_t err_evt;
+		rc = ir9602_sbdwb(ir, data, datasize, &err_evt);
+		if (rc < 0)
+			user->sbdwb_errors++;
+	}
+
+
+	// Даже если у нас не получилось заложить сообщение в модем
+	// сеанс всеравно будем проводить. Вдруг что-то придет сверху
+
+	// Считаем что мы положили сообщение на модем
+	user->accum_carret = 0;
+
+	ir9602_evt_sbdi_t evt_sbdi;
+	rc = ir9602_sbdi(ir, &evt_sbdi);
+	if (rc < 0)
+	{
+		user->sbdi_errors++;
+		return rc;
+	}
+
+	// чего-нибудь нам пришло?
+	if (IR9602_EVT_SBDMSTATUS_YES == evt_sbdi.mo_status)
+		user->mo_sent++;
+
+	if (IR9602_EVT_SBDMSTATUS_YES == evt_sbdi.mt_status)
+	{
+		user->mt_rcvd++;
+		// Вытяигваем сообщение
+		// TODO
+	}
+
+	return 0;
+}
+
+
 void iridium_task(void *pvParameters)
 {
 	(void)pvParameters;
+	ir9602_user_struct_t * const user = &_ir_user_struct;
 
-	_ir_user_struct.signal_power = 0;
-	_ir_user_struct.tx_carret = 0;
-	_ir_user_struct.rx_queue = xQueueCreateStatic(ICU_IR_UART_RX_BUFFER_SIZE, 1,
-			_ir_user_struct.rx_buffer, &_ir_user_struct.rx_queue_object
+	user->sbdwb_errors = 0;
+	user->sbdi_errors = 0;
+	user->mo_sent = 0;
+	user->mt_rcvd = 0;
+
+	user->signal_power = 0;
+	user->accum_carret = 0;
+	user->rx_queue = xQueueCreateStatic(ICU_IR_UART_RX_BUFFER_SIZE, 1,
+			user->rx_buffer, &user->rx_queue_object
 	);
 
-	ir9602_init(&_ir, &_ir_user_struct, _ir_uart_getch, _ir_uart_putch_t, _ir_event_hook);
+	ir9602_init(&_ir, user, _ir_uart_getch, _ir_uart_putch_t, _ir_event_hook);
 
 	// Неможко не логично включать железо в последнюю очередь, но мы должны
 	// быть готовы взаранее
 	_hw_init();
 
-
+	// запомним когда мы начали
+	// portTickType timemark = xTaskGetTickCount();
 	for(;;)
 	{
 		const BaseType_t status = xQueueReceive(iridium_queue_handle, &_ir_user_struct.mavmsgbuf, ICU_IR_TASK_PERIOD);
-		if (pdTRUE == status)
+		if (pdTRUE != status)
 		{
-			// Если нам есть чего отправлять!
-			// mavlink_expected_message_length(&struct.mavmsgbuf);
+			// Мы таймаутнулись - нужно сливать буфер даже если он не полный
+			_perform_sbd(&_ir, user->accum, user->accum_carret);
+		}
+		else
+		{
+			// оп, что-то пришло - пробуем сложить в буфер
+			const uint8_t msglen = mavmsg_len(&user->mavmsgbuf);
+			if (msglen > sizeof(user->accum) - user->accum_carret)
+			{
+				// Сообщение не влезает в буфер - сливаем его
+				_perform_sbd(&_ir, user->accum, user->accum_carret);
+			}
+
+			// ну теперь то влезает? Всеравно проверим на всякий
+			// если нет - ну нет
+			if (msglen > sizeof(user->accum) - user->accum_carret)
+				continue;
+
+			// Влезает - пушим сообщение дальше
+			mavlink_msg_to_send_buffer(user->accum, &user->mavmsgbuf);
 		}
 	}
 }
-
 
 
 void USART1_IRQHandler(void)
@@ -160,56 +247,38 @@ void USART1_IRQHandler(void)
 	UART_HandleTypeDef * const huart = &user_struct->uart;
 
 	uint32_t isrflags   = READ_REG(huart->Instance->SR);
-	uint32_t cr1its     = READ_REG(huart->Instance->CR1);
-	uint32_t cr3its     = READ_REG(huart->Instance->CR3);
+	volatile uint32_t cr1its     = READ_REG(huart->Instance->CR1);
+	volatile uint32_t cr3its     = READ_REG(huart->Instance->CR3);
 	uint32_t errorflags = 0x00U;
+	(void)cr1its;
+	(void)cr3its;
 
 	/* If no error occurs */
 	errorflags = (isrflags & (uint32_t)(USART_SR_PE | USART_SR_FE | USART_SR_ORE | USART_SR_NE));
-	if(errorflags == RESET)
+	/* UART in mode Receiver -------------------------------------------------*/
+	if((isrflags & USART_SR_RXNE) != RESET)
 	{
-		/* UART in mode Receiver -------------------------------------------------*/
-		if(((isrflags & USART_SR_RXNE) != RESET) && ((cr1its & USART_CR1_RXNEIE) != RESET))
-		{
-			const uint8_t rx_byte = (uint8_t)(huart->Instance->DR & (uint8_t)0x00FF);
-			BaseType_t callcontextswitch = false;
-			xQueueSendToBackFromISR(user_struct->rx_queue, &rx_byte, &callcontextswitch);
-			portEND_SWITCHING_ISR(callcontextswitch);
-			return;
-		}
+		const uint8_t rx_byte = (uint8_t)(huart->Instance->DR & (uint8_t)0x00FF);
+		BaseType_t callcontextswitch = false;
+		xQueueSendToBackFromISR(user_struct->rx_queue, &rx_byte, &callcontextswitch);
+		portEND_SWITCHING_ISR(callcontextswitch);
+		return;
 	}
 
-	/* If some errors occur */
-	if((errorflags != RESET) && (((cr3its & USART_CR3_EIE) != RESET) || ((cr1its & (USART_CR1_RXNEIE | USART_CR1_PEIE)) != RESET)))
+	if(errorflags != RESET)
 	{
-		if(errorflags != HAL_UART_ERROR_NONE)
-		{
-			/* UART in mode Receiver -----------------------------------------------*/
-			if(((isrflags & USART_SR_RXNE) != RESET) && ((cr1its & USART_CR1_RXNEIE) != RESET))
-			{
-				const uint8_t rx_byte = (uint8_t)(huart->Instance->DR & (uint8_t)0x00FF);
-				BaseType_t callcontextswitch = false;
-				xQueueSendToBackFromISR(user_struct->rx_queue, &rx_byte, &callcontextswitch);
-				portEND_SWITCHING_ISR(callcontextswitch);
-				return;
-			}
-		}
+		// Если у нас случилась ошибка и зажегся какой-то бит ошибки
+		// никто за нас его не снимет
+		// Сдалем вид что не было никакой ошибки и продолжим работать
+		// Ошибки пускай ловит драйвер выше. Тут слишком геморно передавать наверх что случилось
 
-		if(errorflags != 0)
-		{
-			// Если у нас случилась ошибка и зажегся какой-то бит ошибки
-			// никто за нас его не снимет
-			// Сдалем вид что не было никакой ошибки и продолжим работать
-			// Ошибки пускай ловит драйвер выше. Тут слишком геморно передавать наверх что случилось
-
-			// Сбрасываем все биты ошибок
-			// Согласно даташиту такая последовательность должна помочь
-			__disable_irq();
-			READ_REG(huart->Instance->SR);
-			READ_REG(huart->Instance->DR); // надеемся, что там ничего не повяилось с тех пор как мы проверяли последний раз
-			__enable_irq();
-		}
-	} /* End if some error occurs */
+		// Сбрасываем все биты ошибок
+		// Согласно даташиту такая последовательность должна помочь
+		__disable_irq();
+		READ_REG(huart->Instance->SR);
+		READ_REG(huart->Instance->DR); // надеемся, что там ничего не повяилось с тех пор как мы проверяли последний раз
+		__enable_irq();
+	}
 }
 
 
