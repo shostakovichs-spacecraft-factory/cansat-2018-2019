@@ -35,7 +35,7 @@
  *
  ****************************************************************************/
 
-#include "dcmi.h"
+#include <stdbool.h>
 
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal.h"
@@ -49,7 +49,10 @@
 
 #include <mavlink/zikush/mavlink.h>
 #include <canmavlink_hal.h>
+#include <spectrum.h>
 #include <usart.h>
+#include <can.h>
+
 #include <zikush_config.h>
 
 #define MIN(a, b) ((a)<(b)?(a):(b))
@@ -57,45 +60,48 @@
 void can_mavlink_transmit(mavlink_message_t * msg);
 
 /* counters */
-volatile uint8_t image_counter = 0;
-volatile uint32_t frame_counter;
-volatile uint8_t dcmi_calibration_counter = 0;
+static volatile uint32_t spectrum_frame_counter;
 
 /* image buffers */
-uint8_t dcmi_image_buffer_8bit[FULL_IMAGE_SIZE * 4];
+static uint8_t spectrum_image_buffer_8bit[FULL_IMAGE_SIZE * 4];
+static uint32_t buffer_size = FULL_IMAGE_SIZE; // buffer size in date unit (word)
 
-uint32_t buffer_size;
+/* Various handlers */
+I2C_HandleTypeDef hi2c2; //not static, cause it's referenced in mt9v034 code and i have no time to rewrite it
+static DCMI_HandleTypeDef hdcmi;
+static DMA_HandleTypeDef hdma;
 
-/* extern variables */
-extern CAN_HandleTypeDef hcan;
 
-extern uint16_t spectrum_processing_y_start, spectrum_processing_y_end, spectrum_processing_x_start, spectrum_processing_x_end;
+/*static functions declaration*/
+static void _dcmi_dma_enable(void);
+static void _dcmi_dma_disable(void);
+static void _reset_frame_counter(void);
+static void _dcmi_clock_init(void);
+static void _dcmi_hw_init(void);
+static void _dcmi_dma_init(void);
 
-/* Global variables */
-I2C_HandleTypeDef hi2c2;
-DCMI_HandleTypeDef hdcmi;
-DMA_HandleTypeDef hdma;
+
 /**
  * @brief Initialize DCMI DMA and enable image capturing
  */
-void enable_image_capture(void)
+void spectrum_init_capture(void)
 {
-	dcmi_clock_init();
-	dcmi_hw_init();
-	dcmi_dma_init(FULL_IMAGE_ROW_SIZE * FULL_IMAGE_COLUMN_SIZE * 4);
+	_dcmi_clock_init();
+	_dcmi_hw_init();
+	_dcmi_dma_init();
 	mt9v034_context_configuration();
-	dcmi_dma_enable();
+	_dcmi_dma_enable();
 }
 
 /**
  * @brief Calibration image collection routine restart
  */
-void dcmi_restart_calibration_routine(void)
+void spectrum_restart_calibration_routine(void)
 {
 	/* wait until we have an image */
-	while(frame_counter < 1){}
-	frame_counter = 0;
-	dcmi_dma_enable();
+	while(spectrum_frame_counter < 1){}
+	spectrum_frame_counter = 0;
+	_dcmi_dma_enable();
 }
 
 /**
@@ -107,13 +113,13 @@ void DMA2_Stream1_IRQHandler(void)
 	if (DMA2->LISR & DMA_LISR_TCIF1)
 	{
 		DMA2->LIFCR |= DMA_LIFCR_CTCIF1;
-		frame_counter++;
-		dcmi_dma_disable();
+		spectrum_frame_counter++;
+		_dcmi_dma_disable();
 	}
 }
 
-uint32_t get_frame_counter(void){
-	return frame_counter;
+uint32_t spectrum_get_frame_counter(void){
+	return spectrum_frame_counter;
 }
 
 /**
@@ -122,21 +128,12 @@ uint32_t get_frame_counter(void){
  * @param image_buffer_fast_1 Image buffer in fast RAM
  * @param image_buffer_fast_2 Image buffer in fast RAM
  */
-void send_spectrum_photo() {
+void spectrum_send_photo() {
 
 	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1; //We do it there, cause channel status is a static variable, thus not system-wide
 
 	/*  transmit raw 8-bit image */
 	/* TODO image is too large for this transmission protocol (too much packets), but it works */
-	/*static int debcounter = 0;
-	if(debcounter < 5)
-	{
-		//memcpy(dcmi_image_buffer_8bit + (CCU_SPECTRUM_WIDTH * 62), dcmi_image_buffer_8bit + (CCU_SPECTRUM_WIDTH * 60), CCU_SPECTRUM_WIDTH);
-		memset(dcmi_image_buffer_8bit + (CCU_SPECTRUM_WIDTH * 60), 0, CCU_SPECTRUM_WIDTH);
-		memcpy(dcmi_image_buffer_8bit + (CCU_SPECTRUM_WIDTH * 62), dcmi_image_buffer_8bit + (CCU_SPECTRUM_WIDTH * 60), CCU_SPECTRUM_WIDTH);
-	}
-	debcounter++;
-	debcounter %= 10;*/
 
 	mavlink_data_transmission_handshake_t handshake = {
 		.type = MAVLINK_DATA_STREAM_IMG_RAW8U,
@@ -152,7 +149,7 @@ void send_spectrum_photo() {
 		.camid = ZIKUSH_CAM_SPECTRUM,
 		.size = FULL_IMAGE_SIZE * 4,
 		.packets = FULL_IMAGE_SIZE * 4 / MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN + 1,
-		.y_upleft_crop = spectrum_processing_y_start, //TODO what for?
+		.y_upleft_crop = can_spectrum_processing_y_start, //TODO what for?
 		.time_boot_ms = HAL_GetTick(),
 	};
 
@@ -165,11 +162,15 @@ void send_spectrum_photo() {
 	 */
 	mavlink_msg_data_transmission_handshake_encode(0, ZIKUSH_CCU, &msg, &handshake);
 	can_mavlink_transmit(&msg);
+#ifdef CCU_TESTMODE
 	usart3_mavlink_transmit(&msg);
+#endif
 
 	mavlink_msg_zikush_picture_header_encode(0, ZIKUSH_CCU, &msg, &picture_header);
 	can_mavlink_transmit(&msg);
+#ifdef CCU_TESTMODE
 	usart3_mavlink_transmit(&msg);
+#endif
 
 	uint16_t frame = 0;
 	uint8_t * frame_buffer = encdata.data;
@@ -177,12 +178,14 @@ void send_spectrum_photo() {
 	for(uint32_t i = 0; i < (FULL_IMAGE_SIZE * 4); i += MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN)
 	{
 		int copylen = MIN(MAVLINK_MSG_ENCAPSULATED_DATA_FIELD_DATA_LEN, FULL_IMAGE_SIZE - i);
-		memcpy(frame_buffer, dcmi_image_buffer_8bit + i, copylen);
+		memcpy(frame_buffer, spectrum_image_buffer_8bit + i, copylen);
 
 		encdata.seqnr = frame;
 		mavlink_msg_encapsulated_data_encode(0, ZIKUSH_CCU, &msg, &encdata);
 		can_mavlink_transmit(&msg);
+#ifdef CCU_TESTMODE
 		usart3_mavlink_transmit(&msg);
+#endif
 
 		HAL_Delay(100);
 
@@ -196,112 +199,77 @@ void send_spectrum_photo() {
  * @param image_buffer_fast_1 Image buffer in fast RAM
  * @param image_buffer_fast_2 Image buffer in fast RAM
  */
-/*void send_spectrum_data(uint8_t * image_buffer_fast_1, uint8_t * image_buffer_fast_2)
+void spectrum_send_data(uint16_t y_start, uint16_t y_end, uint16_t x_start, uint16_t x_end)
 {
 	uint8_t * rowdata;
 	mavlink_zikush_spectrum_intensity_header_t spectrum_header = {
-		.size =	(spectrum_processing_y_end - spectrum_processing_y_start) * 2,
-		.packets = (spectrum_processing_y_end - spectrum_processing_y_start) / \
+		.size =	(y_end - y_start) * 2,
+		.packets = (y_end - y_start) / \
 					MAVLINK_MSG_ZIKUSH_SPECTRUM_INTENSITY_ENCAPSULATED_DATA_FIELD_DATA_LEN + 1, //FIXME correct ceiling?
-		.y_upleft_crop = spectrum_processing_y_start,
+		.y_upleft_crop = y_start,
 		.time_boot_ms = HAL_GetTick()
 	};
 	mavlink_zikush_spectrum_intensity_encapsulated_data_t encdata = {
 			.seqnr = 0
 	};
 	mavlink_message_t msg;
-	CANMAVLINK_TX_FRAME_T canframes[34];
 
 
 	mavlink_msg_zikush_spectrum_intensity_header_encode(0, ZIKUSH_CCU, &msg, &spectrum_header);
-	uint8_t canframecount = canmavlink_msg_to_frames(canframes, &msg);
-	for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
-	{
-		hcan.pTxMsg = canframes + i; //DELICIOUS!!
-		HAL_CAN_Transmit(&hcan, 1000);
-	}
+	can_mavlink_transmit(&msg);
+#ifdef CCU_TESTMODE
+	usart3_mavlink_transmit(&msg);
+#endif
 
 
 	//iterating over rows
-	for(int row = spectrum_processing_y_start; row < spectrum_processing_y_end; row++)
+	for(int row = y_start; row < y_end; row++)
 	{
-		int relrow = row - spectrum_processing_y_start;
-
-		//Selecting one of the many buffers in which the current row is placed
-		if(row < FULL_IMAGE_COLUMN_SIZE / 2)
-			rowdata = image_buffer_fast_1 + row * FULL_IMAGE_ROW_SIZE;
-
-		else if(row < FULL_IMAGE_COLUMN_SIZE)
-			rowdata = image_buffer_fast_2 + (row - FULL_IMAGE_COLUMN_SIZE / 2) * FULL_IMAGE_ROW_SIZE;
-
-		else if(row < (FULL_IMAGE_COLUMN_SIZE + FULL_IMAGE_COLUMN_SIZE / 2) )
-		{
-			uint16_t shift = (row - FULL_IMAGE_COLUMN_SIZE) * FULL_IMAGE_ROW_SIZE;
-
-			if (calibration_unused == 1)
-				rowdata = dcmi_image_buffer_8bit_1 + shift;
-			else if (calibration_unused == 2)
-				rowdata = dcmi_image_buffer_8bit_2 + shift;
-			else
-				rowdata = dcmi_image_buffer_8bit_3 + shift;
-		}
-
-		else
-		{
-			uint16_t shift = (row - (FULL_IMAGE_COLUMN_SIZE + FULL_IMAGE_COLUMN_SIZE / 2) ) * FULL_IMAGE_ROW_SIZE;
-
-			if(calibration_used)
-			{
-				if (calibration_mem0 == 1)
-					rowdata = dcmi_image_buffer_8bit_1 + shift;
-				else if (calibration_mem0)
-					rowdata = dcmi_image_buffer_8bit_2 + shift;
-				else
-					rowdata = dcmi_image_buffer_8bit_3 + shift;
-			}
-
-			else
-			{
-				if (calibration_mem1 == 1 == 1)
-					rowdata = dcmi_image_buffer_8bit_1 + shift;
-				else if (calibration_mem1 == 2)
-					rowdata = dcmi_image_buffer_8bit_2 + shift;
-				else
-					rowdata = dcmi_image_buffer_8bit_3 + shift;
-			}
-		}
+		int relrow = row - y_start;
+		rowdata = spectrum_image_buffer_8bit + (FULL_IMAGE_ROW_SIZE * 2 * row);
 
 
-		encdata.data[row % MAVLINK_MSG_ZIKUSH_SPECTRUM_INTENSITY_ENCAPSULATED_DATA_FIELD_DATA_LEN] = 0;
-		for(int col = spectrum_processing_x_start; col < spectrum_processing_x_end; col++)
+		encdata.data[relrow % MAVLINK_MSG_ZIKUSH_SPECTRUM_INTENSITY_ENCAPSULATED_DATA_FIELD_DATA_LEN] = 0;
+		for(int col = x_start; col < x_end; col++)
 		{
 			encdata.data[relrow % MAVLINK_MSG_ZIKUSH_SPECTRUM_INTENSITY_ENCAPSULATED_DATA_FIELD_DATA_LEN] += rowdata[col];
 		}
 
 		//send packet if it's full or if it is the last row
 		if( ( (relrow + 1) % MAVLINK_MSG_ZIKUSH_SPECTRUM_INTENSITY_ENCAPSULATED_DATA_FIELD_DATA_LEN == 0 && row != 0) \
-				|| row == (spectrum_processing_y_end - 1))
+				|| row == (y_end - 1))
 		{
 			mavlink_msg_zikush_spectrum_intensity_encapsulated_data_encode(0, ZIKUSH_CCU, &msg, &encdata);
-			canframecount = canmavlink_msg_to_frames(canframes, &msg);
-			for(int i = 0; i < canframecount; i++) //FIXME rewrite with IRQs
-			{
-				hcan.pTxMsg = canframes + i; //DELICIOUS!!
-				HAL_CAN_Transmit(&hcan, 1000);
-			}
+			can_mavlink_transmit(&msg);
+#ifdef CCU_TESTMODE
+			usart3_mavlink_transmit(&msg);
+#endif
 
 			encdata.seqnr++;
 		}
 	}
-}*/
+}
+
+void spectrum_take(bool sendphoto, uint16_t y_start, uint16_t y_end, uint16_t x_start, uint16_t x_end)
+{
+	spectrum_restart_calibration_routine();
+
+	/* waiting for all parts */
+	while(spectrum_get_frame_counter() < 1){}
+
+	if(sendphoto)
+		spectrum_send_photo();
+
+	spectrum_send_data(y_start, y_end, x_start, x_end);
+}
 
 /**
  * @brief Enable DCMI DMA stream
  */
-void dcmi_dma_enable()
+static void _dcmi_dma_enable(void)
 {
 	/* Enable DMA2 stream 1 and DCMI interface then start image capture */
-	HAL_DMA_Start(&hdma, DCMI_DR_ADDRESS, dcmi_image_buffer_8bit, buffer_size);
+	HAL_DMA_Start(&hdma, DCMI_DR_ADDRESS, spectrum_image_buffer_8bit, buffer_size);
 
 	DCMI->CR &= ~(DCMI_CR_CM);
 	DCMI->CR |= (DCMI_MODE_CONTINUOUS);
@@ -325,7 +293,7 @@ void dcmi_dma_enable()
 /**
  * @brief Disable DCMI DMA stream
  */
-void dcmi_dma_disable()
+static void _dcmi_dma_disable(void)
 {
 	HAL_NVIC_DisableIRQ(DMA2_Stream1_IRQn);
 
@@ -336,15 +304,15 @@ void dcmi_dma_disable()
 	DCMI->CR &= ~( (uint32_t)DCMI_CR_CAPTURE );
 }
 
-void reset_frame_counter()
+static void _reset_frame_counter(void)
 {
-	frame_counter = 0;
+	spectrum_frame_counter = 0;
 }
 
 /**
  * @brief HW initialization of DCMI clock
  */
-void dcmi_clock_init()
+static void _dcmi_clock_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	TIM_HandleTypeDef htim;
@@ -389,13 +357,13 @@ void dcmi_clock_init()
 /**
  * @brief HW initialization DCMI
  */
-void dcmi_hw_init(void)
+static void _dcmi_hw_init(void)
 {
 	uint16_t image_size = FULL_IMAGE_ROW_SIZE * FULL_IMAGE_COLUMN_SIZE * 4;
 	GPIO_InitTypeDef gpio_init;
 
 	/* Reset image buffers */
-	memset(dcmi_image_buffer_8bit, 0, image_size);
+	memset(spectrum_image_buffer_8bit, 0, image_size);
 
 	/*** Configures the DCMI GPIOs to interface with the OV2640 camera module ***/
 	/* Enable DCMI GPIOs clocks */
@@ -469,9 +437,9 @@ void dcmi_hw_init(void)
   *
   * @param  buffer_size Buffer size in bytes
   */
-void dcmi_dma_init(uint32_t buffsize)
+static void _dcmi_dma_init(void)
 {
-	reset_frame_counter();
+	_reset_frame_counter();
 
 	/*** Configures the DCMI to interface with the mt9v034 camera module ***/
 	/* Enable DCMI clock */
@@ -510,8 +478,6 @@ void dcmi_dma_init(uint32_t buffsize)
 	hdma.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
 	hdma.Init.MemBurst = DMA_MBURST_SINGLE;
 	hdma.Init.PeriphBurst = DMA_PBURST_SINGLE;
-
-	buffer_size = buffsize / 4; // buffer size in date unit (word)
 
 	HAL_DMA_Init(&hdma);
 }

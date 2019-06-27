@@ -123,7 +123,7 @@ SystemClock_Config(void)
   // datasheet.
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-#warning "Please check if the SystemClock_Config() settings match your board!"
+//#warning "Please check if the SystemClock_Config() settings match your board!"
   // Comment out the warning after checking and updating.
 
   RCC_OscInitTypeDef RCC_OscInitStruct;

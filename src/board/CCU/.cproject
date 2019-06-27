@@ -29,7 +29,7 @@
             			
             <storageModule moduleId="cdtBuildSystem" version="4.0.0">
                 				
-                <configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.1133177848" name="Debug" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+                <configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.1133177848" name="Debug" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
                     					
                     <folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.1133177848." name="/" resourcePath="">
                         						
@@ -410,18 +410,6 @@
                             </option>
                             							
                             <inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.884897803" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
-                            						
-                        </tool>
-                        					
-                    </fileInfo>
-                    					
-                    <fileInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.1133177848.src/stm32f4xx_hal_msp.c" name="stm32f4xx_hal_msp.c" rcbsApplicability="disable" resourcePath="src/stm32f4xx_hal_msp.c" toolsToInvoke="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1691997037.1271554045">
-                        						
-                        <tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1691997037.1271554045" name="GNU ARM Cross C Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1691997037">
-                            							
-                            <option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.otherwarnings.925593879" name="Other warning flags" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.otherwarnings" useByScannerDiscovery="true" value="  -Wno-missing-prototypes -Wno-missing-declarations" valueType="string"/>
-                            							
-                            <inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.41995776" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
                             						
                         </tool>
                         					
@@ -820,18 +808,6 @@
                             </option>
                             							
                             <inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.35557928" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
-                            						
-                        </tool>
-                        					
-                    </fileInfo>
-                    					
-                    <fileInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.release.1999490796.src/stm32f4xx_hal_msp.c" name="stm32f4xx_hal_msp.c" rcbsApplicability="disable" resourcePath="src/stm32f4xx_hal_msp.c" toolsToInvoke="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.942335707.1149942943">
-                        						
-                        <tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.942335707.1149942943" name="GNU ARM Cross C Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.942335707">
-                            							
-                            <option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.otherwarnings.980273680" name="Other warning flags" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.otherwarnings" useByScannerDiscovery="true" value="  -Wno-missing-prototypes -Wno-missing-declarations" valueType="string"/>
-                            							
-                            <inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.307689852" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
                             						
                         </tool>
                         					

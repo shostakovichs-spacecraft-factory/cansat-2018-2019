@@ -97,7 +97,9 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 
 	while( (uxQueueSpacesAvailable(_rxqueue_handle) != 0) &&\
 			(HAL_CAN_GetRxMessage(&hcan, 0, &( receivedframe.Header ), receivedframe.Data) == HAL_OK) )
-		xQueueSendToBackFromISR(can_queue_handle, &receivedframe, &callcontextswitch);
+		xQueueSendToBackFromISR(_rxqueue_handle, &receivedframe, &callcontextswitch);
+
+	xTaskNotifyFromISR(can_task_handle, 0, eNoAction, &callcontextswitch);
 
 	portEND_SWITCHING_ISR(callcontextswitch);
 }
@@ -111,7 +113,7 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 static void MX_CAN_Init(void)
 {
 	hcan.Instance = CAN1;
-	hcan.Init.Prescaler = 100;
+	hcan.Init.Prescaler = HAL_RCC_GetPCLK1Freq() / PROBEWIDE_CAN_TICKRATE;
 	hcan.Init.Mode = CAN_MODE_NORMAL;
 	hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
 	hcan.Init.TimeSeg1 = CAN_BS1_5TQ;
