@@ -21,6 +21,9 @@ bool canlink_init(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 
+	RCC_ClocksTypeDef chipclocks;
+	RCC_GetClocksFreq(&chipclocks);
+
 	GPIO_InitTypeDef gpioinit =
 	{
 		.GPIO_Pin = GPIO_Pin_11,
@@ -35,7 +38,7 @@ bool canlink_init(void)
 
 	CAN_InitTypeDef caninit =
 	{
-		.CAN_Prescaler = 117, //so ~360 kHz
+		.CAN_Prescaler = chipclocks.PCLK1_Frequency / PROBEWIDE_CAN_TICKRATE,
 		.CAN_Mode = CAN_OperatingMode_Normal,
 		.CAN_SJW = CAN_SJW_1tq,
 		.CAN_BS1 = CAN_BS1_5tq,

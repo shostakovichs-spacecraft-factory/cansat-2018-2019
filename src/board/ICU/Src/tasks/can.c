@@ -113,7 +113,7 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 static void MX_CAN_Init(void)
 {
 	hcan.Instance = CAN1;
-	hcan.Init.Prescaler = 400; //so 360 kHz
+	hcan.Init.Prescaler = HAL_RCC_GetPCLK1Freq() / PROBEWIDE_CAN_TICKRATE;
 	hcan.Init.Mode = CAN_MODE_NORMAL;
 	hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
 	hcan.Init.TimeSeg1 = CAN_BS1_5TQ;

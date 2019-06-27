@@ -254,7 +254,6 @@ void mt9v034_set_context(mt9v034_context_t context)
   */
 uint8_t mt9v034_WriteReg(uint16_t Addr, uint8_t Data)
 {
-	// FIXME check adress and add proper error handling
 	return HAL_I2C_Mem_Write(&hi2c2, mt9v034_DEVICE_WRITE_ADDRESS, Addr, I2C_MEMADD_SIZE_8BIT, &Data, 1, TIMEOUT_MAX);
 }
 
@@ -264,7 +263,6 @@ uint8_t mt9v034_WriteReg(uint16_t Addr, uint8_t Data)
 uint8_t mt9v034_WriteReg16(uint16_t address, uint16_t Data)
 {
 	Data = ( (Data&0xFF) << 8) | ( (Data >> 8) & 0xFF);
-	// FIXME check endianness, address and add proper error handling
 	return HAL_I2C_Mem_Write(&hi2c2, mt9v034_DEVICE_WRITE_ADDRESS, address, I2C_MEMADD_SIZE_8BIT, &Data, 2, TIMEOUT_MAX);
 }
 
