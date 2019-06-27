@@ -48,6 +48,14 @@ static mavlink_message_t radio_task_queue_buffer[ICU_TASKS_ICU_QUEUE_SIZE];
 TaskHandle_t radio_task_handle;
 QueueHandle_t	radio_queue_handle;
 
+void iridium_task(void *pvParameters);
+static StaticTask_t iridium_task_tcb;
+static StackType_t iridium_stack[ICU_TASKS_IRIDIUM_STACKSIZE];
+static StaticQueue_t iridium_task_queue;
+static mavlink_message_t iridium_task_queue_buffer[ICU_TASKS_IRIDIUM_QUEUE_SIZE];
+TaskHandle_t iridium_task_handle;
+QueueHandle_t	iridium_queue_handle;
+
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
@@ -77,6 +85,10 @@ int main(void)
 	radio_task_handle = xTaskCreateStatic(radio_task, (const char *)"radio", ICU_TASKS_RADIO_STACKSIZE, NULL, \
 									   ICU_TASKS_RADIO_TASKPRIORITY, radio_stack, &radio_task_tcb);
 	radio_queue_handle = xQueueCreateStatic(ICU_TASKS_RADIO_QUEUE_SIZE, sizeof(mavlink_message_t), (uint8_t *)radio_task_queue_buffer, &radio_task_queue);
+
+	iridium_task_handle = xTaskCreateStatic(radio_task, (const char *)"irid", ICU_TASKS_IRIDIUM_STACKSIZE, NULL, \
+										   ICU_TASKS_IRIDIUM_TASKPRIORITY, iridium_stack, &iridium_task_tcb);
+	iridium_queue_handle = xQueueCreateStatic(ICU_TASKS_IRIDIUM_QUEUE_SIZE, sizeof(mavlink_message_t), (uint8_t *)iridium_task_queue_buffer, &iridium_task_queue);
 
 
 	vTaskStartScheduler();

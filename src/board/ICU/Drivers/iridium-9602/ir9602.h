@@ -35,7 +35,7 @@ typedef int (*ir9602_uart_putch_t)(void * user_arg, uint8_t byte);
 
 //! Пользовательский хук для обработки абсолютно любых событий, получаемых от модема
 /*! Можно использовать а можно и нет */
-typedef int (*ir9602_evt_hook_t)(void * user_arg, const ir9602_evt_t * event);
+typedef void (*ir9602_evt_hook_t)(void * user_arg, const ir9602_evt_t * event);
 
 //! Результат обработки события от модема
 typedef enum
