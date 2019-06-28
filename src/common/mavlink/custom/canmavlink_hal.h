@@ -8,6 +8,8 @@
 #include <stm32f4xx_hal.h>
 #include <stm32f4xx_hal_can.h>
 
+#define CANMAVLINK_MAXFRAMES	34
+
 #define CANMAVLINK_TX_FRAME_T		CanTxMsgTypeDef
 #define CANMAVLINK_RX_FRAME_T		CanRxMsgTypeDef
 #define CANDATA(FRAMEP)	FRAMEP->Data

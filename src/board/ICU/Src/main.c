@@ -72,8 +72,8 @@ int main(void)
 	SystemClock_Config();
 	MX_GPIO_Init();
 
-	/*heartbeat_task_handle = xTaskCreateStatic(heartbeat_task, (const char *)"heartbeat", configMINIMAL_STACK_SIZE, NULL, \
-										1, heartbeat_stack, &heartbeat_task_tcb);*/
+	heartbeat_task_handle = xTaskCreateStatic(heartbeat_task, (const char *)"heartbeat", configMINIMAL_STACK_SIZE, NULL, \
+										1, heartbeat_stack, &heartbeat_task_tcb);
 
 	ICU_task_handle = xTaskCreateStatic(ICU_task, (const char *)"ICU", ICU_TASKS_ICU_STACKSIZE, NULL, \
 										ICU_TASKS_ICU_TASKPRIORITY, ICU_stack, &ICU_task_tcb);
