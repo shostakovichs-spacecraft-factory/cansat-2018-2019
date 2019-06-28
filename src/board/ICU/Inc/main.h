@@ -23,6 +23,7 @@ extern TaskHandle_t sd_task_handle;
 extern QueueHandle_t	sd_queue_handle;
 extern TaskHandle_t radio_task_handle;
 extern QueueHandle_t	radio_queue_handle;
+extern TaskHandle_t gps_task_handle;
 
 #define RADIO_NOTIFICATION_SEND	(1<<0)
 #define RADIO_NOTIFICATION_EVT	(1<<1)

@@ -39,26 +39,6 @@
 			</entry>
     	</enum>
 
-    	<enum name="ZIKUSH_STATUSFLAGS">
-			<description>Enumeration on status and error flags. Should be used as bitfield number.</description>
-			<entry value="0" name="ZIKUSH_STATUSFLAGS_INIT_OK">
-				<description></description>
-			</entry>
-			<entry value="1" name="ZIKUSH_STATUSFLAGS_LIFTOFF">
-				<description></description>
-			</entry>
-			<entry value="2" name="ZIKUSH_STATUSFLAGS_EXECUTING_MISSION">
-				<description></description>
-			</entry>
-			<entry value="3" name="ZIKUSH_STATUSFLAGS_FALLING">
-				<description></description>
-			</entry>
-			<entry value="4" name="ZIKUSH_STATUSFLAGS_LANDED">
-				<description></description>
-			</entry>
-			<!--and so on-->
-    	</enum>
-
 		<enum name="ZIKUSH_CAM">
 			<description>Enumeration of onboard cameras</description>
 			<entry value="0" name="ZIKUSH_CAM_SPECTRUM">
@@ -70,7 +50,36 @@
 			<entry value="2" name="ZIKUSH_CAM_ZENITH">
 				<description>Zenith (upside) cam</description>
 			</entry>
-    	</enum>    	
+    	</enum>
+
+    	<enum name="ZIKUSH_INFO">
+			<description>Enumeration of ZIKUSH_INFO msg types</description>
+			<entry value="0" name="ZIKUSH_INFO_LOG">
+				<description>Used for logging purposes</description>
+			</entry>
+			<entry value="1" name="ZIKUSH_INFO_ERR_INIT">
+	        	<description>When we can't init interface or device. Concretion should be provided in message (e.q. "RADIO", "INA_ICU" and so on)</description>
+			</entry>
+			<entry value="2" name="ZIKUSH_INFO_ERR_OPERATIONAL">
+	        	<description>Error in operation of some device. Name of the device, as well as error numerical or textual representation should be provided</description>
+			</entry>
+			<entry value="3" name="ZIKUSH_INFO_ERR_HARDFAULT">
+	        	<description>Hardfault happened on one of the controllers. I will consider it as magic if we would actually manage to send this type of messages</description>
+			</entry>
+    	</enum>
+
+    	<enum name="ZIKUSH_MOTION_EVT">
+			<description>Enumeration of ZIKUSH_INFO msg types</description>
+			<entry value="0" name="ZIKUSH_MOTION_EVT_LIFTOFF">
+				<description>Sent when we've detected liftoff</description>
+			</entry>
+			<entry value="1" name="ZIKUSH_MOTION_EVT_APOAPSIS">
+				<description>Sent when we've detected apoapsis</description>
+			</entry>
+			<entry value="2" name="ZIKUSH_MOTION_EVT_LANDING">
+				<description>Sent when we've detected landing</description>
+			</entry>
+    	</enum>
 	</enums>
 
     <messages>
@@ -173,6 +182,28 @@
             <description>Encapsulated data message for spectrum intensity transmission</description>
             <field type="uint16_t" name="seqnr">sequence number (starting with 0 on every transmission)</field>
             <field type="uint16_t[126]" name="data">intensities</field>
+        </message>
+
+        <message id="169" name="ZIKUSH_ICU_STATS">
+            <description>Statistics for various ICU interfaces</description>
+            <field type="uint32_t" name="radio_tx"></field>
+            <field type="uint32_t" name="radio_tx_dropped"></field>
+            <field type="uint16_t" name="iridium_tx"></field>
+            <field type="uint16_t" name="iridium_tx_dropped"></field>
+            <field type="uint16_t" name="iridium_rx"></field>
+            <field type="uint32_t" name="can_tx"></field>
+            <field type="uint32_t" name="can_tx_dropped"></field>
+            <field type="uint32_t" name="can_rx"></field>
+        </message>
+
+		<message id="170" name="ZIKUSH_INFO">
+            <description>Used to report general information and error</description>
+            <field type="uint8_t" name="code">Value of enum ZIKUSH_INFO</field>
+        </message>
+
+        <message id="171" name="ZIKUSH_MOTION_EVENT">
+            <description>Used to report various motion events</description>
+            <field type="uint8_t" name="code">Value of enum ZIKUSH_MOTION_EVT</field>
         </message>
     </messages>
 </mavlink>

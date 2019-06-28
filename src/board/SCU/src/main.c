@@ -43,59 +43,6 @@ void uart_test();
 
 void ads1115_test(I2C_HandleTypeDef * hi2c);
 
-int lsm6ds3_test()
-{
-
-	SPI_HandleTypeDef hspi;
-	spi_config_default(&hspi);
-	hspi.Instance = SPI1;
-	spi_pin_miso_init(&hspi, GPIOA, GPIO_PIN_6);
-	spi_pin_mosi_init(&hspi, GPIOA, GPIO_PIN_7);
-	spi_pin_sck_init(&hspi, GPIOA, GPIO_PIN_5);
-	spi_pin_nss_init(&hspi, GPIOA, GPIO_PIN_4);
-
-	spi_init(&hspi);
-
-	struct lsm6ds3_dev_s hlsm6;
-	lsm6ds3_conf_default(&hlsm6);
-	lsm6ds3_register_spi(&hlsm6, &hspi);
-	HAL_Delay(50);
-	lsm6ds3_push_conf(&hlsm6);
-	//hspi.Instance->CR2 |= SPI_CR2_SSOE;
-	//hspi.Instance->CR1 &= ~SPI_CR1_SSM;
-	HAL_Delay(50);
-	int rc = 0;
-	uint8_t reg_ctrl7;
-	uint8_t reg_ctrl4;
-	uint8_t reg_ctrl2;
-
-	rc = lsm6ds3_read_regn(&hlsm6, 0x16, &reg_ctrl7, 1);
-	if (rc < 0)
-		return rc;
-
-	rc = lsm6ds3_read_regn(&hlsm6, 0x13, &reg_ctrl4, 1);
-		if (rc < 0)
-			return rc;
-
-	rc = lsm6ds3_read_regn(&hlsm6, 0x11, &reg_ctrl2, 1);
-	if (rc < 0)
-		return rc;
-	while(1)
-	{
-		HAL_Delay(10);
-		struct lsm6ds3_raw_data_s rd = {{0,0,0},{0,0,0}};
-		lsm6ds3_gxl_pull(&hlsm6, &rd);
-		float dd[3];
-		lsm6ds3_scale_g(&hlsm6.conf.g, rd.g, dd, 3);
-		trace_printf("Gyro: %5.5f %5.5f %5.5f   ", dd[0], dd[1], dd[2]);
-
-	    //lsm6ds3_read_regn(&hlsm6, 0x22, (uint8_t*)&rd, sizeof(rd)/2);
-		lsm6ds3_scale_xl(&hlsm6.conf.xl, rd.xl, dd, 3);
-		trace_printf("Axel: %5.5f %5.5f %5.5f\n", dd[0], dd[1], dd[2]);
-
-	}
-	return 0;
-}
 
 void toEulerAngle(quaternion_t *q, double *roll, double *pitch, double *yaw)
 {

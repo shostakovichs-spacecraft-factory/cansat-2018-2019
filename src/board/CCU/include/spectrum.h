@@ -39,10 +39,12 @@
 
 #define DCMI_DR_ADDRESS       0x50050028
 
+void spectrum_init_capture(void);
+
 /**
  * @brief Send spectrum image with MAVLINK over USB
  */
-void send_spectrum_photo();
+void send_spectrum_photo(void);
 
 /**
  * @brief Send spectrum data with MAVLINK over CAN

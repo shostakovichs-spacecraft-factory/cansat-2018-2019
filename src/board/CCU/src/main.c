@@ -29,8 +29,16 @@ void SysTick_Handler(void)
 
 int main(int argc, char* argv[])
 {
-	/* enable FPU on Cortex-M4F core */
-	SCB_CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2)); /* set CP10 Full Access and set CP11 Full Access */
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+	mavlink_heartbeat_t heartbeat =
+	{
+		.type = MAV_TYPE_ONBOARD_CONTROLLER,
+		.autopilot = MAV_AUTOPILOT_INVALID,
+		.base_mode = MAV_MODE_FLAG_TEST_ENABLED,
+		.system_status = MAV_STATE_ACTIVE
+	};
+	mavlink_message_t msg;
+	mavlink_msg_heartbeat_encode(0, ZIKUSH_CCU, &msg, &heartbeat);
 
 	SysTick_Config(SystemCoreClock / 1000);
 
@@ -43,6 +51,8 @@ int main(int argc, char* argv[])
 
 	while(true)
 	{
+		can_mavlink_transmit(&msg);
+
 		if(can_spectrum_request)
 		{
 			spectrum_take(can_spectrum_request == SPRQ_FULL, can_spectrum_processing_y_start, can_spectrum_processing_y_end, \
@@ -53,11 +63,10 @@ int main(int argc, char* argv[])
 		//TODO add cam requests processing
 
 
-		HAL_Delay(200); //TODO Add transition into true sleep mode?
+		HAL_Delay(1000); //TODO Add transition into true sleep mode?
 
 #ifdef CCU_TESTMODE
 		can_spectrum_request = SPRQ_FULL;
-		HAL_Delay(800);
 #endif
 	}
 }

@@ -21,6 +21,9 @@
 #define ICU_TASKS_RADIO_TASKPRIORITY	4
 #define ICU_TASKS_RADIO_QUEUE_SIZE	3 //defined in sizes of mavlink_msg_t
 
+#define ICU_TASKS_GPS_STACKSIZE	512
+#define ICU_TASKS_GPS_TASKPRIORITY	4
+
 
 #define ICU_SD_SESSFOLDERNAMEFMT	"0:/zikush/sess%04d"
 #define ICU_SD_SESSNUMBOUNDARY	10000
@@ -35,6 +38,7 @@
 
 #define ICU_CAN_RXBUFFSIZE	34 //in sizes of CANMAVLINK_RX_FRAME_T
 
+#define ICU_GPS_FORCECHECKSUMM	false
 
 
 /* Params for PCU */
