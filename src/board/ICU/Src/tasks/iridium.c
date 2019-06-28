@@ -177,10 +177,10 @@ static int _perform_sbd(ir9602_t * ir, const uint8_t * data, int datasize)
 	}
 
 	// чего-нибудь нам пришло?
-	if (1 == 1) //IR9602_EVT_SBDMSTATUS_YES == evt_sbdi.mo_status)
+	if (IR9602_EVT_SBDMSTATUS_YES == evt_sbdi.mo_status)
 		user->mo_sent++;
 
-	if (1 == 1) //IR9602_EVT_SBDMSTATUS_YES == evt_sbdi.mt_status)
+	if (IR9602_EVT_SBDMSTATUS_YES == evt_sbdi.mt_status)
 	{
 		user->mt_rcvd++;
 		// Вытяигваем сообщение
@@ -217,17 +217,6 @@ void iridium_task(void *pvParameters)
 	// portTickType timemark = xTaskGetTickCount();
 	for(;;)
 	{
-		int len = 50;
-		for (int i = 0; i < len; i++)
-		{
-			user->accum[i] = 'A';
-		}
-
-		user->accum_carret = 50;
-		_perform_sbd(&_ir, user->accum, user->accum_carret);
-
-		continue;
-
 		const BaseType_t status = xQueueReceive(iridium_queue_handle, &_ir_user_struct.mavmsgbuf, ICU_IR_TASK_PERIOD);
 		if (pdTRUE != status)
 		{
