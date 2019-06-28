@@ -98,17 +98,18 @@ static void _hw_init(void)
 
 
 	GPIO_InitTypeDef pinit;
-	pinit.Mode = GPIO_MODE_AF_PP;
+	pinit.Mode = GPIO_MODE_AF_INPUT;
 	pinit.Pin = GPIO_PIN_7; // PB7 - RX
 	pinit.Pull = GPIO_NOPULL;
 	pinit.Speed = GPIO_SPEED_FREQ_HIGH;
 	HAL_GPIO_Init(GPIOB, &pinit);
 
 	pinit.Pin = GPIO_PIN_6; // PB6 - TX
+	pinit.Mode = GPIO_MODE_AF_PP;
 	HAL_GPIO_Init(GPIOB, &pinit);
 
-	pinit.Mode = GPIO_MODE_INPUT;
 	pinit.Pin = GPIO_PIN_9; // PC7 - RING INDICATOR
+	pinit.Mode = GPIO_MODE_INPUT;
 	HAL_GPIO_Init(GPIOC, &pinit);
 
 	_ir_user_struct.uart.Instance = USART1;
@@ -150,7 +151,7 @@ static int mavmsg_len(const mavlink_message_t * msg)
 
 static int _perform_sbd(ir9602_t * ir, const uint8_t * data, int datasize)
 {
-	ir9602_user_struct_t * const user = (ir9602_user_struct_t*)&ir->user_arg;
+	ir9602_user_struct_t * const user = (ir9602_user_struct_t*)ir->user_arg;
 
 	int rc;
 	{
@@ -176,10 +177,10 @@ static int _perform_sbd(ir9602_t * ir, const uint8_t * data, int datasize)
 	}
 
 	// чего-нибудь нам пришло?
-	if (IR9602_EVT_SBDMSTATUS_YES == evt_sbdi.mo_status)
+	if (1 == 1) //IR9602_EVT_SBDMSTATUS_YES == evt_sbdi.mo_status)
 		user->mo_sent++;
 
-	if (IR9602_EVT_SBDMSTATUS_YES == evt_sbdi.mt_status)
+	if (1 == 1) //IR9602_EVT_SBDMSTATUS_YES == evt_sbdi.mt_status)
 	{
 		user->mt_rcvd++;
 		// Вытяигваем сообщение
@@ -216,6 +217,17 @@ void iridium_task(void *pvParameters)
 	// portTickType timemark = xTaskGetTickCount();
 	for(;;)
 	{
+		int len = 50;
+		for (int i = 0; i < len; i++)
+		{
+			user->accum[i] = 'A';
+		}
+
+		user->accum_carret = 50;
+		_perform_sbd(&_ir, user->accum, user->accum_carret);
+
+		continue;
+
 		const BaseType_t status = xQueueReceive(iridium_queue_handle, &_ir_user_struct.mavmsgbuf, ICU_IR_TASK_PERIOD);
 		if (pdTRUE != status)
 		{
@@ -250,8 +262,8 @@ void USART1_IRQHandler(void)
 	UART_HandleTypeDef * const huart = &user_struct->uart;
 
 	uint32_t isrflags   = READ_REG(huart->Instance->SR);
-	volatile uint32_t cr1its     = READ_REG(huart->Instance->CR1);
-	volatile uint32_t cr3its     = READ_REG(huart->Instance->CR3);
+	uint32_t cr1its     = READ_REG(huart->Instance->CR1);
+	uint32_t cr3its     = READ_REG(huart->Instance->CR3);
 	uint32_t errorflags = 0x00U;
 	(void)cr1its;
 	(void)cr3its;

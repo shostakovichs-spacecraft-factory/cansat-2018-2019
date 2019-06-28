@@ -44,7 +44,7 @@ static int _send_cmd(ir9602_t * device, const ir9602_cmd_t * command)
 	while(*carret)
 	{
 		const uint8_t ch = *(uint8_t*)(carret++);
-		int rc = device->putch(device, ch);
+		int rc = device->putch(device->user_arg, ch);
 		if (rc < 0)
 			return rc;
 	}

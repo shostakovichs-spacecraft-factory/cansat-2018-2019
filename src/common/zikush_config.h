@@ -21,7 +21,7 @@
 #define ICU_TASKS_RADIO_TASKPRIORITY	4
 #define ICU_TASKS_RADIO_QUEUE_SIZE	3 //defined in sizes of mavlink_msg_t
 
-#define ICU_TASKS_IRIDIUM_STACKSIZE	512
+#define ICU_TASKS_IRIDIUM_STACKSIZE	2048
 #define ICU_TASKS_IRIDIUM_TASKPRIORITY	5
 #define ICU_TASKS_IRIDIUM_QUEUE_SIZE	3 //defined in sizes of mavlink_msg_t
 

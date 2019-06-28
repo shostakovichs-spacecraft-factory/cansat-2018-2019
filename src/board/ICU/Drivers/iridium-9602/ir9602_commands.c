@@ -125,6 +125,7 @@ int ir9602_serialize_command(char * buffer, int buffer_size, const ir9602_cmd_t 
 	if (cmdsize > buffer_size)
 		return -EOVERFLOW;
 
+	buffer[cmdsize] = 0;
 	return cmdsize;
 }
 
