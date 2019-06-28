@@ -53,6 +53,14 @@ static StaticTask_t gps_task_tcb;
 static StackType_t gps_stack[ICU_TASKS_RADIO_STACKSIZE];
 TaskHandle_t gps_task_handle;
 
+void iridium_task(void *pvParameters);
+static StaticTask_t iridium_task_tcb;
+static StackType_t iridium_stack[ICU_TASKS_IRIDIUM_STACKSIZE];
+static StaticQueue_t iridium_task_queue;
+static mavlink_message_t iridium_task_queue_buffer[ICU_TASKS_IRIDIUM_QUEUE_SIZE];
+TaskHandle_t iridium_task_handle;
+QueueHandle_t	iridium_queue_handle;
+
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
@@ -83,8 +91,7 @@ int main(void)
 									   ICU_TASKS_RADIO_TASKPRIORITY, radio_stack, &radio_task_tcb);
 	radio_queue_handle = xQueueCreateStatic(ICU_TASKS_RADIO_QUEUE_SIZE, sizeof(mavlink_message_t), (uint8_t *)radio_task_queue_buffer, &radio_task_queue);
 
-	gps_task_handle = xTaskCreateStatic(gps_task, (const char *)"gps", ICU_TASKS_GPS_STACKSIZE, NULL, \
-											ICU_TASKS_GPS_TASKPRIORITY, gps_stack, &gps_task_tcb);
+
 
 	vTaskStartScheduler();
 }
