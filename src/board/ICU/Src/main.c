@@ -86,7 +86,7 @@ int main(void)
 									   ICU_TASKS_RADIO_TASKPRIORITY, radio_stack, &radio_task_tcb);
 	radio_queue_handle = xQueueCreateStatic(ICU_TASKS_RADIO_QUEUE_SIZE, sizeof(mavlink_message_t), (uint8_t *)radio_task_queue_buffer, &radio_task_queue);
 
-	iridium_task_handle = xTaskCreateStatic(radio_task, (const char *)"irid", ICU_TASKS_IRIDIUM_STACKSIZE, NULL, \
+	iridium_task_handle = xTaskCreateStatic(iridium_task, (const char *)"irid", ICU_TASKS_IRIDIUM_STACKSIZE, NULL, \
 										   ICU_TASKS_IRIDIUM_TASKPRIORITY, iridium_stack, &iridium_task_tcb);
 	iridium_queue_handle = xQueueCreateStatic(ICU_TASKS_IRIDIUM_QUEUE_SIZE, sizeof(mavlink_message_t), (uint8_t *)iridium_task_queue_buffer, &iridium_task_queue);
 
