@@ -35,12 +35,12 @@ static _ir_divider_t _ir_divider_table[] = {
 
 static _ir_divider_t * _ir_divider_find_entry(uint8_t msg_id)
 {
-	_ir_divider_t * retval = _ir_divider_table;
+	const _ir_divider_t * retval = _ir_divider_table;
 
-	for ( ; retval->msg_id > 0; retval++)
+	for ( ; retval->msg_id >= 0; retval++)
 	{
 		if (retval->msg_id == msg_id)
-			return retval;
+			return (_ir_divider_t *)retval;
 	}
 
 	return NULL;
@@ -61,12 +61,16 @@ static bool _table_Iridium(mavlink_message_t * msg);
 router_status_t router_route(mavlink_message_t * msg, TickType_t xTicksToWait)
 {
 	if(_table_SD(msg))
+	{
 		if (xQueueSendToBack(sd_queue_handle, msg, xTicksToWait) != pdTRUE)
 			global_stats.rt_drops_sd++;
+	}
 
 	if(_table_ICU(msg))
+	{
 		if (xQueueSendToBack(ICU_queue_handle, msg, xTicksToWait) != pdTRUE)
 			global_stats.rt_drops_icu++;
+	}
 
 	if(_table_CAN(msg))
 	{
@@ -113,9 +117,7 @@ static bool _table_SD(mavlink_message_t * msg)
 
 static bool _table_CAN(mavlink_message_t * msg)
 {
-	if(msg->sysid == 0)
-		return false;
-
+	// На данный момент в CAN не форвардится ничего
 	return false;
 }
 
