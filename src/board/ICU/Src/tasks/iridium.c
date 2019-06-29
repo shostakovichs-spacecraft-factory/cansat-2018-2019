@@ -149,6 +149,7 @@ static int _perform_sbd(ir9602_t * ir, const uint8_t * data, int datasize)
 	ir9602_user_struct_t * const user = (ir9602_user_struct_t*)ir->user_arg;
 
 	int rc;
+	if (user->accum_carret > 0) // Если есть что отправлять, то попытаемся
 	{
 		ir9602_evt_errcode_t err_evt;
 		rc = ir9602_sbdwb(ir, data, datasize, &err_evt);
@@ -156,11 +157,9 @@ static int _perform_sbd(ir9602_t * ir, const uint8_t * data, int datasize)
 			global_stats.iridium_errors++;
 	}
 
-
 	// Даже если у нас не получилось заложить сообщение в модем
 	// сеанс всеравно будем проводить. Вдруг что-то придет сверху
-
-	// Считаем что мы положили сообщение на модем
+	// Так и так, считаем что отправлять нам теперь уж точно нечего
 	user->accum_carret = 0;
 
 	ir9602_evt_sbdi_t evt_sbdi;
