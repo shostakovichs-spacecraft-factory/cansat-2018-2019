@@ -168,6 +168,15 @@ static bool _table_Iridium(mavlink_message_t * msg)
 
 static bool _table_ICU(mavlink_message_t * msg)
 {
+	if (msg->sysid == 0)
+		return false; // Сообщения с борта не обрабатываем
+
+	switch (msg->msgid)
+	{
+	case MAVLINK_MSG_ID_ZIKUSH_CMD_SET_IR_DIVIDER:
+		return true;
+	}
+
 	return false;
 }
 

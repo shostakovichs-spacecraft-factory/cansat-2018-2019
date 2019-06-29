@@ -115,6 +115,12 @@
 			<field type="uint8_t" name="camid">0 - nadir, 1 - zenith</field>
 		</message>
 
+		<message id="155" name="ZIKUSH_CMD_SET_IR_DIVIDER">
+			<description>Set the divider for the specified mav masg id for the iridium xfer</description>
+			<field type="uint8_t" name="mav_msg_id"></field>
+			<field type="uint16_t" name="divider"></field>
+		</message>
+
 		<message id="160" name="ZIKUSH_STATE">
 			<description>Current state of the probe</description>
 			<field type="uint32_t" name="status">Bitfield (see enum ZIKUSH_STATUSFLAGS)</field>
@@ -209,6 +215,7 @@
             <field type="uint8_t"  name="rt_drops_icu"></field>
 
             <field type="uint16_t" name="cmds_executed">Amount of executed commands</field>
+            <field type="uint16_t" name="cmds_rejected">Amount of rejected (or failed) commands</field>
         </message>
 
 		<message id="170" name="ZIKUSH_INFO">
