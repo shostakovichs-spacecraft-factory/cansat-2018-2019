@@ -153,9 +153,7 @@ static int _perform_sbd(ir9602_t * ir, const uint8_t * data, int datasize)
 		ir9602_evt_errcode_t err_evt;
 		rc = ir9602_sbdwb(ir, data, datasize, &err_evt);
 		if (rc < 0)
-		{
 			global_stats.iridium_errors++;
-		}
 	}
 
 
@@ -174,17 +172,41 @@ static int _perform_sbd(ir9602_t * ir, const uint8_t * data, int datasize)
 	}
 
 	// чего-нибудь нам пришло?
-	if (IR9602_EVT_SBDMSTATUS_YES == evt_sbdi.mo_status)
+//	if (IR9602_EVT_SBDMSTATUS_YES == evt_sbdi.mo_status)
+//		global_stats.iridium_tx++;
+	global_stats.iridium_tx = evt_sbdi.momsn;
+
+#if ICU_IR_PROCESS_UPLINK
+
+	if (IR9602_EVT_SBDMSTATUS_YES != evt_sbdi.mt_status)
+		return 0; // Если ничего не пришло - больше ничего и не делаем
+
+	// Теперь, если что-то нам пришло..
+	global_stats.iridium_rx++;
+
+
+	// Вытяигваем сообщение
+	rc = ir9602_sbdrb(ir, user->accum, sizeof(user->accum));
+	if (rc < 0)
 	{
-		global_stats.iridium_tx++;
+		global_stats.iridium_errors++;
+		return rc;
 	}
 
-	if (IR9602_EVT_SBDMSTATUS_YES == evt_sbdi.mt_status)
+
+	// Ничего себе! оно вытянулось!
+	for (int i = 0; i < rc; i++)
 	{
-		global_stats.iridium_rx++;
-		// Вытяигваем сообщение
-		// TODO
+		mavlink_status_t status;
+		uint8_t parsed = mavlink_parse_char(MAVLINK_COMM_0, user->accum[i], &user->mavmsgbuf, &status);
+		if (parsed)
+		{
+			// оно еще и распарсилось!
+			global_stats.iridium_rx_mav++;
+			router_route(&user->mavmsgbuf, ICU_IR_ROUTE_WAIT);
+		}
 	}
+#endif //ICU_IR_PROCESS_UPLINK
 
 	return 0;
 }

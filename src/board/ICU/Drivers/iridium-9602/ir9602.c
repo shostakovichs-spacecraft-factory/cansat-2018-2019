@@ -373,5 +373,5 @@ int ir9602_sbdrb(ir9602_t * device, void * buffer, int buffer_size)
 		return - EBADMSG;
 
 	// А совпало - так совпало!
-	return 0;
+	return msglen;
 }
