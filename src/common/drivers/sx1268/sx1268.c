@@ -487,6 +487,9 @@ static void _dotx(sx1268_t * self, uint8_t * buff, int len)
 	_waitbusy(self, TIMEOUT);
 	_cmd_SetTX(self, 64000); //1 second timeout
 	_waitbusy(self, TIMEOUT);
+
+	if (self->tx_hook != NULL)
+		self->tx_hook(self);
 }
 
 
@@ -509,6 +512,7 @@ void sx1268_struct_init(sx1268_t * self, void * platform_specific, uint8_t * rxb
 	self->fifo_tx.locked = false;
 
 	self->platform_specific = platform_specific;
+	self->tx_hook = NULL;
 }
 
 sx1268_status_t sx1268_init(sx1268_t * self)

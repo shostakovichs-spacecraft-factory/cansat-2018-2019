@@ -15,7 +15,11 @@
 
 #define RXLEN(SELF)	((SELF.fifo_rx.head - SELF.fifo_rx.tail) % (SELF.fifo_rx.length))
 
-typedef struct
+struct sx1268_t;
+
+typedef void (*sx1262_tx_hook_t)(struct sx1268_t * device);
+
+typedef struct sx1268_fifo_t
 {
 	volatile bool locked;
 	uint8_t * mem;
@@ -23,10 +27,11 @@ typedef struct
 	bool empty;
 } sx1268_fifo_t;
 
-typedef struct
+typedef struct sx1268_t
 {
 	sx1268_fifo_t fifo_rx, fifo_tx;
 	void * platform_specific;
+	sx1262_tx_hook_t tx_hook;
 } sx1268_t;
 
 typedef enum
