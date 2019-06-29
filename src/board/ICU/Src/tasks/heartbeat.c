@@ -9,6 +9,7 @@
 
 void heartbeat_task(void *pvParameters)
 {
+	int counter = 0;
 	while(1)
 	{
 		static mavlink_message_t msg;
@@ -22,6 +23,13 @@ void heartbeat_task(void *pvParameters)
 		mavlink_msg_heartbeat_encode(0, ZIKUSH_ICU, &msg, &heartbeat);
 
 		router_route(&msg, 0);
+
+		counter++;
+		if (counter % 10 == 0)
+		{
+			mavlink_msg_zikush_icu_stats_encode(0, ZIKUSH_ICU, &msg, &global_stats);
+			router_route(&msg, 0);
+		}
 
 
 		vTaskDelay(1000 * portTICK_RATE_MS);

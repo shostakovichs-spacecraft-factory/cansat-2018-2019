@@ -17,6 +17,36 @@
 #include <main.h>
 #include <zikush_config.h>
 
+typedef struct {
+	int16_t msg_id;
+	uint32_t divider;
+	uint32_t counter;
+} _ir_divider_t;
+
+static _ir_divider_t _ir_divider_table[] = {
+		{ MAVLINK_MSG_ID_ZIKUSH_ICU_STATS, 1 },
+		{ MAVLINK_MSG_ID_HIL_GPS, 10 },
+		{ MAVLINK_MSG_ID_ZIKUSH_POWER_STATE, 10 },
+
+		{ MAVLINK_MSG_ID_ZIKUSH_PICTURE_HEADER, 1 },
+		{ MAVLINK_MSG_ID_ZIKUSH_SPECTRUM_INTENSITY_HEADER, 1},
+		{-1, 0 }
+};
+
+static _ir_divider_t * _ir_divider_find_entry(uint8_t msg_id)
+{
+	_ir_divider_t * retval = _ir_divider_table;
+
+	for ( ; retval->msg_id > 0; retval++)
+	{
+		if (retval->msg_id == msg_id)
+			return retval;
+	}
+
+	return NULL;
+}
+
+
 extern QueueHandle_t	ICU_queue_handle;
 extern QueueHandle_t	can_queue_handle;
 extern QueueHandle_t	sd_queue_handle;
@@ -64,12 +94,21 @@ router_status_t router_route(mavlink_message_t * msg, TickType_t xTicksToWait)
 }
 
 
+bool router_set_ir_divider(uint8_t mav_msg_id, uint16_t divider)
+{
+	_ir_divider_t * const entry = _ir_divider_find_entry(mav_msg_id);
+	if (NULL == entry)
+		return false;
+
+	entry->divider = divider;
+	return true;
+}
+
+
 /*Routing 'tables'*/
 static bool _table_SD(mavlink_message_t * msg)
 {
 	return msg != NULL;
-
-	return false;
 }
 
 static bool _table_CAN(mavlink_message_t * msg)
@@ -90,23 +129,46 @@ static bool _table_radio(mavlink_message_t * msg)
 
 static bool _table_Iridium(mavlink_message_t * msg)
 {
-	if(msg->sysid != 0)
+	if(msg->sysid == 0)
 		return false;
 
-	if (msg->msgid == MAVLINK_MSG_ID_HIL_GPS)
+	_ir_divider_t * const entry = _ir_divider_find_entry(msg->msgid);
+
+	if (NULL == entry)
+		return false;
+
+	if (0 == entry->divider)
+		return false;
+
+	if (entry->counter + 1 >= entry->divider)
 	{
+		entry->counter = 0;
 		return true;
 	}
-
-	if (msg->msgid == MAVLINK_MSG_ID_ZIKUSH_ICU_STATS)
+	else
 	{
-		return true;
+		entry->counter++;
+		return false;
 	}
 
-	return false;
+	/*
+	 * 0+1 = 1 >= 1 => true
+	 * 0+1 = 1 >= 1 => true
+	 *
+	 * 0+1 = 1 >= 2 => false
+	 * 1+1 = 2 >= 2 => true
+	 * 0+1 = 1 >= 2 => false
+	 *
+	 * 0+1 = 1 >= 3 => false
+	 * 1+1 = 2 >= 3 => false
+	 * 2+1 = 3 >= 3 => true
+	 * 0+1 = 1 >= 3 => false
+	 */
 }
 
 static bool _table_ICU(mavlink_message_t * msg)
 {
 	return false;
 }
+
+

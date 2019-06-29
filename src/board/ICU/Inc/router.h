@@ -20,6 +20,9 @@ typedef enum
 	ROUTER_MALFUNCTION = 4,
 } router_status_t;
 
+
+
 router_status_t router_route(mavlink_message_t * msg, TickType_t xTicksToWait);
+bool router_set_ir_divider(uint8_t mav_msg_id, uint16_t divider);
 
 #endif /* ROUTER_H_ */
