@@ -31,25 +31,34 @@ static bool _table_Iridium(mavlink_message_t * msg);
 router_status_t router_route(mavlink_message_t * msg, TickType_t xTicksToWait)
 {
 	if(_table_SD(msg))
-		xQueueSendToBack(sd_queue_handle, msg, xTicksToWait);
+		if (xQueueSendToBack(sd_queue_handle, msg, xTicksToWait) != pdTRUE)
+			global_stats.rt_drops_sd++;
 
 	if(_table_ICU(msg))
-		xQueueSendToBack(ICU_queue_handle, msg, xTicksToWait);
+		if (xQueueSendToBack(ICU_queue_handle, msg, xTicksToWait) != pdTRUE)
+			global_stats.rt_drops_icu++;
 
 	if(_table_CAN(msg))
 	{
-		xQueueSendToBack(can_queue_handle, msg, xTicksToWait);
+		if (xQueueSendToBack(can_queue_handle, msg, xTicksToWait) != pdTRUE)
+			global_stats.rt_drops_can++;
+
 		xTaskNotifyGive(can_task_handle);
 	}
 
 	if(_table_radio(msg))
 	{
-		xQueueSendToBack(radio_queue_handle, msg, xTicksToWait);
+		if (xQueueSendToBack(radio_queue_handle, msg, xTicksToWait) != pdTRUE)
+			global_stats.rt_drops_radio++;
+
 		xTaskNotify(radio_task_handle, RADIO_NOTIFICATION_SEND, eSetBits);
 	}
 
 	if(_table_Iridium(msg))
-		return ROUTER_MALFUNCTION; //FIXME add IRIDIUM sending
+	{
+		if (xQueueSendToBack(iridium_queue_handle, msg, xTicksToWait) != pdTRUE)
+			global_stats.rt_drops_iridium++;
+	}
 
 	return ROUTER_OK;
 }
@@ -83,6 +92,16 @@ static bool _table_Iridium(mavlink_message_t * msg)
 {
 	if(msg->sysid != 0)
 		return false;
+
+	if (msg->msgid == MAVLINK_MSG_ID_HIL_GPS)
+	{
+		return true;
+	}
+
+	if (msg->msgid == MAVLINK_MSG_ID_ZIKUSH_ICU_STATS)
+	{
+		return true;
+	}
 
 	return false;
 }

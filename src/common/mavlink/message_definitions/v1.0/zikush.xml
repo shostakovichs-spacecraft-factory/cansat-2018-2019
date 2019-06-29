@@ -187,13 +187,28 @@
         <message id="169" name="ZIKUSH_ICU_STATS">
             <description>Statistics for various ICU interfaces</description>
             <field type="uint32_t" name="radio_tx"></field>
-            <field type="uint32_t" name="radio_tx_dropped"></field>
+            <field type="uint16_t" name="radio_tx_mav"></field>
+            
+            <field type="uint8_t"  name="iridium_sigind">Iridium network Signal power (0-5)</field>
+            <field type="uint16_t" name="iridium_errors">Iridium command errors count</field>
             <field type="uint16_t" name="iridium_tx"></field>
-            <field type="uint16_t" name="iridium_tx_dropped"></field>
+            <field type="uint16_t" name="iridium_tx_mav"></field>
             <field type="uint16_t" name="iridium_rx"></field>
+            <field type="uint16_t" name="iridium_rx_mav"></field>
+
             <field type="uint32_t" name="can_tx"></field>
-            <field type="uint32_t" name="can_tx_dropped"></field>
+            <field type="uint16_t" name="can_tx_mav"></field>
+
             <field type="uint32_t" name="can_rx"></field>
+            <field type="uint16_t" name="can_rx_mav"></field>
+
+            <field type="uint8_t"  name="rt_drops_sd"></field>
+            <field type="uint8_t"  name="rt_drops_radio"></field>
+            <field type="uint8_t"  name="rt_drops_iridium"></field>
+            <field type="uint8_t"  name="rt_drops_can"></field>
+            <field type="uint8_t"  name="rt_drops_icu"></field>
+
+            <field type="uint16_t" name="cmds_executed">Amount of executed commands</field>
         </message>
 
 		<message id="170" name="ZIKUSH_INFO">

@@ -11,7 +11,7 @@
 
 #include <zikush_config.h>
 
-
+extern mavlink_zikush_icu_stats_t global_stats;
 extern volatile int16_t zikush_runsessnum;
 
 extern TaskHandle_t heartbeat_task_handle;

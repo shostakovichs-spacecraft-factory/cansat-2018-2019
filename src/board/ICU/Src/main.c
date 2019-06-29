@@ -7,7 +7,7 @@
 
 #include "main.h"
 
-
+mavlink_zikush_icu_stats_t global_stats = {0};
 volatile int16_t zikush_runsessnum = -1;
 
 

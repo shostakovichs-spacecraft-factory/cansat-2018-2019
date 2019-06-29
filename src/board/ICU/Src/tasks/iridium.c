@@ -13,13 +13,6 @@ static ir9602_t _ir;
 
 typedef struct
 {
-	// Статусные поля таска
-	uint8_t signal_power;
-	uint8_t sbdwb_errors;
-	uint8_t sbdi_errors;
-	uint8_t mo_sent;
-	uint8_t mt_rcvd;
-
 	UART_HandleTypeDef uart;
 
 	mavlink_message_t mavmsgbuf;
@@ -78,11 +71,11 @@ static int _ir_uart_putch_t(void * user_arg, uint8_t byte)
 
 static void _ir_event_hook(void * user_arg, const ir9602_evt_t * event)
 {
-	ir9602_user_struct_t * const user_struct = (ir9602_user_struct_t *)user_arg;
-
 	// Смотрим уровень сигнала и запоминаем
 	if (IR9602_EVT_CIEV == event->code && IR9602_EVT_CIEV_KIND_SIGIND == event->arg.ciev.type)
-		user_struct->signal_power = event->arg.ciev.value;
+	{
+		global_stats.iridium_sigind = event->arg.ciev.value;
+	}
 }
 
 
@@ -158,7 +151,9 @@ static int _perform_sbd(ir9602_t * ir, const uint8_t * data, int datasize)
 		ir9602_evt_errcode_t err_evt;
 		rc = ir9602_sbdwb(ir, data, datasize, &err_evt);
 		if (rc < 0)
-			user->sbdwb_errors++;
+		{
+			global_stats.iridium_errors++;
+		}
 	}
 
 
@@ -172,17 +167,19 @@ static int _perform_sbd(ir9602_t * ir, const uint8_t * data, int datasize)
 	rc = ir9602_sbdi(ir, &evt_sbdi);
 	if (rc < 0)
 	{
-		user->sbdi_errors++;
+		global_stats.iridium_errors++;
 		return rc;
 	}
 
 	// чего-нибудь нам пришло?
 	if (IR9602_EVT_SBDMSTATUS_YES == evt_sbdi.mo_status)
-		user->mo_sent++;
+	{
+		global_stats.iridium_tx++;
+	}
 
 	if (IR9602_EVT_SBDMSTATUS_YES == evt_sbdi.mt_status)
 	{
-		user->mt_rcvd++;
+		global_stats.iridium_rx++;
 		// Вытяигваем сообщение
 		// TODO
 	}
@@ -196,12 +193,6 @@ void iridium_task(void *pvParameters)
 	(void)pvParameters;
 	ir9602_user_struct_t * const user = &_ir_user_struct;
 
-	user->sbdwb_errors = 0;
-	user->sbdi_errors = 0;
-	user->mo_sent = 0;
-	user->mt_rcvd = 0;
-
-	user->signal_power = 0;
 	user->accum_carret = 0;
 	user->rx_queue = xQueueCreateStatic(ICU_IR_UART_RX_BUFFER_SIZE, 1,
 			user->rx_buffer, &user->rx_queue_object

@@ -22,6 +22,11 @@ static void MX_SPI2_Init(void);
 static void MX_GPIO_Init(void);
 static void radio_init(void);
 
+static void _radio_tx_hook(sx1268_t * radio)
+{
+	global_stats.radio_tx++;
+}
+
 
 void radio_task (void *pvParameters)
 {
@@ -49,6 +54,8 @@ void radio_task (void *pvParameters)
 				sx1268_send(&radio, framebuff, len);
 
 				sx1268_event(&radio);
+
+				global_stats.radio_tx_mav++;
 			}
 		}
 	}
@@ -59,6 +66,8 @@ void radio_task (void *pvParameters)
 static void radio_init(void)
 {
 	sx1268_struct_init(&radio, &radio_specific, radio_rxbuf, ICU_RADIO_RXBUFFLEN, radio_txbuf, ICU_RADIO_TXBUFFLEN);
+	radio.tx_hook = _radio_tx_hook;
+
 	radio_specific.bus = &hspi2;
 	radio_specific.busy_port = RADIO_BUSY_GPIO_Port;
 	radio_specific.busy_pin = RADIO_BUSY_Pin;

@@ -41,9 +41,13 @@ void can_task (void *pvParameters)
 			static mavlink_status_t status;
 
 			uint8_t result = canmavlink_parse_frame(&receivedframe, &msg, &status);
+			global_stats.can_rx++;
 
 			if(result == MAVLINK_FRAMING_OK)
+			{
 				router_route(&msg, 0);
+				global_stats.can_rx_mav++;
+			}
 		}
 
 		while( xQueueReceive(can_queue_handle,&msg, 0) != errQUEUE_EMPTY )
@@ -60,7 +64,11 @@ void can_task (void *pvParameters)
 				do {
 					pending = HAL_CAN_IsTxMessagePending(&hcan, mailbox); //TODO consider yielding here, but notice that for proper canmavlink functionality messages should come serially
 				} while(pending);
+
+				global_stats.can_tx++;
 			}
+
+			global_stats.can_tx_mav++;
 		}
 	}
 
