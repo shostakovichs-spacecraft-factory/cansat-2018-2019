@@ -285,7 +285,7 @@ void madgwick_test()
 			ddg[i] *= 2 * M_PI;
 		}
 		mag_calib_scale(ddm, ddm);
-		trace_printf("%.3f\t%.3f\t%.3f\n", ddm[0], ddm[1], ddm[2]);
+		//trace_printf("%.3f\t%.3f\t%.3f\n", ddm[0], ddm[1], ddm[2]);
 		//char str[100];
 		//int count = sprintf(str, "%.2f\t%.2f\t%.2f\n", ddm[0], ddm[1], ddm[2]);
 		//HAL_UART_Transmit(&huart, str, count, 2000);\
@@ -303,9 +303,9 @@ void madgwick_test()
 		vx.z = ddx[2];
 		vec_normalize(&vx);
 
-		vm.x = ddm[0];
-		vm.y = ddm[1];
-		vm.z = ddm[2];
+		vm.x = -ddm[2];
+		vm.y = -ddm[1];
+		vm.z = ddm[0];
 		vec_normalize(&vm);
 		//trace_printf("Mag: \t%8.3f %8.3f %8.3f \n", vm.x, vm.y, vm.z);
 		ahrs_updateVecMeasured(AHRS_ACCEL, vx);
@@ -315,8 +315,8 @@ void madgwick_test()
 
 		sampleFreq = 1000 / (float)(time_now - time_prev);
 		MadgwickAHRSupdate(0, 0, 0, vx.x, vx.y, vx.z, vm.x, vm.y, vm.z);
-		//quaternion_t result = quat_init(q0, q1, q2, q3);
-		quaternion_t result = ahrs_getOrientation();
+		quaternion_t result = quat_init(q0, q1, q2, q3);
+		//quaternion_t result = ahrs_getOrientation();
 		double r[3];
 		toEulerAngle(&result, &r[0], &r[1], &r[2]);
 		for(int i = 0; i < 3; i++)
@@ -324,7 +324,7 @@ void madgwick_test()
 			r[i] *= 180 / M_PI;
 		}
 		trace_printf("\t%8.3lf %8.3lf %8.3lf \n", r[0], r[1], r[2]);
-		HAL_Delay(50);
+		HAL_Delay(10);
 		time_prev = time_now;
 
 	}
