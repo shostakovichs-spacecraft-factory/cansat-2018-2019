@@ -72,8 +72,8 @@ int main(void)
 	SystemClock_Config();
 	MX_GPIO_Init();
 
-	heartbeat_task_handle = xTaskCreateStatic(heartbeat_task, (const char *)"heartbeat", configMINIMAL_STACK_SIZE, NULL, \
-										1, heartbeat_stack, &heartbeat_task_tcb);
+	/*heartbeat_task_handle = xTaskCreateStatic(heartbeat_task, (const char *)"heartbeat", configMINIMAL_STACK_SIZE, NULL, \
+										1, heartbeat_stack, &heartbeat_task_tcb);*/
 
 	ICU_task_handle = xTaskCreateStatic(ICU_task, (const char *)"ICU", ICU_TASKS_ICU_STACKSIZE, NULL, \
 										ICU_TASKS_ICU_TASKPRIORITY, ICU_stack, &ICU_task_tcb);
@@ -91,6 +91,9 @@ int main(void)
 									   ICU_TASKS_RADIO_TASKPRIORITY, radio_stack, &radio_task_tcb);
 	radio_queue_handle = xQueueCreateStatic(ICU_TASKS_RADIO_QUEUE_SIZE, sizeof(mavlink_message_t), (uint8_t *)radio_task_queue_buffer, &radio_task_queue);
 
+
+	gps_task_handle = xTaskCreateStatic(gps_task, (const char *)"gps", ICU_TASKS_GPS_STACKSIZE, NULL, \
+										   ICU_TASKS_GPS_TASKPRIORITY, gps_stack, &gps_task_tcb);
 
 
 	vTaskStartScheduler();

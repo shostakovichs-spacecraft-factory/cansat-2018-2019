@@ -43,7 +43,7 @@ void can_task (void *pvParameters)
 			uint8_t result = canmavlink_parse_frame(&receivedframe, &msg, &status);
 
 			if(result == MAVLINK_FRAMING_OK)
-				router_route(&msg, 1000 * portTICK_RATE_MS);
+				router_route(&msg, 0);
 		}
 
 		while( xQueueReceive(can_queue_handle,&msg, 0) != errQUEUE_EMPTY )
@@ -85,6 +85,7 @@ static void can_init()
 	HAL_CAN_ConfigFilter(&hcan, &filter);
 
 	hcan.Instance->IER |= CAN_IER_FMPIE0;
+	hcan.Instance->IER |= CAN_IER_FOVIE0;
 }
 
 /**

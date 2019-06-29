@@ -27,7 +27,7 @@ void SysTick_Handler(void)
 #pragma GCC optimize ("O0")
 void delay_until(uint32_t ms)
 {
-	while(ms < global_ms);
+	while(ms > global_ms);
 }
 #pragma GCC pop_options
 

@@ -182,12 +182,12 @@ void spectrum_send_photo() {
 
 		encdata.seqnr = frame;
 		mavlink_msg_encapsulated_data_encode(0, ZIKUSH_CCU, &msg, &encdata);
-		can_mavlink_transmit(&msg);
+		//can_mavlink_transmit(&msg);
 #ifdef CCU_TESTMODE
 		usart3_mavlink_transmit(&msg);
 #endif
 
-		HAL_Delay(100);
+		//HAL_Delay(100);
 
 		frame++;
 	}
@@ -201,6 +201,8 @@ void spectrum_send_photo() {
  */
 void spectrum_send_data(uint16_t y_start, uint16_t y_end, uint16_t x_start, uint16_t x_end)
 {
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1; //We do it there, cause channel status is a static variable, thus not system-wide
+
 	uint8_t * rowdata;
 	mavlink_zikush_spectrum_intensity_header_t spectrum_header = {
 		.size =	(y_end - y_start) * 2,
@@ -244,6 +246,8 @@ void spectrum_send_data(uint16_t y_start, uint16_t y_end, uint16_t x_start, uint
 #ifdef CCU_TESTMODE
 			usart3_mavlink_transmit(&msg);
 #endif
+
+			HAL_Delay(100);
 
 			encdata.seqnr++;
 		}
