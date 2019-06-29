@@ -16,6 +16,7 @@ typedef struct
 	UART_HandleTypeDef uart;
 
 	mavlink_message_t mavmsgbuf;
+	mavlink_message_t outmavmsgbuf;
 
 	QueueHandle_t rx_queue;
 	StaticQueue_t rx_queue_object;
@@ -197,12 +198,12 @@ static int _perform_sbd(ir9602_t * ir, const uint8_t * data, int datasize)
 	for (int i = 0; i < rc; i++)
 	{
 		mavlink_status_t status;
-		uint8_t parsed = mavlink_parse_char(MAVLINK_COMM_0, user->accum[i], &user->mavmsgbuf, &status);
+		uint8_t parsed = mavlink_parse_char(MAVLINK_COMM_0, user->accum[i], &user->outmavmsgbuf, &status);
 		if (parsed)
 		{
 			// оно еще и распарсилось!
 			global_stats.iridium_rx_mav++;
-			router_route(&user->mavmsgbuf, ICU_IR_ROUTE_WAIT);
+			router_route(&user->outmavmsgbuf, ICU_IR_ROUTE_WAIT);
 		}
 	}
 #endif //ICU_IR_PROCESS_UPLINK
