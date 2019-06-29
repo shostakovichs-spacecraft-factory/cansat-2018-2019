@@ -27,7 +27,7 @@
 
 //! Указатель на функцию для чтения данных из уарта связанного с модемом
 /*! Функция читает ровно один байт, если может. Если не может - дает ошибку <0 */
-typedef int (*ir9602_uart_getch_t)(void * user_arg);
+typedef int (*ir9602_uart_getch_t)(void * user_arg, bool block);
 
 //! Указатель на функцию для записи данных в уарт связанный с модемом
 /*! Функция пишет ровно один байт, если может. Если не может - дает ошибку <0 */
@@ -36,19 +36,6 @@ typedef int (*ir9602_uart_putch_t)(void * user_arg, uint8_t byte);
 //! Пользовательский хук для обработки абсолютно любых событий, получаемых от модема
 /*! Можно использовать а можно и нет */
 typedef void (*ir9602_evt_hook_t)(void * user_arg, const ir9602_evt_t * event);
-
-//! Результат обработки события от модема
-typedef enum
-{
-	//! нет новых событий (пока что)
-	IR9602_POLL_RESULT_NONE,
-	//! Модуль ответил каким-то неожиданным событием
-	IR9602_POLL_RESULT_EVENT,
-	//! Выполнение команды успешно завершено
-	IR9602_POLL_RESULT_CMD_COMPLETE,
-	//! Модуль ответил чем-то не понятным впринципе
-	IR9602_POLL_RESULT_UNEXPECTED,
-} ir9602_poll_result_t;
 
 
 //! Дескриптор устройства 9602
@@ -62,7 +49,6 @@ typedef struct
 } ir9602_t;
 
 
-
 //! Инициализация дескриптора модема
 /*! Настривает все поля дескриптора и больше ничего. */
 void ir9602_init(ir9602_t * device, void * user_arg,
@@ -73,5 +59,7 @@ void ir9602_init(ir9602_t * device, void * user_arg,
 int ir9602_sbdwb(ir9602_t * device, const void * data, int data_size, ir9602_evt_errcode_t * err_evt);
 
 int ir9602_sbdi(ir9602_t * device, ir9602_evt_sbdi_t * evt_sbdi);
+
+int ir9602_sbdrb(ir9602_t * device, void * buffer, int buffer_size);
 
 #endif /* IR9602_H_ */

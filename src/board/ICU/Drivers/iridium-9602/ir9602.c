@@ -53,7 +53,7 @@ static int _send_cmd(ir9602_t * device, const ir9602_cmd_t * command)
 }
 
 
-static int _read_event(ir9602_t * device, ir9602_evt_t * evt)
+static int _read_event(ir9602_t * device, ir9602_evt_t * evt, bool should_block)
 {
 	int carret = 0;
 	uint8_t * const buffer = (uint8_t*)device->cmdevt_buffer;
@@ -65,7 +65,7 @@ static int _read_event(ir9602_t * device, ir9602_evt_t * evt)
 			return -EOVERFLOW;
 
 		// Есть чего?
-		int character = device->getch(device->user_arg);
+		int character = device->getch(device->user_arg, should_block);
 		if (character < 0)
 			return character;
 
@@ -111,13 +111,13 @@ static int _read_event(ir9602_t * device, ir9602_evt_t * evt)
 
 
 static int _wait_for_events(ir9602_t * device, const ir9602_evt_code_t * expected_events,
-		ir9602_evt_t * evt
+		bool should_block, ir9602_evt_t * evt
 )
 {
 	int rcved_event_counter = 0;
 	int rc;
 again:
-	rc = _read_event(device, evt);
+	rc = _read_event(device, evt, should_block);
 	if (rc < 0)
 		return rc;
 
@@ -131,7 +131,6 @@ again:
 
 	goto again;
 }
-
 
 static int _send_mo_data(ir9602_t * device, const uint8_t * data, int datasize)
 {
@@ -158,6 +157,27 @@ static int _send_mo_data(ir9602_t * device, const uint8_t * data, int datasize)
 	}
 
 	return 0;
+}
+
+
+static int _read_blob(ir9602_t * device, void * buffer, int buffer_size, bool should_block)
+{
+	uint8_t * const u8_buffer = (uint8_t *)buffer;
+	for (int i = 0; i < buffer_size; i++)
+	{
+		int rc = device->getch(device->user_arg, should_block);
+		if (rc < 0)
+		{
+			if (!should_block && -EWOULDBLOCK == rc)
+				return i;
+			else
+				return rc;
+		}
+
+		u8_buffer[i] = (uint8_t)(rc & 0xFF);
+	}
+
+	return buffer_size;
 }
 
 
@@ -199,7 +219,7 @@ int ir9602_sbdwb(ir9602_t * device, const void * data, int data_size, ir9602_evt
 	};
 
 	ir9602_evt_t evt;
-	rc = _wait_for_events(device, expected_events, &evt);
+	rc = _wait_for_events(device, expected_events, true, &evt);
 	if (rc < 0)
 		return rc;
 
@@ -235,7 +255,7 @@ int ir9602_sbdwb(ir9602_t * device, const void * data, int data_size, ir9602_evt
 
 	// Теперь ждем код ошибки (и только его)
 	// Делаем хитрый хак и используем тот же самый массив-список
-	rc = _wait_for_events(device, expected_events+2, &evt);
+	rc = _wait_for_events(device, expected_events+2, true, &evt);
 	if (rc < 0)
 		return rc;
 
@@ -269,7 +289,7 @@ int ir9602_sbdi(ir9602_t * device, ir9602_evt_sbdi_t * evt_sbdi)
 	};
 
 	ir9602_evt_t evt;
-	rc = _wait_for_events(device, expected_events, &evt);
+	rc = _wait_for_events(device, expected_events, true, &evt);
 	switch (evt.code)
 	{
 	case IR9602_EVT_ERROR:
@@ -286,5 +306,72 @@ int ir9602_sbdi(ir9602_t * device, ir9602_evt_sbdi_t * evt_sbdi)
 		break;
 	};
 
+	return 0;
+}
+
+
+int ir9602_sbdrb(ir9602_t * device, void * buffer, int buffer_size)
+{
+	int rc;
+
+	// Действуем тонко.
+	// Сперва засылаем модему команду SBDRB, но не шлем \r\n
+	const char * cmd = "AT+SBDRB";
+	while (*cmd != 0)
+	{
+		rc = device->putch(device, *cmd++);
+		if (rc < 0)
+			return rc;
+	}
+
+	// Теперь вычитываем из нашего RX буфера все все все что там лежит
+	// что модем мог успеть накидать до этих пор
+	// Эксперименты показали, что модем молчит, если кто-то начал отправлять
+	// ему команду, но еще не отправил \r\n
+	// поэтому считаем что лишнего он нам не накидает
+	ir9602_evt_t evt;
+	rc = _wait_for_events(device, NULL, false, &evt);
+	if (rc < 0 && rc != -EWOULDBLOCK)
+		return rc;
+
+	// Теперь засылаем \r\n
+	cmd = "\r\n";
+	while (*cmd != 0)
+	{
+		rc = device->putch(device, *cmd++);
+		if (rc < 0)
+			return rc;
+	}
+
+	// Теперь вычитываем два байта - это длина сообщения
+	uint16_t msglen;
+	rc = _read_blob(device, &msglen, sizeof(msglen), true);
+	if (rc < 0)
+		return rc;
+
+	msglen = _swap_endian(msglen);
+
+	// в буфере место то хватит?
+	if (msglen > buffer_size)
+		return -EMSGSIZE;
+
+	// вычитываем тело сообщения
+	rc = _read_blob(device, buffer, buffer_size, true);
+	if (rc < 0)
+		return rc;
+
+	// вычитываем контрольную сумму
+	uint16_t chksum;
+	rc = _read_blob(device, &chksum, sizeof(chksum), true);
+	if (rc < 0)
+		return rc;
+
+	chksum = _swap_endian(chksum);
+
+	// Не совпало - ну значит не совпало
+	if (chksum != _sbd_checksum(buffer, msglen))
+		return - EBADMSG;
+
+	// А совпало - так совпало!
 	return 0;
 }

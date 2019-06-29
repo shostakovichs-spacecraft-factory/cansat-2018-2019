@@ -28,14 +28,16 @@ typedef struct
 static ir9602_user_struct_t _ir_user_struct;
 
 
-static int _ir_uart_getch(void * user_arg)
+static int _ir_uart_getch(void * user_arg, bool should_block)
 {
 	ir9602_user_struct_t * const user_struct = (ir9602_user_struct_t *)user_arg;
 
+	const TickType_t to_wait = should_block ? ICU_IR_UART_RX_QUEUE_WAIT : 0;
+
 	uint8_t byte;
-	const BaseType_t status = xQueueReceive(user_struct->rx_queue, &byte, ICU_IR_UART_RX_QUEUE_WAIT);
+	const BaseType_t status = xQueueReceive(user_struct->rx_queue, &byte, to_wait);
 	if (pdTRUE != status)
-		return -ETIMEDOUT;
+		return should_block ? -ETIMEDOUT: -EWOULDBLOCK;
 
 	return byte;
 }
