@@ -17,6 +17,7 @@
 #include <math.h>
 #include "MadgwickAHRS.h"
 #include "ahrs.h"
+#include "my_uart.h"
 
 #include "thread.h"
 
@@ -54,6 +55,8 @@ int lsm6ds3_test()
 	spi_pin_nss_init(&hspi, GPIOA, GPIO_PIN_4);
 
 	spi_init(&hspi);
+
+
 
 	struct lsm6ds3_dev_s hlsm6;
 	lsm6ds3_conf_default(&hlsm6);
@@ -141,6 +144,15 @@ int main()
 	return 0;
 }
 
+float maxf(float a, float b)
+{
+	return a > b ? a : b;
+}
+float minf(float a, float b)
+{
+	return a < b ? a : b;
+}
+
 void madgwick_test()
 {
 	SPI_HandleTypeDef hspi;
@@ -173,14 +185,39 @@ void madgwick_test()
 	lsm303c_m_push_conf(&hlsm3, &hlsm3.conf.m);
 
 
+
+	__USART3_CLK_ENABLE();
+	__USART2_CLK_ENABLE();
+	__USART1_CLK_ENABLE();
+
+	GPIO_InitTypeDef pa_init;
+	pa_init.Alternate = GPIO_AF7_USART3;
+	pa_init.Mode = GPIO_MODE_AF_PP;
+	pa_init.Pin = GPIO_PIN_10;
+	pa_init.Pull = GPIO_NOPULL;
+	pa_init.Speed = GPIO_SPEED_FAST;
+	HAL_GPIO_Init(GPIOC, &pa_init);
+
+	pa_init.Pin = GPIO_PIN_11;
+	HAL_GPIO_Init(GPIOC, &pa_init);
+
+	UART_HandleTypeDef huart;
+	uart_config_default(&huart);
+	huart.Instance = USART3;
+	huart.Init.BaudRate = 9600;
+	uart_init(&huart);
+
+
+
+
+
 	trace_printf("\n%s\n", "Hi!");
 	HAL_Delay(5000);
 	mag_calib_init();
-	trace_printf("%s\n", "Begin mag calibration");
-	//mag_calib_calibrate_lsm303c(&hlsm3, 27, 400);
-	trace_printf("%s\n", "End mag calibration");
-	HAL_Delay(5000);
-
+	//trace_printf("%s\n", "Begin mag calibration");
+	//mag_calib_calibrate_lsm303c(&hlsm3, 500, 100);
+	//trace_printf("%s\n", "End mag calibration");
+	//HAL_Delay(5000);
 
 	struct lsm303c_raw_data_m_s rdm;
 	struct lsm6ds3_raw_data_s rd = {{0,0,0},{0,0,0}};
@@ -189,10 +226,10 @@ void madgwick_test()
 
 	lsm303c_m_pull(&hlsm3, &rdm);
 	lsm303c_scale_m(&hlsm3, rdm.m, ddm, 3);
-	mag_calib_scale(ddm, ddm + 1, ddm + 2);
+	mag_calib_scale(ddm, ddm);
 
 	ahrs_init();
-	ahrs_setKoefB(10.0);
+	ahrs_setKoefB(2.0);
 	ahrs_vectorActivate(AHRS_LIGHT, 0);
 	ahrs_vectorActivate(AHRS_MAG, 1);
 	ahrs_vectorActivate(AHRS_ACCEL, 1);
@@ -215,6 +252,24 @@ void madgwick_test()
 
 	uint32_t time_prev = HAL_GetTick();
 	HAL_Delay(10);
+
+	volatile float best_mag_values[3][2];
+	for(int i = 0; i < 3; i++)
+		for(int j = 0; j < 2; j++)
+			best_mag_values[i][j] = 0;/*
+	while(1)
+	{
+		lsm303c_m_pull(&hlsm3, &rdm);
+		lsm303c_scale_m(&hlsm3, rdm.m, ddm, 3);
+
+		trace_printf("%.3f\t%.3f\t%.3f\n", ddm[0], ddm[1], ddm[2]);
+		for(int i = 0; i < 3; i++)
+		{
+			best_mag_values[i][0] = maxf(ddm[i], best_mag_values[i][0]);
+			best_mag_values[i][1] = minf(ddm[i], best_mag_values[i][1]);
+		}
+	}*/
+
 	while(1)
 	{
 		uint32_t time_now = HAL_GetTick();
@@ -229,17 +284,20 @@ void madgwick_test()
 		{
 			ddg[i] *= 2 * M_PI;
 		}
-		mag_calib_scale(ddm, ddm + 1, ddm + 2);
-		trace_printf("Mag: \t%8.3f %8.3f %8.3f \n\n", ddm[0], ddm[1], ddm[2]);
-		/*
-		trace_printf("Gyro: \t%8.3f %8.3f %8.3f \n", ddg[0], ddg[1], ddg[2]);
+		mag_calib_scale(ddm, ddm);
+		trace_printf("%.3f\t%.3f\t%.3f\n", ddm[0], ddm[1], ddm[2]);
+		//char str[100];
+		//int count = sprintf(str, "%.2f\t%.2f\t%.2f\n", ddm[0], ddm[1], ddm[2]);
+		//HAL_UART_Transmit(&huart, str, count, 2000);\
+
+		//trace_printf("Gyro: \t%8.3f %8.3f %8.3f \n", ddg[0], ddg[1], ddg[2]);
 
 	    //lsm6ds3_read_regn(&hlsm6, 0x22, (uint8_t*)&rd, sizeof(rd)/2);
-		trace_printf("Axel: \t%8.3f %8.3f %8.3f \n", ddx[0], ddx[1], ddx[2]);
+		//trace_printf("Axel: \t%8.3f %8.3f %8.3f \n", ddx[0], ddx[1], ddx[2]);
 
 
 
-		trace_printf("Mag: \t%8.3f %8.3f %8.3f \n\n", ddm[0], ddm[1], ddm[2]);*/
+
 		vx.x = ddx[0];
 		vx.y = ddx[1];
 		vx.z = ddx[2];
@@ -249,10 +307,15 @@ void madgwick_test()
 		vm.y = ddm[1];
 		vm.z = ddm[2];
 		vec_normalize(&vm);
+		//trace_printf("Mag: \t%8.3f %8.3f %8.3f \n", vm.x, vm.y, vm.z);
 		ahrs_updateVecMeasured(AHRS_ACCEL, vx);
 		ahrs_updateVecMeasured(AHRS_MAG, vm);
 		ahrs_updateGyroData(vec_init(0,0,0));
 		ahrs_calculateOrientation((time_now - time_prev)/1000.0);
+
+		sampleFreq = 1000 / (float)(time_now - time_prev);
+		MadgwickAHRSupdate(0, 0, 0, vx.x, vx.y, vx.z, vm.x, vm.y, vm.z);
+		//quaternion_t result = quat_init(q0, q1, q2, q3);
 		quaternion_t result = ahrs_getOrientation();
 		double r[3];
 		toEulerAngle(&result, &r[0], &r[1], &r[2]);
@@ -260,9 +323,10 @@ void madgwick_test()
 		{
 			r[i] *= 180 / M_PI;
 		}
-	//	trace_printf("\t%8.3lf %8.3lf %8.3lf \n", r[0], r[1], r[2]);
-
+		trace_printf("\t%8.3lf %8.3lf %8.3lf \n", r[0], r[1], r[2]);
+		HAL_Delay(50);
 		time_prev = time_now;
+
 	}
 }
 

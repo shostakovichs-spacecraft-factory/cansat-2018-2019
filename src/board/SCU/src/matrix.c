@@ -6,13 +6,12 @@
  */
 #include <math.h>
 #include <stdlib.h>
-#include "matrix.h"
 #include <errno.h>
 #include <diag/Trace.h>
 
 
-#define EPS 1 / (1 << 20)
 #define BAD_SIZES 0x10
+#include "matrix.h"
 #define BAD_INDEX 0x11
 #define DET_IS_ZERO 0x12
 #define NORM_IS_ZERO 0x13
@@ -85,6 +84,7 @@ void matrix_print(Matrixf *matrix)
 }
 
 
+#define EPS 1 / (1 << 20)
 int matrix_add(Matrixf *left, Matrixf *right)
 {
 	if(left->height != right->height || left->width != right->width)

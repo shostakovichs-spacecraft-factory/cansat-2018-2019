@@ -63,6 +63,10 @@
 /******************************************************************************/
 /* Acceleration Registers */
 #define LSM303C_WHO_AM_I_ADDR             0x0F  /* device identification register */
+#define LSM303C_WHO_AM_I_M_VAL            0b00111101
+#define LSM303C_WHO_AM_I_A_VAL            0b01000001
+
+
 #define LSM303C_ACT_THS_A                 0x1E
 #define LSM303C_ACT_DUR_A                 0x1F
 #define LSM303C_CTRL_REG1_A               0x20  /* Control register 1 acceleration */
@@ -130,8 +134,8 @@
 
 #define LSM303C_TIMEOUT 100
 
-#define LSM303C_I2C_ADDRESS_M 			  0b00111101
-#define LSM303C_I2C_ADDRESS_A 			  0b01000001
+#define LSM303C_I2C_ADDRESS_M 			  0b00011110
+#define LSM303C_I2C_ADDRESS_A 			  0b00011101
 
 /******************************************************************************/
 /**************************** END REGISTER MAPPING  ***************************/
@@ -159,17 +163,39 @@ static int lsm303c_m_do_write_regn_i2c( struct lsm303c_handler_s * priv, uint8_t
 	return rc;
 }
 
-// registration of device on spi bus
+uint8_t lsm303c_who_am_i(struct lsm303c_handler_s * handler)
+{
+	uint8_t res = 0;
+	handler->read_regn(handler, LSM303C_WHO_AM_I_ADDR, &res, 1);
+	return res;
+}
+
+// registration of device on i2c bus
 int lsm303c_register_i2c(struct lsm303c_handler_s * handler, I2C_HandleTypeDef* hi2c)
 {
 	handler->read_regn =  lsm303c_m_do_read_regn_i2c;
 	handler->write_regn =  lsm303c_m_do_write_regn_i2c;
 	handler->setup_conf.iface.i2c.hi2c = hi2c;
 
-	handler->setup_conf.iface.i2c.addr_a = LSM303C_I2C_ADDRESS_A;
-	handler->setup_conf.iface.i2c.addr_m = LSM303C_I2C_ADDRESS_M;
+	handler->setup_conf.iface.i2c.addr_a = LSM303C_I2C_ADDRESS_A << 1;
+	handler->setup_conf.iface.i2c.addr_m = LSM303C_I2C_ADDRESS_M << 1;
+	int res = lsm303c_who_am_i(handler);
+
+	switch(res)
+	{
+	case LSM303C_WHO_AM_I_A_VAL:
+		trace_printf("I'm Accel on lsm303c!\n\n");
+		break;
+	case LSM303C_WHO_AM_I_M_VAL:
+		trace_printf("I'm Mag on lsm303c!\n\n");
+		break;
+	default:
+		trace_printf("ERROR: unknown device instead of lsm303c\n");
+	}
+
 	return 0;
 }
+
 
 
 
@@ -212,10 +238,6 @@ int lsm303c_m_pull(const struct lsm303c_handler_s *handler,
         struct lsm303c_raw_data_m_s * m_raw)
 {
 	int rc = handler->read_regn(handler, LSM303C_OUT_X_L_M, (uint8_t*)m_raw, 6);
-	for(int i = 0; i < 3; i++)
-	{
-		m_raw->m[i] /= 16.0;
-	}
 	return rc;
 }
 
