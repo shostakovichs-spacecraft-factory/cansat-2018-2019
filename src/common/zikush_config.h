@@ -5,6 +5,8 @@
 #define PROBEWIDE_CAN_TICKRATE	360000 //tickrate, not a bitrate. br = tr / (1 + 5 + 2) (according to current time quantum utilisation)
 
 /* Params for ICU */
+#define ICU_TASKS_HEARTBEAT_STACKSIZE 512
+
 #define ICU_TASKS_ICU_STACKSIZE	512
 #define ICU_TASKS_ICU_TASKPRIORITY	5
 #define ICU_TASKS_ICU_QUEUE_SIZE	3 //defined in sizes of mavlink_msg_t

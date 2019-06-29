@@ -112,17 +112,26 @@ bool router_set_ir_divider(uint8_t mav_msg_id, uint16_t divider)
 /*Routing 'tables'*/
 static bool _table_SD(mavlink_message_t * msg)
 {
+	if (NULL == sd_task_handle || NULL == sd_queue_handle)
+		return false;
+
 	return msg != NULL;
 }
 
 static bool _table_CAN(mavlink_message_t * msg)
 {
+	if (NULL == can_task_handle || NULL == can_queue_handle)
+		return false;
+
 	// На данный момент в CAN не форвардится ничего
 	return false;
 }
 
 static bool _table_radio(mavlink_message_t * msg)
 {
+	if (NULL == radio_task_handle || NULL == radio_queue_handle)
+		return false;
+
 	if(msg->sysid == 0)
 		return true;
 
@@ -131,6 +140,9 @@ static bool _table_radio(mavlink_message_t * msg)
 
 static bool _table_Iridium(mavlink_message_t * msg)
 {
+	if (NULL == iridium_task_handle || NULL == iridium_queue_handle)
+		return false;
+
 	if(msg->sysid == 0)
 		return false;
 
@@ -170,6 +182,9 @@ static bool _table_Iridium(mavlink_message_t * msg)
 
 static bool _table_ICU(mavlink_message_t * msg)
 {
+	if (NULL == ICU_task_handle || NULL == ICU_queue_handle)
+		return false;
+
 	if (msg->sysid == 0)
 		return false; // Сообщения с борта не обрабатываем
 
