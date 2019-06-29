@@ -40,7 +40,7 @@ void gps_task (void *pvParameters)
 
 		memcpy(_processingbuff, _rxbuff, _rxbuff_received);
 		_rxbuff_received = 0;
-		HAL_NVIC_EnableIRQ(USART3_IRQn);
+		HAL_UART_Init(&huart3); //maybe not the best way, TODO make it simpler
 
 		switch( minmea_sentence_id(_processingbuff, ICU_GPS_FORCECHECKSUMM) )
 		{
@@ -90,7 +90,7 @@ void USART3_IRQHandler(void)
 	{
 		_rxbuff[_rxbuff_received++] = (uint8_t)(huart->Instance->DR & 0xFF);
 
-		if(_rxbuff[0] != '$' || (_rxbuff_received > 1 && _rxbuff[1] == '$') ) //there is a strong difference...
+		if(_rxbuff[0] != '$')
 		{
 			_rxbuff_received = 0;
 			return;
@@ -99,7 +99,7 @@ void USART3_IRQHandler(void)
 		if(_rxbuff[_rxbuff_received - 1] == '\n' || _rxbuff_received == NMEA_MAX_LENGTH) //If we've finished sentence receiveing or the buffer overflow occured
 		{
 			xTaskNotifyGive(gps_task_handle);
-			HAL_NVIC_DisableIRQ(USART3_IRQn);
+			HAL_UART_DeInit(huart);
 		}
 
 

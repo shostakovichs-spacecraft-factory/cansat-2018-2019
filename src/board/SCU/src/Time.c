@@ -18,7 +18,7 @@ void delay_us(uint32_t us)
 
 	 while (DWT->CYCCNT - startTick < delayTicks);
 }
-void delay_init(void)
+void delay_us_init(void)
 {
     if (1) {
     	//DWT->LAR = 0xC5ACCE55;

@@ -35,6 +35,7 @@ void quat_sub(quaternion_t *left, quaternion_t *right);
 
 int vecToMatrix(Matrixf *result, vector_t *vec);
 int quatToMatrix(Matrixf *result, quaternion_t *quat);
+void quatToEulerAngle(quaternion_t *q, double *roll, double *pitch, double *yaw);
 quaternion_t vecToQuat(vector_t *vec);
 int matrixToQuat(quaternion_t *result, Matrixf *m);
 

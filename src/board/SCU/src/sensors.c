@@ -21,32 +21,62 @@
 
 #include "thread.h"
 
-struct bme280_dev_s hbme;
+static I2C_HandleTypeDef hi2c;
+static struct bme280_dev_s hbme;
 
-void sensors_init(I2C_HandleTypeDef* i2c_handler, onewire_t * how)
+static onewire_t how;
+static ds18b20_config_t hds;
+
+static ADS1x1x_config_t hads;
+
+//Inits BME280, DS18B20, MPX2100AP (and also I2C1, OneWire and ADS1115 required for them)
+void sensors_init(void)
 {
-	{
-		bme280_register_i2c(&hbme, i2c_handler, BME280_I2C_ADDR_SDO_LOW << 1);
+	{	//I2C1 (separately, cause it's used both by BME280 and MPX2100)
+		i2c_pin_scl_init(GPIOB, GPIO_PIN_6);
+		i2c_pin_sda_init(GPIOB, GPIO_PIN_7);
+		i2c_config_default(&hi2c);
+		hi2c.Instance = I2C1;
+		i2c_init(&hi2c);
+	}
+
+	{	//BME280
+		bme280_register_i2c(&hbme, &hi2c, BME280_I2C_ADDR_SDO_LOW << 1);
 		bme280_init(&hbme);
 	}
 
-	{
-		onewire_ReadRom(how, &hds->rom);
-		hds->resolution = ds18b20_Resolution_12bits;
-		hds->how = how;
-		ds18b20_SetResolution(hds, hds->resolution);
-		ds18b20_Start(hds);
+	{	//DS18B20
+		delay_us_init();
+
+		onewire_Init(&how, GPIOB, GPIO_PIN_3);
+
+		onewire_ReadRom(&how, &hds->rom);
+		hds.resolution = ds18b20_Resolution_12bits;
+		hds.how = &how;
+		ds18b20_SetResolution(&hds, hds.resolution);
+		ds18b20_Start(&hds);
 	}
+
+	{	//MPX2100AP
+		ADS1x1x_config_default(&hads);
+		ADS1x1x_register_i2c(&hads, &hi2c, ADS1x1x_I2C_ADDRESS_ADDR_TO_GND << 1);
+		ADS1x1x_init(&hads);
+
+		ADS1x1x_start_conversion(&hads);
+	}
+
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
 }
 
-void sensors_internal_read(bme280_dev_s *hbme)
+//Read data from BME280 sensor and send scaled_pressure MAVLink message
+void sensors_bme280_update(void)
 {
 	struct bme280_float_data_s data;
 	mavlink_scaled_pressure_t scaled_pressure;
-	mavlink_zikush_humidity_t humidity;'
+	mavlink_zikush_humidity_t humidity;
 	mavlink_message_t msg;
 
-	bme280_read(hbme, &data, sizeof(struct bme280_float_data_s));
+	bme280_read(&hbme, &data, sizeof(struct bme280_float_data_s));
 
 	scaled_pressure.time_boot_ms = HAL_GetTick();
 	scaled_pressure.press_abs = data.pressure;
@@ -60,41 +90,33 @@ void sensors_internal_read(bme280_dev_s *hbme)
 	can_malvink_send(&msg);
 }
 
-
-void thread_update_ds18b20(ds18b20_config_t *hds, uint8_t *arg)
+//Read data from DS18B20 and MPX2100AP sensors and send scaled_pressure2 MAVLink message
+void sensors_external_update(void)
 {
-	static int isReady = 1;
-	static float temp;
-	isReady = ds18b20_Read(hds, &temp);
-	if(isReady)
+	float temperature;
+	static mavlink_scaled_pressure2_t scaled_pressure;
+	mavlink_message_t msg;
+
+	if( ds18b20_Read(&hds, &temperature) )
 	{
-		arg[0] = 1;
-		*(float*)(arg + 1) = temp;
-		ds18b20_Start(hds);
+		scaled_pressure.temperature = temperature * 100;
+
+		ds18b20_Start(&hds);
 	}
-}
-////////////////////////
-void thread_init_mpx2100ap(ADS1x1x_config_t *hads)
-{
-	ADS1x1x_start_conversion(hads);
-}
 
-void thread_update_mpx2100ap(ADS1x1x_config_t *hads, uint8_t *arg)
-{
-	static uint32_t start = 0;
-
-	if(HAL_GetTick() - start >= 200)
+	static previousConversionTime = 0;
+	if(HAL_GetTick() - previousConversionTime >= 200)
 	{
-		arg[0] = 1;
-
 		uint16_t data = ADS1x1x_read(hads);
 
-		float result = mpx2100ap_compensate_pressure_flt(data);
-		*(float*)(arg + 1) = result;
-		ADS1x1x_start_conversion(hads);
-		start = HAL_GetTick();
+		scaled_pressure.press_abs = mpx2100ap_compensate_pressure_flt(data);
+
+		ADS1x1x_start_conversion(&hads);
+		previousConversionTime = HAL_GetTick();
 	}
+
+	scaled_pressure.time_boot_ms = HAL_GetTick();
+
+	mavlink_msg_scaled_pressure2_encode(0, ZIKUSH_SCU, &msg, &scaled_pressure);
+	can_mavlink_send(&msg);
 }
-
-
-

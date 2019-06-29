@@ -12,6 +12,6 @@
 void delay_us(uint32_t us);
 
 
-void delay_init(void);
+void delay_us_init(void);
 
 #endif /* TIME_H_ */
