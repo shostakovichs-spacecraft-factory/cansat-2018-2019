@@ -27,7 +27,12 @@ void heartbeat_task(void *pvParameters)
 		counter++;
 		if (counter % 10 == 0)
 		{
-			mavlink_msg_zikush_icu_stats_encode(0, ZIKUSH_ICU, &msg, &global_stats);
+			static mavlink_zikush_icu_stats_t gstats_local;
+			taskENTER_CRITICAL();
+			gstats_local = global_stats;
+			taskEXIT_CRITICAL();
+
+			mavlink_msg_zikush_icu_stats_encode(0, ZIKUSH_ICU, &msg, &gstats_local);
 			router_route(&msg, 0);
 		}
 
