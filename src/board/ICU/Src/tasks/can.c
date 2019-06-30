@@ -104,6 +104,7 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 	CANMAVLINK_RX_FRAME_T receivedframe;
 	BaseType_t callcontextswitch = false;
 
+	//if(hcan.Instance->MSR & h)
 	while( (uxQueueSpacesAvailable(_rxqueue_handle) != 0) &&\
 			(HAL_CAN_GetRxMessage(&hcan, 0, &( receivedframe.Header ), receivedframe.Data) == HAL_OK) )
 		xQueueSendToBackFromISR(_rxqueue_handle, &receivedframe, &callcontextswitch);
