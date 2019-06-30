@@ -111,13 +111,13 @@ static int _read_event(ir9602_t * device, ir9602_evt_t * evt, bool should_block)
 
 
 static int _wait_for_events(ir9602_t * device, const ir9602_evt_code_t * expected_events,
-		bool should_block, ir9602_evt_t * evt
+		ir9602_evt_t * evt
 )
 {
 	int rcved_event_counter = 0;
 	int rc;
 again:
-	rc = _read_event(device, evt, should_block);
+	rc = _read_event(device, evt, true);
 	if (rc < 0)
 		return rc;
 
@@ -197,6 +197,29 @@ void ir9602_init(ir9602_t * device, void * user_arg,
 }
 
 
+int ir9602_flush_events(ir9602_t * device, ir9602_evt_t * evt_buff)
+{
+	int rcved_event_counter = 0;
+	int rc;
+again:
+	rc = _read_event(device, evt_buff, false);
+
+	if (-EWOULDBLOCK == rc)
+		return rcved_event_counter; // нас наконец-то сблочило
+
+	if (rc != -EOVERFLOW && rc != -EBADMSG)
+	{
+		// Произошло что-то более страшное, чем ошибка в разборе эвента
+		// это уже не к нам
+		return rc;
+	}
+
+	rcved_event_counter++;
+
+	goto again;
+}
+
+
 int ir9602_sbdwb(ir9602_t * device, const void * data, int data_size, ir9602_evt_errcode_t * err_evt)
 {
 	int rc;
@@ -219,7 +242,7 @@ int ir9602_sbdwb(ir9602_t * device, const void * data, int data_size, ir9602_evt
 	};
 
 	ir9602_evt_t evt;
-	rc = _wait_for_events(device, expected_events, true, &evt);
+	rc = _wait_for_events(device, expected_events, &evt);
 	if (rc < 0)
 		return rc;
 
@@ -255,7 +278,7 @@ int ir9602_sbdwb(ir9602_t * device, const void * data, int data_size, ir9602_evt
 
 	// Теперь ждем код ошибки (и только его)
 	// Делаем хитрый хак и используем тот же самый массив-список
-	rc = _wait_for_events(device, expected_events+2, true, &evt);
+	rc = _wait_for_events(device, expected_events+2, &evt);
 	if (rc < 0)
 		return rc;
 
@@ -289,7 +312,7 @@ int ir9602_sbdi(ir9602_t * device, ir9602_evt_sbdi_t * evt_sbdi)
 	};
 
 	ir9602_evt_t evt;
-	rc = _wait_for_events(device, expected_events, true, &evt);
+	rc = _wait_for_events(device, expected_events, &evt);
 	switch (evt.code)
 	{
 	case IR9602_EVT_ERROR:
@@ -330,7 +353,7 @@ int ir9602_sbdrb(ir9602_t * device, void * buffer, int buffer_size)
 	// ему команду, но еще не отправил \r\n
 	// поэтому считаем что лишнего он нам не накидает
 	ir9602_evt_t evt;
-	rc = _wait_for_events(device, NULL, false, &evt);
+	rc = ir9602_flush_events(device, &evt);
 	if (rc < 0 && rc != -EWOULDBLOCK)
 		return rc;
 

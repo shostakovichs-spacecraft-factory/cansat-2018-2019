@@ -150,6 +150,12 @@ static int _perform_sbd(ir9602_t * ir, const uint8_t * data, int datasize)
 	ir9602_user_struct_t * const user = (ir9602_user_struct_t*)ir->user_arg;
 
 	int rc;
+	// Сфлушим все эвенты из нашего RX буфера, которые могли успеть там накопиться
+	{
+		ir9602_evt_t evtbuf;
+		ir9602_flush_events(ir, &evtbuf);
+	}
+
 	if (user->accum_carret > 0) // Если есть что отправлять, то попытаемся
 	{
 		ir9602_evt_errcode_t err_evt;
@@ -244,7 +250,7 @@ void iridium_task(void *pvParameters)
 			const uint8_t msglen = mavmsg_len(&user->mavmsgbuf);
 			if (msglen > sizeof(user->accum) - user->accum_carret)
 			{
-				// Сообщение не влезает в буфер - сливаем его
+				// Сообщение не влезает в буфер - сливаем буфер
 				_perform_sbd(&_ir, user->accum, user->accum_carret);
 			}
 

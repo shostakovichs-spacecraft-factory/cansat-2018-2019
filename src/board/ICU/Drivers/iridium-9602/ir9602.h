@@ -56,6 +56,8 @@ void ir9602_init(ir9602_t * device, void * user_arg,
 		ir9602_evt_hook_t evt_hook
 );
 
+int ir9602_flush_events(ir9602_t * device, ir9602_evt_t * evt_buff);
+
 int ir9602_sbdwb(ir9602_t * device, const void * data, int data_size, ir9602_evt_errcode_t * err_evt);
 
 int ir9602_sbdi(ir9602_t * device, ir9602_evt_sbdi_t * evt_sbdi);
