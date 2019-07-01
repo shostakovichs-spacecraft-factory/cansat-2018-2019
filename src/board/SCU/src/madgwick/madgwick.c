@@ -172,6 +172,7 @@ int madgwick_getErrorOri(quaternion_t *result, vector_t *real[], vector_t *measu
 
 	matrixToQuat(result, &_result);
 
+	matrix_delete(&_result);
 	matrix_delete(&temp);
 	matrix_delete(&F);
 	matrix_delete(&J);

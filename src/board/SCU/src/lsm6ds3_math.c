@@ -53,7 +53,7 @@ void lsm6ds3_scale_g(const struct lsm6ds3_g_conf_s * conf, int16_t * in, lsm6ds3
         fs_range = 0;
     };
 
-    lsm6ds3_float_t lsb_value = fs_range / (lsm6ds3_float_t)0x10000 ;
+    lsm6ds3_float_t lsb_value = fs_range / (lsm6ds3_float_t)0x10000 * 2 ;
 
     for (size_t i = 0; i < count; i++)
     {

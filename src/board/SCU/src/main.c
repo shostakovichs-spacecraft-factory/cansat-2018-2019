@@ -204,7 +204,7 @@ void madgwick_test()
 	UART_HandleTypeDef huart;
 	uart_config_default(&huart);
 	huart.Instance = USART3;
-	huart.Init.BaudRate = 9600;
+	huart.Init.BaudRate = 115200;
 	uart_init(&huart);
 
 
@@ -229,7 +229,7 @@ void madgwick_test()
 	mag_calib_scale(ddm, ddm);
 
 	ahrs_init();
-	ahrs_setKoefB(2.0);
+	ahrs_setKoefB(0.05);
 	ahrs_vectorActivate(AHRS_LIGHT, 0);
 	ahrs_vectorActivate(AHRS_MAG, 1);
 	ahrs_vectorActivate(AHRS_ACCEL, 1);
@@ -243,9 +243,9 @@ void madgwick_test()
 	vx.z = ddx[2];
 	vec_normalize(&vx);
 
-	vm.x = ddm[0];
-	vm.y = ddm[1];
-	vm.z = ddm[2];
+	vm.x = -ddm[2];
+	vm.y = -ddm[1];
+	vm.z = ddm[0];
 	vec_normalize(&vm);
 	ahrs_updateVecReal(AHRS_ACCEL, vx);
 	ahrs_updateVecReal(AHRS_MAG, vm);
@@ -269,7 +269,7 @@ void madgwick_test()
 			best_mag_values[i][1] = minf(ddm[i], best_mag_values[i][1]);
 		}
 	}*/
-
+	volatile uint32_t t = 0;
 	while(1)
 	{
 		uint32_t time_now = HAL_GetTick();
@@ -282,7 +282,7 @@ void madgwick_test()
 		lsm6ds3_scale_xl(&hlsm6.conf.xl, rd.xl, ddx, 3);
 		for(int i = 0; i < 3; i++)
 		{
-			ddg[i] *= 2 * M_PI;
+			ddg[i] *= 2 * M_PI / 360.0;
 		}
 		mag_calib_scale(ddm, ddm);
 		//trace_printf("%.3f\t%.3f\t%.3f\n", ddm[0], ddm[1], ddm[2]);
@@ -307,23 +307,32 @@ void madgwick_test()
 		vm.y = -ddm[1];
 		vm.z = ddm[0];
 		vec_normalize(&vm);
+
+		vg.x = ddg[0];
+		vg.y = ddg[1];
+		vg.z = ddg[2];
+
 		//trace_printf("Mag: \t%8.3f %8.3f %8.3f \n", vm.x, vm.y, vm.z);
+		t = HAL_GetTick();
 		ahrs_updateVecMeasured(AHRS_ACCEL, vx);
 		ahrs_updateVecMeasured(AHRS_MAG, vm);
-		ahrs_updateGyroData(vec_init(0,0,0));
+		ahrs_updateGyroData(vg);
 		ahrs_calculateOrientation((time_now - time_prev)/1000.0);
-
+		t -= HAL_GetTick();
 		sampleFreq = 1000 / (float)(time_now - time_prev);
-		MadgwickAHRSupdate(0, 0, 0, vx.x, vx.y, vx.z, vm.x, vm.y, vm.z);
-		quaternion_t result = quat_init(q0, q1, q2, q3);
-		//quaternion_t result = ahrs_getOrientation();
+		MadgwickAHRSupdate(vg.x, vg.y, vg.z, vx.x, vx.y, vx.z, vm.x, vm.y, vm.z);
+		//quaternion_t result = quat_init(q0, q1, q2, q3);
+		quaternion_t result = ahrs_getOrientation();
 		double r[3];
 		toEulerAngle(&result, &r[0], &r[1], &r[2]);
 		for(int i = 0; i < 3; i++)
 		{
 			r[i] *= 180 / M_PI;
 		}
-		trace_printf("\t%8.3lf %8.3lf %8.3lf \n", r[0], r[1], r[2]);
+
+		char str[100];
+		int count = sprintf(str, "%8.3lf %8.3lf %8.3lf \n", r[0], r[1], r[2]);
+		HAL_UART_Transmit(&huart, str, count, 10);
 		HAL_Delay(10);
 		time_prev = time_now;
 
