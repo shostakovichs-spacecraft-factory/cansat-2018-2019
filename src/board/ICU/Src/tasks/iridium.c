@@ -242,7 +242,7 @@ void iridium_task(void *pvParameters)
 //
 //		user->accum_carret = i;
 
-		const BaseType_t status = xQueueReceive(iridium_queue_handle, &_ir_user_struct.mavmsgbuf, 2000); //ICU_IR_TASK_PERIOD);
+		const BaseType_t status = xQueueReceive(iridium_queue_handle, &_ir_user_struct.mavmsgbuf, ICU_IR_TASK_PERIOD);
 		if (pdTRUE != status)
 		{
 			// Мы таймаутнулись - нужно сливать буфер даже если он не полный
