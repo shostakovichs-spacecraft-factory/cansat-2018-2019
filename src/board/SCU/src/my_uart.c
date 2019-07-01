@@ -37,10 +37,10 @@ void uart_pin_rx_init(GPIO_TypeDef *GPIOx, uint32_t pin)
 	pa_init.Speed = GPIO_SPEED_FAST;
 	HAL_GPIO_Init(GPIOx, &pa_init);
 }
-int uart_init(MY_UART *des)
+int uart_init(UART_HandleTypeDef *huart)
 {
 
-	int rc = HAL_UART_Init(&des->huart);
+	int rc = HAL_UART_Init(huart);
 	if(rc)
 	{
 		trace_printf("ERROR: can't init uart\n");

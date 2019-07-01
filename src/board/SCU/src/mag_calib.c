@@ -22,6 +22,21 @@ void mag_calib_init()
 {
 	mag_calib_soft = matrix_create(3,3);
 	mag_calib_hard = matrix_create(3,1);
+
+	*matrix_at(&mag_calib_soft, 0, 0) = 0.017091;
+	*matrix_at(&mag_calib_soft, 0, 1) = -0.000030;
+	*matrix_at(&mag_calib_soft, 0, 2) = -0.000757;
+	*matrix_at(&mag_calib_soft, 1, 0) = -0.000030;
+	*matrix_at(&mag_calib_soft, 1, 1) = 0.017535;
+	*matrix_at(&mag_calib_soft, 1, 2) = 0.000031;
+	*matrix_at(&mag_calib_soft, 2, 0) = -0.000757;
+	*matrix_at(&mag_calib_soft, 2, 1) = 0.000031;
+	*matrix_at(&mag_calib_soft, 2, 2) = 0.018660;
+
+
+	*matrix_at(&mag_calib_hard, 0, 0) = 3.184670;
+	*matrix_at(&mag_calib_hard, 1, 0) = 38.563712;
+	*matrix_at(&mag_calib_hard, 2, 0) = 10.748894;
 }
 
 void mag_calib_deinit()
@@ -33,29 +48,34 @@ void mag_calib_deinit()
 
 
 
-void mag_calib_scale(float *x, float *y, float *z)
+void mag_calib_scale(float *in, float *out)
 {
-	float a[3];
 	Matrixf t1 =
 	{
 		.height = 3,
 		.width = 1,
-		.arr = a,
+		.arr = in,
 	};
-	float b[] = {*x, *y ,*z};
 	Matrixf t2 =
 	{
 		.height = 3,
 		.width = 1,
-		.arr = b,
+		.arr = out,
+	};
+	float arr[3];
+	Matrixf t3 =
+	{
+		.height = 3,
+		.width = 1,
+		.arr = arr,
 	};
 
-	matrix_multiplicate(&mag_calib_soft, &t2, &t1);
-	matrix_add(&t1, &mag_calib_hard);
+	matrix_copy(&t1, &t2, 0);
 
-	*x = t1.arr[0];
-	*y = t1.arr[1];
-	*z = t1.arr[2];
+	matrix_sub(&t2, &mag_calib_hard);
+	matrix_multiplicate(&mag_calib_soft, &t2, &t3);
+	matrix_copy(&t3, &t2, 0);
+
 }
 
 void _mag_mat_rot_left(Matrixf *A, int i, int j, float c, float s)
@@ -105,7 +125,7 @@ void mag_calib_calibrate_lsm303c(struct lsm303c_handler_s *handler, int n, uint3
 	////////////////////////////////////
 	//Find koefs of equation of second order surface (ellipse)
 	////////////////////////////////
-	const int count = 9;
+	const int count = n;
 	matrix_make_identity(&mag_calib_soft);
 	matrix_make_zero(&mag_calib_hard);
 	Matrixf AA = matrix_create(n, 9);
@@ -152,7 +172,7 @@ void mag_calib_calibrate_lsm303c(struct lsm303c_handler_s *handler, int n, uint3
 		{
 			for(int j = 0; j < 9; j++)
 			{
-				*matrix_at(&A, i, j) = *matrix_at(&AA, i * shift, j);
+				*matrix_at(&A, i, j) = *matrix_at(&AA, i * shift + k, j);
 			}
 		}
 
@@ -185,17 +205,14 @@ void mag_calib_calibrate_lsm303c(struct lsm303c_handler_s *handler, int n, uint3
 	// Find diag form of bilinear form in orthonormal basis
 	// and it's transfer matrix
 	/////////////////////////////////////////////////
-	for(int i = 3; i < 6; i++)
-	{
-		x.arr[i] /= 2.0;
-	}
+
 	A = matrix_create(3,3);
-	*matrix_at(&A, 0, 1) = x.arr[3];
-	*matrix_at(&A, 1, 2) = x.arr[4];
-	*matrix_at(&A, 0, 2) = x.arr[5];
-	*matrix_at(&A, 1, 0) = x.arr[3];
-	*matrix_at(&A, 2, 1) = x.arr[4];
-	*matrix_at(&A, 2, 0) = x.arr[5];
+	*matrix_at(&A, 0, 1) = x.arr[3] / 2.0;
+	*matrix_at(&A, 1, 2) = x.arr[4] / 2.0;
+	*matrix_at(&A, 0, 2) = x.arr[5] / 2.0;
+	*matrix_at(&A, 1, 0) = x.arr[3] / 2.0;
+	*matrix_at(&A, 2, 1) = x.arr[4] / 2.0;
+	*matrix_at(&A, 2, 0) = x.arr[5] / 2.0;
 	for(int i = 0; i < 3; i++)
 	{
 		*matrix_at(&A, i, i) = x.arr[i];
@@ -208,7 +225,7 @@ void mag_calib_calibrate_lsm303c(struct lsm303c_handler_s *handler, int n, uint3
 	}
 	float norm2 = 0.5 * (matrix_norm(&A) - norm1);
 	float K = norm2 / norm1 / MAG_CALIB_ACCURACY;
-	float N = logf(K) / logf(3/2.0);
+	float N = logf(K) / logf(3.0/2.0);
 	assert(N < INT_MAX);
 
 	Matrixf A_trans = matrix_create(3, 3);
@@ -273,6 +290,7 @@ void mag_calib_calibrate_lsm303c(struct lsm303c_handler_s *handler, int n, uint3
 		s += btn.arr[i] * btn.arr[i];
 	}
 	matrix_copy(&A_trans, &mag_calib_soft, 0);
+	s = sqrtf(s);
 	for(int i = 0; i < 3; i++)
 	{
 		mag_calib_hard.arr[i] = -btn.arr[i] / s;

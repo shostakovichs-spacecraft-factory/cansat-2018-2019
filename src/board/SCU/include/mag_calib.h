@@ -14,7 +14,7 @@ void mag_calib_init();
 
 void mag_calib_deinit();
 
-void mag_calib_scale(float *x, float *y, float *z);
+void mag_calib_scale(float *in, float *out);
 
 void mag_calib_calibrate_lsm303c(struct lsm303c_handler_s *handler, int n, uint32_t wait_ms);
 

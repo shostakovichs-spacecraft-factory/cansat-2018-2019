@@ -21,7 +21,7 @@
 //---------------------------------------------------------------------------------------------------
 // Definitions
 
-#define betaDef		10.0f		// 2 * proportional gain
+#define betaDef		5.0f		// 2 * proportional gain
 volatile float sampleFreq = 200.0f;
 //---------------------------------------------------------------------------------------------------
 // Variable definitions

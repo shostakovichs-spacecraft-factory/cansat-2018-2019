@@ -29,7 +29,7 @@ void uart_pin_tx_init(GPIO_TypeDef *GPIOx, uint32_t pin);
 
 int uart_config_default(UART_HandleTypeDef *huart);
 
-int uart_init(MY_UART* des);
+int uart_init(UART_HandleTypeDef *huart);
 
 int my_uart_tx(MY_UART *des, uint8_t *buffer, size_t size, uint32_t timeout);
 

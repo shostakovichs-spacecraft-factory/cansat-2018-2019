@@ -13,6 +13,7 @@
 #define MAX_COUNT 3
 struct{
 	float koef_B;
+	float koef_gyro_comp;
 	quaternion_t orientation;
 
 	vector_t real_vectros[MAX_COUNT];
@@ -22,7 +23,7 @@ struct{
 	float portions[MAX_COUNT];
 
 	int is_vector_used[MAX_COUNT];
-
+	vector_t gyro_compensate;
 
 }ahrs_parametres;
 
@@ -30,6 +31,7 @@ void ahrs_init()
 {
 	ahrs_parametres.gyro_data = vec_zero();
 	ahrs_parametres.koef_B = 0.3;
+	ahrs_parametres.koef_gyro_comp = 0.5;
 	ahrs_parametres.orientation = quat_init(1,0,0,0);
 
 	for(int i = 0; i < MAX_COUNT; i++)
@@ -37,6 +39,7 @@ void ahrs_init()
 		ahrs_parametres.portions[i] = 1;
 		ahrs_parametres.is_vector_used[i] = 0;
 	}
+	ahrs_parametres.gyro_compensate = vec_zero();
 };
 void ahrs_deinit()
 {
@@ -68,8 +71,17 @@ quaternion_t ahrs_getOrientation()
 {
 	return ahrs_parametres.orientation;
 }
+
+
+
 int ahrs_calculateOrientation(float dt)
 {
+	//gyro compensate
+	ahrs_parametres.gyro_data.x -= ahrs_parametres.koef_gyro_comp * ahrs_parametres.gyro_compensate.x;
+	ahrs_parametres.gyro_data.y -= ahrs_parametres.koef_gyro_comp * ahrs_parametres.gyro_compensate.y;
+	ahrs_parametres.gyro_data.z -= ahrs_parametres.koef_gyro_comp * ahrs_parametres.gyro_compensate.z;
+
+
 	vector_t *measured[MAX_COUNT];
 	vector_t *real[MAX_COUNT];
 	float portions[MAX_COUNT];
@@ -95,6 +107,12 @@ int ahrs_calculateOrientation(float dt)
 	quat_normalize(&result);
 
 	ahrs_parametres.orientation = result;
+	result = quat_getConj(&result);
+	quaternion_t gyro_data_calc = quat_mulByQuat(&result, &error);
+
+	ahrs_parametres.gyro_compensate.x = gyro_data_calc.x;
+	ahrs_parametres.gyro_compensate.y = gyro_data_calc.y;
+	ahrs_parametres.gyro_compensate.z = gyro_data_calc.z;
 
 	return err;
 }
