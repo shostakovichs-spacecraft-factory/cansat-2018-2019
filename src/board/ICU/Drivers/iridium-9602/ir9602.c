@@ -342,7 +342,7 @@ int ir9602_sbdrb(ir9602_t * device, void * buffer, int buffer_size)
 	const char * cmd = "AT+SBDRB";
 	while (*cmd != 0)
 	{
-		rc = device->putch(device, *cmd++);
+		rc = device->putch(device->user_arg, *cmd++);
 		if (rc < 0)
 			return rc;
 	}
@@ -361,7 +361,7 @@ int ir9602_sbdrb(ir9602_t * device, void * buffer, int buffer_size)
 	cmd = "\r\n";
 	while (*cmd != 0)
 	{
-		rc = device->putch(device, *cmd++);
+		rc = device->putch(device->user_arg, *cmd++);
 		if (rc < 0)
 			return rc;
 	}
@@ -379,7 +379,7 @@ int ir9602_sbdrb(ir9602_t * device, void * buffer, int buffer_size)
 		return -EMSGSIZE;
 
 	// вычитываем тело сообщения
-	rc = _read_blob(device, buffer, buffer_size, true);
+	rc = _read_blob(device, buffer, msglen, true);
 	if (rc < 0)
 		return rc;
 
@@ -397,4 +397,39 @@ int ir9602_sbdrb(ir9602_t * device, void * buffer, int buffer_size)
 
 	// А совпало - так совпало!
 	return msglen;
+}
+
+
+int ir9602_sbdtc(ir9602_t * device)
+{
+	int rc;
+
+	// Готовим команду и отправляем
+	ir9602_cmd_t cmd = {
+			.code = IR9602_CMD_SBDTC,
+	};
+	rc = _send_cmd(device, &cmd);
+	if (rc < 0 )
+		return rc;
+
+	// ждем события READY или кода ошибки, если что-то не так
+	ir9602_evt_code_t expected_events[] = {
+			IR9602_EVT_SBDTC,
+			IR9602_EVT_ERROR,
+			0
+	};
+
+	ir9602_evt_t evt;
+	rc = _wait_for_events(device, expected_events+2, &evt);
+	if (rc < 0)
+		return rc;
+
+	switch (evt.code)
+	{
+	default:
+	case IR9602_EVT_ERROR:
+		return -EBADMSG;
+	}
+
+	return evt.arg.sbdtc.size;
 }

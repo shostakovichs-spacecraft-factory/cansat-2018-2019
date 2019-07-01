@@ -169,7 +169,7 @@ static int _perform_sbd(ir9602_t * ir, const uint8_t * data, int datasize)
 	// Так и так, считаем что отправлять нам теперь уж точно нечего
 	user->accum_carret = 0;
 
-	ir9602_evt_sbdi_t evt_sbdi;
+	ir9602_evt_sbdi_t evt_sbdi = {};
 	rc = ir9602_sbdi(ir, &evt_sbdi);
 	if (rc < 0)
 	{
@@ -188,8 +188,7 @@ static int _perform_sbd(ir9602_t * ir, const uint8_t * data, int datasize)
 		return 0; // Если ничего не пришло - больше ничего и не делаем
 
 	// Теперь, если что-то нам пришло..
-	global_stats.iridium_rx++;
-
+	global_stats.iridium_rx = evt_sbdi.mtmsn;
 
 	// Вытяигваем сообщение
 	rc = ir9602_sbdrb(ir, user->accum, sizeof(user->accum));
@@ -198,7 +197,6 @@ static int _perform_sbd(ir9602_t * ir, const uint8_t * data, int datasize)
 		global_stats.iridium_errors++;
 		return rc;
 	}
-
 
 	// Ничего себе! оно вытянулось!
 	for (int i = 0; i < rc; i++)
@@ -238,7 +236,13 @@ void iridium_task(void *pvParameters)
 	// portTickType timemark = xTaskGetTickCount();
 	for(;;)
 	{
-		const BaseType_t status = xQueueReceive(iridium_queue_handle, &_ir_user_struct.mavmsgbuf, ICU_IR_TASK_PERIOD);
+//		int i;
+//		for (i = 0; i < 100; i++)
+//			user->accum[i] = i;
+//
+//		user->accum_carret = i;
+
+		const BaseType_t status = xQueueReceive(iridium_queue_handle, &_ir_user_struct.mavmsgbuf, 2000); //ICU_IR_TASK_PERIOD);
 		if (pdTRUE != status)
 		{
 			// Мы таймаутнулись - нужно сливать буфер даже если он не полный

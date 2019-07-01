@@ -30,6 +30,8 @@ typedef enum
 	IR9602_EVT_ERRCODE,
 	//! Сообщение о проведенной SBD сессии
 	IR9602_EVT_SBDI,
+	//! Сообщение вида size=<size> о размере скопированного сообщения
+	IR9602_EVT_SBDTC,
 } ir9602_evt_code_t;
 
 
@@ -133,6 +135,13 @@ typedef struct
 	uint16_t mt_queed;
 } ir9602_evt_sbdi_t;
 
+
+//! Сообщение об успешном копировании SBD буфера MO в MT
+typedef struct
+{
+	uint16_t size;
+} ir9602_evt_sbdtc_t;
+
 // ===========================================================================
 // ===========================================================================
 // ===========================================================================
@@ -150,6 +159,7 @@ typedef struct
 		ir9602_evt_ciev_t ciev;
 		ir9602_evt_errcode_t errcode;
 		ir9602_evt_sbdi_t sbdi;
+		ir9602_evt_sbdtc_t sbdtc;
 	} arg;
 } ir9602_evt_t;
 

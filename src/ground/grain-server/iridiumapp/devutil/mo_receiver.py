@@ -52,7 +52,7 @@ def main(iface: str, port: int, blog_stream: typing.BinaryIO = None):
         server_address=(iface, port,),
         request_handler_cls=ReqHandler,
         bind_and_activate=True,
-        send_ack=True,
+        send_ack=False,
         blog_stream=blog_stream,
     )
 

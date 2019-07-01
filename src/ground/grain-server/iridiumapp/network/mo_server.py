@@ -3,9 +3,9 @@ import socket
 import logging
 from socketserver import BaseRequestHandler, TCPServer
 
-from iridium.messages.serialization import MessageParser as SBDMessageParser, MessageSerializer as SBDMessageSerializer
-from iridium.messages.mobile_originated import Message, MOMessage, MOMessageConfirmation
-from iridium.messages.enum import ConfirmationStatus
+from ..messages.serialization import MessageParser as SBDMessageParser, MessageSerializer as SBDMessageSerializer
+from ..messages.mobile_originated import Message, MOMessage, MOMessageConfirmation
+from ..messages.enum import ConfirmationStatus
 
 _log = logging.getLogger(__name__)
 
@@ -99,7 +99,7 @@ class MOServiceServer(TCPServer):
             server_address,
             request_handler_cls: typing.Type[BaseRequestHandler],
             bind_and_activate=True,
-            send_ack=True,
+            send_ack=False,
             blog_stream: typing.BinaryIO = None
     ):
         """

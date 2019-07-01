@@ -64,4 +64,6 @@ int ir9602_sbdi(ir9602_t * device, ir9602_evt_sbdi_t * evt_sbdi);
 
 int ir9602_sbdrb(ir9602_t * device, void * buffer, int buffer_size);
 
+int ir9602_sbdtc(ir9602_t * device);
+
 #endif /* IR9602_H_ */
