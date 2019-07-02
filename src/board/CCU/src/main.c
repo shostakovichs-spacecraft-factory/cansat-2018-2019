@@ -51,7 +51,6 @@ int main(int argc, char* argv[])
 
 	spectrum_init_capture();
 	CAMERA hcam;
-	camera_system_init(&hcam);
 	can_init();
 
 
@@ -66,7 +65,6 @@ int main(int argc, char* argv[])
 			can_spectrum_request = SPRQ_NO;
 		}
 
-		camera_system_update(&hcam);
 
 		//TODO add cam requests processing
 
