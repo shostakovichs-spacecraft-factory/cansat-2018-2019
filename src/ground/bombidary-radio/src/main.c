@@ -4,7 +4,10 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <string.h>
+#include <errno.h>
 
 #include <pigpio.h>
 #include <sx1268.h>
@@ -34,7 +37,7 @@ int main(int argc, char ** argv)
 	if (( err = gpioInitialise() ) < 0)
 	{
 		printf("pigpio initialisation failed with code %d! Exitting\n", err);
-		return 0;
+		return err;
 	}
 
 	int spihandle = spiOpen(0,32000, (1 << 5)); //spi0.0@10kHz, self-controlling CS
@@ -64,6 +67,10 @@ int main(int argc, char ** argv)
 	sx1268_init(&radio);
 
 	const char* hostname="192.168.0.1";
+
+	if(argc > 1)
+		hostname = argv[1];
+
 	const char* portname="11000";
 	struct addrinfo hints;
 	memset(&hints,0,sizeof(hints));
@@ -75,19 +82,55 @@ int main(int argc, char ** argv)
 	err = getaddrinfo(hostname,portname,&hints,&addr);
 
 	int sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
-	printf("sock: %d   addr err: %d\n", sock, err);
+	printf("addr: %s	port: %s	sock: %d   addr err: %d\n", hostname, portname, sock, err);
 
+	char * filename = "./lastlog.bin";
+
+	if(argc > 2)
+		hostname = argv[2];
+
+	int file = open(filename, O_WRONLY | O_CREAT | O_EXCL, S_IROTH);
+	if(file != 0 && errno == EEXIST)
+	{
+		printf("File %s already exists, I wouldn't overwrite it\n", filename);
+		return errno;
+	}
+	printf("filename: %s	file: %d\n", filename, file);
+
+	bool verbose = true;
+	if(argc > 3)
+		verbose = strcmp(argv[3], "-v") == 0;
 
 	while(1) {
 		if( RXLEN(radio) != 0)
 		{
+			time_t current_time;
+			struct tm * time_info;
+			char timeString[9];  // space for "HH:MM:SS\0"
+
+			time(&current_time);
+			time_info = localtime(&current_time);
+
+			strftime(timeString, sizeof(timeString), "%H:%M:%S", time_info);
+
 			int rxlen = RXLEN(radio);
 			sx1268_status_t status = sx1268_receive(&radio, tmpbuff, rxlen);
+			printf("%s; received %d bytes; status %d\n", timeString, rxlen, status);
+
 			int res = sendto(sock, tmpbuff, rxlen, 0, addr->ai_addr, addr->ai_addrlen);
-			//puts(tmpbuff);
-			printf("Forwarded %d bytes\n", rxlen);
+			if(res != rxlen)
+				printf("Pushed to socket, res %d\n", res);
+
+			res = write(file, tmpbuff, rxlen);
+			if(res != rxlen)
+				printf("Writed to file, res %d\n", res);
+			else
+			{
+				if(fsync(file) != 0)
+					printf("fsync failed with %d\n", errno);
+			}
 		}
-		usleep(1000);
+		usleep(500);
 	}
 
 

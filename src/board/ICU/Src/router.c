@@ -122,7 +122,9 @@ static bool _table_CAN(mavlink_message_t * msg)
 {
 	if (NULL == can_task_handle || NULL == can_queue_handle)
 		return false;
-	return true;
+
+	if(msg->sysid != 0)
+		return true;
 
 	// На данный момент в CAN не форвардится ничего
 	return false;
