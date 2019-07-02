@@ -18,12 +18,12 @@ class ReqHandler(BaseRequestHandler):
         if hdr:
             _log.info(
                 "hdr: \n"
-                f"\t mtmsn: {hdr.mtmsn}\n"
-                f"\t momsn: {hdr.momsn}\n"
-                f"\t session status: {hdr.session_status}\n"
-                f"\t imei: {hdr.imei}\n"
-                f"\t cdr: {hdr.cdr}\n"
-                f"\t time of session: {hdr.time_of_session}\n"
+                "\t mtmsn: %s\n" % hdr.mtmsn
+                "\t momsn: %s\n" % hdr.momsn
+                "\t session status: %s\n" % hdr.session_status
+                "\t imei: %s\n" % hdr.imei
+                "\t cdr: %s\n" % hdr.cdr
+                "\t time of session: %s\n" % hdr.time_of_session
             )
         else:
             _log.warning("no header present")
@@ -32,16 +32,16 @@ class ReqHandler(BaseRequestHandler):
         if loc:
             _log.info(
                 "loc info:\n"
-                f"\t lon: {loc.lon}\n"
-                f"\t lat: {loc.lat}\n"
-                f"\t CEP r: {loc.CEP_radius}\n"
+                "\t lon: %s\n" % loc.lon
+                "\t lat: %s\n" % loc.lat
+                "\t CEP r: %d\n" % loc.CEP_radius
             )
         else:
             _log.warning("no location info present")
 
         pay = msg.payload
         if pay:
-            _log.info(f"payload: {pay.raw_payload}")
+            _log.info("payload: %s" % pay.raw_payload)
         else:
             _log.warning("no payload present")
 

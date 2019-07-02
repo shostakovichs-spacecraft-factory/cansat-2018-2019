@@ -29,22 +29,22 @@ def main(host: str, port: int, imei: str, data: bytes):
         else:
             _log.info(
                 "message header:\n"
-                f"\t uid: {hdr.uid}\n"
-                f"\t imei: {hdr.imei}\n"
-                f"\t flags: {hdr.flags}\n"
+                "\t uid: %s\n" % hdr.uid
+                "\t imei: %s\n" % hdr.imei
+                "\t flags: %s\n" % hdr.flags
             )
 
         prio = msg.prio_ie
         if not prio:
             _log.info("priority ie is not present")
         else:
-            _log.info(f"prio: {prio.priority_level}")
+            _log.info("prio: %s" % prio.priority_level)
 
         pload = msg.payload_ie
         if not pload:
             _log.info("payload ie is not present")
         else:
-            _log.info(f"payload: {pload.payload_data}")
+            _log.info("payload: %s" % pload.payload_data)
 
         _log.info("prepearing client")
         client = MTClient(host, port)
@@ -56,10 +56,10 @@ def main(host: str, port: int, imei: str, data: bytes):
         cie = conf_msg.confirmation_ie
         _log.info(
             "conf:\n"
-            f"\t uid: {cie.uid}\n"
-            f"\t imei: {cie.imei}\n"
-            f"\t status or queue number: {cie.status_or_queue_number}\n"
-            f"\t ref-id: {cie.ref_id}\n"
+            "\t uid: %s\n" % cie.uid
+            "\t imei: %s\n" % cie.imei
+            "\t status or queue number: %s\n" % cie.status_or_queue_number
+            "\t ref-id: %s\n" % cie.ref_id
         )
 
     except Exception:

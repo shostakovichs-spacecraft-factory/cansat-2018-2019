@@ -37,10 +37,10 @@ def power_bus_control(busid, state):
     cie = conf_msg.confirmation_ie
     _log.info(
         "conf:\n"
-        f"\t uid: {cie.uid}\n"
-        f"\t imei: {cie.imei}\n"
-        f"\t status or queue number: {cie.status_or_queue_number}\n"
-        f"\t ref-id: {cie.ref_id}\n"
+        "\t uid: %s\n" % cie.uid
+        "\t imei: %s\n" % cie.imei
+        "\t status or queue number: %s\n" % cie.status_or_queue_number
+        "\t ref-id: %s\n" % cie.ref_id
     )
 
 

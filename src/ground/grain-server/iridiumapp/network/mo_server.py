@@ -12,10 +12,10 @@ _log = logging.getLogger(__name__)
 
 class _MOTcpRequestHandler(BaseRequestHandler):
     """ Хендлер TCP сообщений от иридиумного гейтевея """
-    serializer: SBDMessageSerializer
+    serializer = None
 
     def __init__(self, request, client_address, server):
-        srv: MOServiceServer = server
+        srv = server
         self.parser = srv.parser
         self.serializer = srv.serializer
         self.send_ack = srv.send_ack
@@ -53,7 +53,7 @@ class _MOTcpRequestHandler(BaseRequestHandler):
 
     def read_all(self):
         """ Парсинг SBD сообщения из всех байт полученных в сокет """
-        sock: socket.socket = self.request
+        sock = self.request # type: socket.socket
 
         # Читаем все что передал нам гейтвей иридиума
         accum = bytes()
@@ -81,7 +81,7 @@ class _MOTcpRequestHandler(BaseRequestHandler):
         try:
             msg = MOMessageConfirmation(conf_status)
             msg_data = self.serializer.serialize(msg)
-            sock: socket.socket = self.request
+            sock = self.request  # type: socket.socket
             sock.send(msg_data)
         except OSError:
             _log.warning("Unable to send ACK message", exc_info=True)

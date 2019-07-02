@@ -19,7 +19,7 @@ def build_req_handler_cls(mav_handler):
 
     class ReqHandler(BaseRequestHandler):
         def handle(self):
-            msg: MOMessage = self.request
+            msg = self.request
 
             hdr = msg.header
             if not hdr:
