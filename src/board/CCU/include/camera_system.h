@@ -22,4 +22,5 @@ enum{
 
 void camera_system_init(CAMERA *hcam);
 
+void camera_system_update(CAMERA *hcam);
 #endif

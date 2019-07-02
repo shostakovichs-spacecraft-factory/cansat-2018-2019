@@ -11,6 +11,7 @@
 
 #include <mavlink/zikush/mavlink.h>
 #include <canmavlink_hal.h>
+#include "can.h"
 
 
 #define CAM_BUFFER_SIZE 100
@@ -116,6 +117,7 @@ void camera_send_photo(CAMERA *hcam) {
 
 void camera_system_update(CAMERA *hcam)
 {
+	camera_request = can_zenithcam_request ? CAMRQ_TAKE_PHOTO : CAMRQ_NO;
 	switch(camera_request)
 	{
 	case CAMRQ_TAKE_PHOTO:
@@ -132,6 +134,7 @@ void camera_system_update(CAMERA *hcam)
 		{
 			camera_status = CAMST_ERROR;
 		}
+		camera_request = CAMRQ_SEND_PHOTO;
 	}
 	/* no break */
 	case CAMRQ_SEND_PHOTO:
