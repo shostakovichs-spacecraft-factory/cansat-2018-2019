@@ -2,6 +2,8 @@
 
 #include <FreeRTOSConfig.h>
 
+#include <zikush_config.h>
+
 /**
   * Initializes the Global MSP.
   */
@@ -43,7 +45,7 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
 		__HAL_AFIO_REMAP_CAN1_3();
 
 		/* CAN1 interrupt Init */
-		HAL_NVIC_SetPriority(USB_LP_CAN1_RX0_IRQn, configMAX_SYSCALL_INTERRUPT_PRIORITY + 1, 0);
+		HAL_NVIC_SetPriority(USB_LP_CAN1_RX0_IRQn, ICU_CAN_IRQ_PRIO, 0);
 		HAL_NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
 	}
 }

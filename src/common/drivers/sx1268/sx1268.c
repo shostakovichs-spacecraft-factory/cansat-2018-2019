@@ -705,7 +705,7 @@ void sx1268_event(sx1268_t * self)
 	if(!self->fifo_tx.empty)
 	{
 		_critical_exit(self);
-		HAL_Delay(70);
+		//HAL_Delay(70);
 		_critical_exit(self);
 
 		_rxen_write(self, false);

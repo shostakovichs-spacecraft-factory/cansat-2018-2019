@@ -12,9 +12,11 @@
 #include <canmavlink_hal.h>
 #include <spectrum.h>
 #include <usart.h>
+
 #include <can.h>
 
 #include "zikush_config.h"
+#include "../../SCU_real/include/camera_system.h"
 
 /* coprocessor control register (fpu) */
 #ifndef SCB_CPACR
@@ -26,6 +28,7 @@ void SysTick_Handler(void)
 {
 	HAL_IncTick();
 }
+
 
 int main(int argc, char* argv[])
 {
@@ -47,7 +50,9 @@ int main(int argc, char* argv[])
 #endif
 
 	spectrum_init_capture();
+	CAMERA hcam;
 	can_init();
+
 
 	while(true)
 	{
@@ -59,6 +64,7 @@ int main(int argc, char* argv[])
 																can_spectrum_processing_x_start, can_spectrum_processing_x_end);
 			can_spectrum_request = SPRQ_NO;
 		}
+
 
 		//TODO add cam requests processing
 

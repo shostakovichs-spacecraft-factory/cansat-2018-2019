@@ -27,6 +27,8 @@ void can_task (void *pvParameters)
 	CANMAVLINK_RX_FRAME_T receivedframe;
 	mavlink_message_t msg;
 
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 	MX_CAN_Init();
 	can_init();
 
@@ -104,9 +106,17 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 	CANMAVLINK_RX_FRAME_T receivedframe;
 	BaseType_t callcontextswitch = false;
 
-	while( (uxQueueSpacesAvailable(_rxqueue_handle) != 0) &&\
-			(HAL_CAN_GetRxMessage(&hcan, 0, &( receivedframe.Header ), receivedframe.Data) == HAL_OK) )
+	if(hcan.Instance->RF0R & CAN_RF0R_FOVR0) //Handling overrun condition
+		hcan.Instance->RF0R |= CAN_RF0R_RFOM0;
+
+	uint8_t filllevel = hcan.Instance->RF0R & CAN_RF0R_FMP0;
+	for(uint8_t i = 0; i < filllevel; i++)
+	{
+		if( HAL_CAN_GetRxMessage(&hcan, CAN_RX_FIFO0, &( receivedframe.Header ), receivedframe.Data) != HAL_OK)
+			continue;
+
 		xQueueSendToBackFromISR(_rxqueue_handle, &receivedframe, &callcontextswitch);
+	}
 
 	xTaskNotifyFromISR(can_task_handle, 0, eNoAction, &callcontextswitch);
 

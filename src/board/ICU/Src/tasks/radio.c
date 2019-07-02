@@ -34,6 +34,8 @@ void radio_task (void *pvParameters)
 	static mavlink_message_t msg;
 	static uint32_t notifications = 0;
 
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 	MX_SPI2_Init();
 	MX_GPIO_Init();
 
@@ -191,6 +193,6 @@ static void MX_GPIO_Init(void)
 	HAL_GPIO_Init(RADIO_IRQ_GPIO_Port, &GPIO_InitStruct);
 
 	/* EXTI interrupt init*/
-	HAL_NVIC_SetPriority(EXTI15_10_IRQn, configMAX_SYSCALL_INTERRUPT_PRIORITY + 1, 0);
+	HAL_NVIC_SetPriority(EXTI15_10_IRQn, ICU_RADIO_IRQ_PRIO, 0);
 	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 }

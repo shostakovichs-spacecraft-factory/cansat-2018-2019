@@ -9,6 +9,8 @@
 
 void heartbeat_task(void *pvParameters)
 {
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 	int counter = 0;
 	while(1)
 	{
@@ -25,7 +27,7 @@ void heartbeat_task(void *pvParameters)
 		router_route(&msg, 0);
 
 		counter++;
-		if (counter % 10 == 0)
+		if (counter % 5 == 0)
 		{
 			static mavlink_zikush_icu_stats_t gstats_local;
 			taskENTER_CRITICAL();

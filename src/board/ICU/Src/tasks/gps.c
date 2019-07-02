@@ -32,6 +32,8 @@ void gps_task (void *pvParameters)
 	mavlink_hil_gps_t hil_gps;
 	mavlink_message_t msg;
 
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 	uart_init();
 
 	while(1)
@@ -158,6 +160,6 @@ static void uart_init(void)
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_RXNE);
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_ERR);
 
-	HAL_NVIC_SetPriority(USART3_IRQn, 0, 0);
+	HAL_NVIC_SetPriority(USART3_IRQn, ICU_GPS_IRQ_PRIO, 0);
 	HAL_NVIC_EnableIRQ(USART3_IRQn);
 }

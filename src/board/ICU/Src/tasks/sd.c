@@ -26,6 +26,8 @@ void sd_task (void *pvParameters)
 	static uint8_t buf[MAVLINK_MAX_PACKET_LEN];
 	static mavlink_message_t msg;
 
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 	MX_SDIO_SD_Init();
 	MX_FATFS_Init();
 

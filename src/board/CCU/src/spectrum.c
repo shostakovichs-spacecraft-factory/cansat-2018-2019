@@ -182,7 +182,7 @@ void spectrum_send_photo() {
 
 		encdata.seqnr = frame;
 		mavlink_msg_encapsulated_data_encode(0, ZIKUSH_CCU, &msg, &encdata);
-		//can_mavlink_transmit(&msg);
+		//can_mavlink_transmit(&msg);//FIXME Is it ok?
 #ifdef CCU_TESTMODE
 		usart3_mavlink_transmit(&msg);
 #endif
@@ -281,7 +281,7 @@ static void _dcmi_dma_enable(void)
 	DCMI->CR |= DCMI_CR_CAPTURE;
 
 	/* Enable the DMA global Interrupt */
-	HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0, 0);
+	HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, CCU_DMA_IRQ_PRIO, 0);
 	HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
 
 	// Enable HT and TC interrupts
