@@ -39,12 +39,12 @@ bool canlink_init(void)
 	CAN_InitTypeDef caninit =
 	{
 		.CAN_Prescaler = chipclocks.PCLK1_Frequency / PROBEWIDE_CAN_TICKRATE,
-		.CAN_Mode = CAN_OperatingMode_Normal,
+		.CAN_Mode = CAN_Mode_Normal,
 		.CAN_SJW = CAN_SJW_1tq,
 		.CAN_BS1 = CAN_BS1_5tq,
 		.CAN_BS2 = CAN_BS2_2tq,
 		.CAN_TTCM = DISABLE,
-		.CAN_ABOM = DISABLE,
+		.CAN_ABOM = ENABLE,
 		.CAN_AWUM = DISABLE,
 		.CAN_NART = ENABLE,
 		.CAN_RFLM = DISABLE,
@@ -54,8 +54,10 @@ bool canlink_init(void)
 
 	CAN_FilterInitTypeDef canfilter =
 	{
-		.CAN_FilterMaskIdHigh = 0,
-		.CAN_FilterMaskIdLow = 0,
+		.CAN_FilterMaskIdLow = 0xFE,
+		.CAN_FilterIdLow = MAVLINK_MSG_ID_ZIKUSH_CMD_PREFLIGHTRESET | MAVLINK_MSG_ID_ZIKUSH_CMD_POWEROFF,
+		.CAN_FilterMaskIdHigh = 0xFF,
+		.CAN_FilterIdHigh = MAVLINK_MSG_ID_ZIKUSH_CMD_POWERBUS,
 		.CAN_FilterMode = CAN_FilterMode_IdMask,
 		.CAN_FilterActivation = ENABLE,
 		.CAN_FilterFIFOAssignment = CAN_Filter_FIFO0,

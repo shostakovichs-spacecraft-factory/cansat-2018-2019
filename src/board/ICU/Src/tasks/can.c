@@ -104,10 +104,17 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 	CANMAVLINK_RX_FRAME_T receivedframe;
 	BaseType_t callcontextswitch = false;
 
-	//if(hcan.Instance->MSR & h)
-	while( (uxQueueSpacesAvailable(_rxqueue_handle) != 0) &&\
-			(HAL_CAN_GetRxMessage(&hcan, 0, &( receivedframe.Header ), receivedframe.Data) == HAL_OK) )
+	if(hcan.Instance->RF0R & CAN_RF0R_FOVR0) //Handling overrun condition
+		hcan.Instance->RF0R |= CAN_RF0R_RFOM0;
+
+	uint8_t filllevel = hcan.Instance->RF0R & CAN_RF0R_FMP0;
+	for(uint8_t i = 0; i < filllevel; i++)
+	{
+		if( HAL_CAN_GetRxMessage(&hcan, CAN_RX_FIFO0, &( receivedframe.Header ), receivedframe.Data) != HAL_OK)
+			continue;
+
 		xQueueSendToBackFromISR(_rxqueue_handle, &receivedframe, &callcontextswitch);
+	}
 
 	xTaskNotifyFromISR(can_task_handle, 0, eNoAction, &callcontextswitch);
 
@@ -129,7 +136,7 @@ static void MX_CAN_Init(void)
 	hcan.Init.TimeSeg1 = CAN_BS1_5TQ;
 	hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
 	hcan.Init.TimeTriggeredMode = DISABLE;
-	hcan.Init.AutoBusOff = DISABLE;
+	hcan.Init.AutoBusOff = ENABLE;
 	hcan.Init.AutoWakeUp = DISABLE;
 	hcan.Init.AutoRetransmission = DISABLE;
 	hcan.Init.ReceiveFifoLocked = DISABLE;
