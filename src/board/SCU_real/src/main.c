@@ -40,7 +40,7 @@ void heartbeat_init(void)
 void heartbeat_send(void)
 {
 	const uint32_t freq = 1;
-	static uint32_t t_prev = 0, t_now;
+	static uint32_t t_prev = 0, t_now = 0;
 	if((t_now = HAL_GetTick()) - t_prev < 1000 / freq)
 	{
 		return;
