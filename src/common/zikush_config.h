@@ -4,8 +4,11 @@
 /* Probe-wide params */
 #define PROBEWIDE_CAN_TICKRATE	360000 //tickrate, not a bitrate. br = tr / (1 + 5 + 2) (according to current time quantum utilisation)
 
+
+
 /* Params for ICU */
-#define ICU_TASKS_HEARTBEAT_STACKSIZE 512
+#define ICU_TASKS_HEARTBEAT_STACKSIZE 128
+#define ICU_TASKS_HEARTBEAT_TASKPRIORITY	1
 
 #define ICU_TASKS_ICU_STACKSIZE	512
 #define ICU_TASKS_ICU_TASKPRIORITY	5
@@ -17,7 +20,7 @@
 
 #define ICU_TASKS_SD_STACKSIZE	512
 #define ICU_TASKS_SD_TASKPRIORITY	2
-#define ICU_TASKS_SD_QUEUE_SIZE	3 //defined in sizes of mavlink_msg_t
+#define ICU_TASKS_SD_QUEUE_SIZE	6 //defined in sizes of mavlink_msg_t
 
 #define ICU_TASKS_RADIO_STACKSIZE	512
 #define ICU_TASKS_RADIO_TASKPRIORITY	4
@@ -29,6 +32,7 @@
 #define ICU_TASKS_IRIDIUM_STACKSIZE	2048
 #define ICU_TASKS_IRIDIUM_TASKPRIORITY	5
 #define ICU_TASKS_IRIDIUM_QUEUE_SIZE	3 //defined in sizes of mavlink_msg_t
+
 
 #define ICU_IR_UART_RX_BUFFER_SIZE	200
 #define ICU_IR_UART_RX_QUEUE_WAIT	((1*40*1000)/portTICK_PERIOD_MS)
@@ -49,11 +53,13 @@
 
 #define ICU_RADIO_RXBUFFLEN	1
 #define ICU_RADIO_TXBUFFLEN	1024
+#define ICU_RADIO_IRQ_PRIO	14
 
-#define ICU_CAN_RXBUFFSIZE	34 //in sizes of CANMAVLINK_RX_FRAME_T
+#define ICU_CAN_RXBUFFSIZE	68 //in sizes of CANMAVLINK_RX_FRAME_T
+#define ICU_CAN_IRQ_PRIO	12
 
 #define ICU_GPS_FORCECHECKSUMM	false
-
+#define ICU_GPS_IRQ_PRIO	15
 
 /* Params for PCU */
 #define PCU_INA_ICU_ADDR	INA219_I2CADDR_A1_GND_A0_VSP
@@ -78,6 +84,9 @@
 #define CCU_SPECTRUM_Y_END		240
 #define CCU_SPECTRUM_X_START	0
 #define CCU_SPECTRUM_X_END		376
+
+#define CCU_DMA_IRQ_PRIO	0
+#define CCU_CAN_IRQ_PRIO	1
 
 #define CCU_TESTMODE	//Take picture every second and enable UART output
 

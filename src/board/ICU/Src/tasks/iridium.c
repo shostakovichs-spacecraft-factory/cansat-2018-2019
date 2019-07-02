@@ -221,6 +221,8 @@ void iridium_task(void *pvParameters)
 	(void)pvParameters;
 	ir9602_user_struct_t * const user = &_ir_user_struct;
 
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 	user->accum_carret = 0;
 	user->rx_queue = xQueueCreateStatic(ICU_IR_UART_RX_BUFFER_SIZE, 1,
 			user->rx_buffer, &user->rx_queue_object

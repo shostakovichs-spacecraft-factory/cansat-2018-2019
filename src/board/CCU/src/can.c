@@ -54,7 +54,7 @@ void can_init(void)
 	hcan.Init.BS1 = CAN_BS1_5TQ;
 	hcan.Init.BS2 = CAN_BS2_2TQ;
 	hcan.Init.TTCM = DISABLE;
-	hcan.Init.ABOM = DISABLE;
+	hcan.Init.ABOM = ENABLE;
 	hcan.Init.AWUM = DISABLE;
 	hcan.Init.NART = ENABLE;
 	hcan.Init.RFLM = DISABLE;
@@ -62,8 +62,10 @@ void can_init(void)
 	HAL_CAN_Init(&hcan);
 
 	CAN_FilterConfTypeDef filter = {
-		.FilterMaskIdHigh = 0,
-		.FilterMaskIdLow = 0,
+		.FilterMaskIdLow = 0xFF,
+		.FilterIdLow = MAVLINK_MSG_ID_ZIKUSH_CMD_TAKE_SPECTRUM,
+		.FilterMaskIdHigh = 0xFF,
+		.FilterIdHigh = MAVLINK_MSG_ID_ZIKUSH_CMD_TAKE_PHOTO,
 		.FilterMode = CAN_FILTERMODE_IDMASK,
 		.FilterActivation = ENABLE,
 		.FilterFIFOAssignment = CAN_FILTER_FIFO0,
@@ -73,6 +75,7 @@ void can_init(void)
 
 	HAL_CAN_ConfigFilter(&hcan, &filter);
 
+	HAL_NVIC_SetPriority(CAN1_RX0_IRQn, CCU_CAN_IRQ_PRIO);
 	NVIC_EnableIRQ(CAN1_RX0_IRQn);
 	hcan.Instance->IER |= CAN_IER_FMPIE0;
 }
