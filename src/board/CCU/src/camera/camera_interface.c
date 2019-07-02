@@ -195,7 +195,7 @@ int camera_run_command(CAMERA *cam, uint8_t command, uint8_t *args, uint8_t argn
 		uint8_t *reply, size_t count, int flush_flag)
 {
 	if(flush_flag)
-		skip_response(cam, 100, 1000);
+		skip_response(cam, 100, 50);
 
 
 	ssize_t sent = send_command(cam, command, args, argn);
