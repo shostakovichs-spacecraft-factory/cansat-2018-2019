@@ -65,11 +65,11 @@ int lsm6ds3_test()
 		lsm6ds3_gxl_pull(&hlsm6, &rd);
 		float dd[3];
 		lsm6ds3_scale_g(&hlsm6.conf.g, rd.g, dd, 3);
-		trace_printf("Gyro: %5.5f %5.5f %5.5f   ", dd[0], dd[1], dd[2]);
+		my_debug("Gyro: %5.5f %5.5f %5.5f   ", dd[0], dd[1], dd[2]);
 
 	    //lsm6ds3_read_regn(&hlsm6, 0x22, (uint8_t*)&rd, sizeof(rd)/2);
 		lsm6ds3_scale_xl(&hlsm6.conf.xl, rd.xl, dd, 3);
-		trace_printf("Axel: %5.5f %5.5f %5.5f\n", dd[0], dd[1], dd[2]);
+		my_debug("Axel: %5.5f %5.5f %5.5f\n", dd[0], dd[1], dd[2]);
 
 	}
 	return 0;
@@ -107,12 +107,12 @@ void madgwick_test()
 	lsm303c_m_push_conf(&hlsm3, &hlsm3.conf.m);
 
 
-	trace_printf("\n%s\n", "Hi!");
+	my_debug("\n%s\n", "Hi!");
 	HAL_Delay(5000);
 	mag_calib_init();
-	trace_printf("%s\n", "Begin mag calibration");
+	my_debug("%s\n", "Begin mag calibration");
 	//mag_calib_calibrate_lsm303c(&hlsm3, 27, 400);
-	trace_printf("%s\n", "End mag calibration");
+	my_debug("%s\n", "End mag calibration");
 	HAL_Delay(5000);
 
 
@@ -164,16 +164,16 @@ void madgwick_test()
 			ddg[i] *= 2 * M_PI;
 		}
 		mag_calib_scale(ddm, ddm);
-		trace_printf("Mag: \t%8.3f %8.3f %8.3f \n\n", ddm[0], ddm[1], ddm[2]);
+		my_debug("Mag: \t%8.3f %8.3f %8.3f \n\n", ddm[0], ddm[1], ddm[2]);
 		/*
-		trace_printf("Gyro: \t%8.3f %8.3f %8.3f \n", ddg[0], ddg[1], ddg[2]);
+		my_debug("Gyro: \t%8.3f %8.3f %8.3f \n", ddg[0], ddg[1], ddg[2]);
 
 	    //lsm6ds3_read_regn(&hlsm6, 0x22, (uint8_t*)&rd, sizeof(rd)/2);
-		trace_printf("Axel: \t%8.3f %8.3f %8.3f \n", ddx[0], ddx[1], ddx[2]);
+		my_debug("Axel: \t%8.3f %8.3f %8.3f \n", ddx[0], ddx[1], ddx[2]);
 
 
 
-		trace_printf("Mag: \t%8.3f %8.3f %8.3f \n\n", ddm[0], ddm[1], ddm[2]);*/
+		my_debug("Mag: \t%8.3f %8.3f %8.3f \n\n", ddm[0], ddm[1], ddm[2]);*/
 		vx.x = ddx[0];
 		vx.y = ddx[1];
 		vx.z = ddx[2];
@@ -194,7 +194,7 @@ void madgwick_test()
 		{
 			r[i] *= 180 / M_PI;
 		}
-	//	trace_printf("\t%8.3lf %8.3lf %8.3lf \n", r[0], r[1], r[2]);
+	//	my_debug("\t%8.3lf %8.3lf %8.3lf \n", r[0], r[1], r[2]);
 
 		time_prev = time_now;
 	}
@@ -215,7 +215,7 @@ void ads1115_test(I2C_HandleTypeDef * hi2c)
 		uint16_t data = ADS1x1x_read(&ads);
 
 		float result = mpx2100ap_compensate_pressure_flt(data);
-		trace_printf("pressure: %3.1f kPa %4X\n", result/1000, data);
+		my_debug("pressure: %3.1f kPa %4X\n", result/1000, data);
 	}
 
 }
@@ -305,7 +305,7 @@ void adc_iternal_test()
 		HAL_ADC_Start(&h);
 		rc = HAL_ADC_PollForConversion(&h, 3000);
 		if(rc)
-			trace_printf("First is bad\n");
+			my_debug("First is bad\n");
 		else
 		{
 			pa = HAL_ADC_GetValue(&h);
@@ -315,7 +315,7 @@ void adc_iternal_test()
 
 		rc = HAL_ADC_PollForConversion(&h, 3000);
 		if(rc)
-			trace_printf("Second is bad\n");
+			my_debug("Second is bad\n");
 		else
 		{
 			pb = HAL_ADC_GetValue(&h);
@@ -326,7 +326,7 @@ void adc_iternal_test()
 		if(k == n)
 		{
 
-			trace_printf("pressure: %8.4f\n", sum / s / (float)n);
+			my_debug("pressure: %8.4f\n", sum / s / (float)n);
 			k = 0;
 			sum = 0;
 		}
@@ -352,7 +352,7 @@ void bmp_test(I2C_HandleTypeDef * Hi2c)
 	while(1)
 	{
 		bme280_read(&descr_bme280, (char*)&data, sizeof(data));
-		trace_printf("%9f %9f %9f \n", data.pressure, data.temperature, data.humidity);
+		my_debug("%9f %9f %9f \n", data.pressure, data.temperature, data.humidity);
 	}
 
 	bme280_deinit(&descr_bme280);

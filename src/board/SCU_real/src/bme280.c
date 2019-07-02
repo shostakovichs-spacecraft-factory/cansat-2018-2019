@@ -94,7 +94,6 @@
 
 
 
-#define printf trace_printf
 
 /****************************************************************************
  * private declarations
@@ -156,7 +155,7 @@ int bme280_pull_raw_data( const struct bme280_dev_s * priv, struct bme280_raw_da
     rc = bme280_pull_sensor_conf(priv);
     if (rc < 0)
     {
-        /*error*/printf("ERROR: can`t properly open device: %d\n", rc);
+    	my_debug("ERROR: can`t properly open device: %d\n", rc);
         goto end;
     }
     bme280_config_default(bme280);
@@ -176,11 +175,11 @@ end:
 
     if (1)
     {
-        /*info*/printf("putting device to sleep, because no one is using it\n");
+    	my_debug("INFO: putting device to sleep, because no one is using it\n");
         // put device to sleep if no one in using it
         rc = bme280_push_sensor_mode(priv, BME280_MODE_SLEEP);
         if (rc < 0)
-            /*error*/printf("ERROR: can`t properly close device: %d\n", rc);
+        	my_debug("ERROR: can`t properly close device: %d\n", rc);
     }
 
     // in any case close is successful
@@ -271,7 +270,7 @@ end:
         break;
 
     default:
-        /*error*/printf("ERROR: invalid ioctl cmd: %d\n", cmd);
+    	my_debug("ERROR: invalid ioctl cmd: %d\n", cmd);
         rc = -ENOSYS;
         break;
     }
@@ -375,7 +374,7 @@ static int _bme280_do_read_i2c( const struct bme280_dev_s * priv, uint8_t regadd
     ret = HAL_I2C_Mem_Read(priv->setup_conf.iface.i2c.bus, priv->setup_conf.iface.i2c.devaddr,
     		regaddr, 1, data, datasize, TIMEOUT);
     if (ret)
-        /*error*/printf("ERROR: read_regs_i2c: i2c_writeread failed: %d\n", ret);
+    	my_debug("ERROR: read_regs_i2c: i2c_writeread failed: %d\n", ret);
 
     return ret;
 
@@ -389,7 +388,7 @@ static int _bme280_do_write_i2c( const struct bme280_dev_s * priv, uint8_t * ctr
     ret = HAL_I2C_Master_Transmit(priv->setup_conf.iface.i2c.bus,priv->setup_conf.iface.i2c.devaddr,
     		ctrl_pairs, ctrl_pairs_count*2,TIMEOUT);
     if(ret)
-        /*error*/printf("ERROR: write_regs_i2c: i2c_write failed: %d\n", ret);
+    	my_debug("ERROR: write_regs_i2c: i2c_write failed: %d\n", ret);
 
     return ret;
 
@@ -427,11 +426,11 @@ static int bme280_checkid( const struct bme280_dev_s *priv)
   if (rc < 0)
       return rc;
 
-  /*info*/printf("INFO: bme280 device id: 0x%02x\n", devid);
+  my_debug("INFO: bme280 device id: 0x%02x\n", devid);
   if (devid != (uint8_t)BME280_CHIP_ID)
     {
       /* ID is not Correct */
-      /*error*/printf("ERROR: Wrong Device ID: 0x%02X!\n", devid);
+	  my_debug("ERROR: Wrong Device ID: 0x%02X!\n", devid);
       return -ENODEV;
     }
 
@@ -447,7 +446,7 @@ int bme280_pull_calvals( struct bme280_dev_s *priv)
     rc = bme280_read_regn(priv, BME280_TEMP_PRESS_CALIB_DATA_ADDR, reg_data, BME280_TEMP_PRESS_CALIB_DATA_LEN);
     if (rc < 0)
     {
-        /*error*/printf("ERROR: Can`t load temperature and pressure calibration data: %d", rc);
+    	my_debug("ERROR: Can`t load temperature and pressure calibration data: %d", rc);
         return rc;
     }
 
@@ -469,7 +468,7 @@ int bme280_pull_calvals( struct bme280_dev_s *priv)
     rc = bme280_read_regn(priv, BME280_HUMIDITY_CALIB_DATA_ADDR, reg_data, BME280_HUMIDITY_CALIB_DATA_LEN);
     if (rc < 0)
     {
-        /*error*/printf("ERROR: Can`t load humidity calibration data: %d", rc);
+    	my_debug("ERROR: Can`t load humidity calibration data: %d", rc);
         return rc;
     }
 
@@ -501,7 +500,7 @@ int bme280_pull_sensor_conf( struct bme280_dev_s * priv)
     rc = bme280_read_regn(priv, BME280_CTRL_HUM_ADDR, reg_data, 4);
     if (rc < 0)
     {
-        /*error*/printf("ERROR: can`t get device settings: %d\n", rc);
+    	my_debug("ERROR: can`t get device settings: %d\n", rc);
         return rc;
     }
 
@@ -530,7 +529,7 @@ int bme280_push_sensor_conf( const struct bme280_dev_s * priv, int settings_set_
         rc = bme280_write_reg8(priv, BME280_CTRL_HUM_ADDR, ctrl_hum);
         if (rc < 0)
         {
-            /*error*/printf("ERROR: can`t set hum osr value: %d\n", rc);
+        	my_debug("ERROR: can`t set hum osr value: %d\n", rc);
             return rc;
 
         }
@@ -543,7 +542,7 @@ int bme280_push_sensor_conf( const struct bme280_dev_s * priv, int settings_set_
         rc = bme280_write_reg8(priv, BME280_CTRL_MEAS_ADDR, ctrl_meas);
         if (rc < 0)
         {
-            /*error*/printf("ERROR: can`t write ctrl_meas reg: %d\n", rc);
+        	my_debug("ERROR: can`t write ctrl_meas reg: %d\n", rc);
             return rc;
         }
     }
@@ -558,7 +557,7 @@ int bme280_push_sensor_conf( const struct bme280_dev_s * priv, int settings_set_
     rc = bme280_read_reg8(priv, BME280_CONFIG_ADDR, &cfg_reg);
     if (rc < 0)
     {
-        /*error*/printf("ERROR: can`t read cfg reg: %d\n", rc);
+    	my_debug("ERROR: can`t read cfg reg: %d\n", rc);
         return rc;
     }
 
@@ -572,7 +571,7 @@ int bme280_push_sensor_conf( const struct bme280_dev_s * priv, int settings_set_
     rc = bme280_write_reg8(priv, BME280_CONFIG_ADDR, cfg_reg);
     if (rc < 0)
     {
-        /*error*/printf("ERROR: can`t read cfg reg: %d\n", rc);
+    	my_debug("ERROR: can`t read cfg reg: %d\n", rc);
         return rc;
     }
 
@@ -587,7 +586,7 @@ int bme280_push_sensor_mode(const  struct bme280_dev_s * priv, bme280_mode_t mod
     rc = bme280_read_reg8(priv, BME280_CTRL_MEAS_ADDR, &ctrl_meas);
     if (rc < 0)
     {
-        /*error*/printf("ERROR: can`t read ctrl_meas reg :%d\n", rc);
+    	my_debug("ERROR: can`t read ctrl_meas reg :%d\n", rc);
         return rc;
     }
 
@@ -595,7 +594,7 @@ int bme280_push_sensor_mode(const  struct bme280_dev_s * priv, bme280_mode_t mod
     rc = bme280_write_reg8(priv, BME280_CTRL_MEAS_ADDR, ctrl_meas);
     if (rc < 0)
     {
-        /*error*/printf("ERROR: can`t write ctrl_meas reg :%d\n", rc);
+    	my_debug("ERROR: can`t write ctrl_meas reg :%d\n", rc);
         return rc;
     }
 
@@ -612,14 +611,14 @@ int bme280_soft_reset( const struct bme280_dev_s * priv)
     rc = bme280_write_reg8(priv, BME280_RESET_ADDR, soft_rst_cmd);
     if (rc < 0)
     {
-        /*error*/printf("ERROR: can`t soft reset device: %d\n", rc);
+    	my_debug("ERROR: can`t soft reset device: %d\n", rc);
         return rc;
     }
 
     /* As per data sheet, startup time is 2 ms. */
     HAL_Delay(2);
 
-    /*info*/printf("INFO: bme280 soft reseted\n");
+    my_debug("INFO: bme280 soft reseted\n");
 
     return rc;
 }
@@ -632,7 +631,7 @@ int bme280_pull_raw_data( const struct bme280_dev_s * priv, struct bme280_raw_da
     int rc = bme280_read_regn(priv, BME280_DATA_ADDR, reg_data, sizeof(reg_data));
     if (rc < 0)
     {
-        /*error*/printf("ERROR: can`t get sensor data from device: %d\n", rc);
+    	my_debug("ERROR: can`t get sensor data from device: %d\n", rc);
         return rc;
     }
 
@@ -673,7 +672,7 @@ int bme280_register_i2c(struct bme280_dev_s *bme280, I2C_HandleTypeDef *i2c_hand
     //priv = ( struct bme280_dev_s *)malloc(sizeof(struct bme280_dev_s));
     if (!priv)
     {
-        /*error*/printf("ERROR: Failed to allocate bme280 device instance\n");//TODO change description
+    	my_debug("ERROR: Failed to allocate bme280 device instance\n");//TODO change description
         return -ENOMEM;
     }
     priv->setup_conf.iface.i2c.bus = i2c_handler;
@@ -700,12 +699,12 @@ int bme280_register_i2c(struct bme280_dev_s *bme280, I2C_HandleTypeDef *i2c_hand
     rc = bme280_pull_calvals(priv);
     if (rc < 0)
     {
-        /*error*/printf("ERROR: Can`t load calibration values from device: %d\n", rc);
+    	my_debug("ERROR: Can`t load calibration values from device: %d\n", rc);
         return rc;
     }
-    /*info*/printf("INFO: loaded calibration values\n");
+    my_debug("INFO: loaded calibration values\n");
 
-    /*info*/printf("INFO: BME280 driver loaded successfully!\n");
+    my_debug("INFO: BME280 driver loaded successfully!\n");
     return rc;
 }
 
@@ -725,7 +724,7 @@ int bme280_config_default(bme280_dev_s * bme280)
 
 	if(rc)
 	{
-		trace_printf("ERROR: Can't config bme280\n");
+		my_debug("ERROR: Can't config bme280\n");
 	}
 	return rc;
 }

@@ -147,7 +147,7 @@ static int lsm303c_m_do_read_regn_i2c(const  struct lsm303c_handler_s * priv, ui
 	int rc = HAL_I2C_Mem_Read(priv->setup_conf.iface.i2c.hi2c ,priv->setup_conf.iface.i2c.addr_m,
 				regaddr, I2C_MEMADD_SIZE_8BIT, data, datasize, LSM303C_TIMEOUT);
 	if(rc)
-		trace_printf("ERROR: can't read i2c lsm303c: %d\n", rc);
+		my_debug("ERROR: can't read i2c lsm303c: %d\n", rc);
 	return rc;
 }
 
@@ -159,7 +159,7 @@ static int lsm303c_m_do_write_regn_i2c( struct lsm303c_handler_s * priv, uint8_t
 			regaddr, I2C_MEMADD_SIZE_8BIT, data, datasize, LSM303C_TIMEOUT);
 
 	if(rc)
-		trace_printf("ERROR: can't write i2c lsm303c: %d\n", rc);
+		my_debug("ERROR: can't write i2c lsm303c: %d\n", rc);
 	return rc;
 }
 
@@ -184,13 +184,13 @@ int lsm303c_register_i2c(struct lsm303c_handler_s * handler, I2C_HandleTypeDef* 
 	switch(res)
 	{
 	case LSM303C_WHO_AM_I_A_VAL:
-		trace_printf("I'm Accel on lsm303c!\n\n");
+		my_debug("I'm Accel on lsm303c!\n\n");
 		break;
 	case LSM303C_WHO_AM_I_M_VAL:
-		trace_printf("I'm Mag on lsm303c!\n\n");
+		my_debug("I'm Mag on lsm303c!\n\n");
 		break;
 	default:
-		trace_printf("ERROR: unknown device instead of lsm303c\n");
+		my_debug("ERROR: unknown device instead of lsm303c\n");
 	}
 
 	return 0;

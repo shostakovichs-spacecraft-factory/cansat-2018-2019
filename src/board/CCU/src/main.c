@@ -15,11 +15,8 @@
 
 #include <can.h>
 
-#include "camera_system.h"
-
-
-
 #include "zikush_config.h"
+#include "../../SCU_real/include/camera_system.h"
 
 /* coprocessor control register (fpu) */
 #ifndef SCB_CPACR

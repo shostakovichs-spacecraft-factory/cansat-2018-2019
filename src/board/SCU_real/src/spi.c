@@ -15,7 +15,7 @@ int spi_init(SPI_HandleTypeDef * hspi)
 	__SPI1_CLK_ENABLE();
 	int rc = HAL_SPI_Init(hspi);
 	if(rc)
-		trace_printf("ERROR: Can't init SPI: %d\n", rc);
+		my_debug("ERROR: Can't init SPI: %d\n", rc);
 	return rc;
 }
 int spi_deinit(SPI_HandleTypeDef * hspi)
@@ -23,7 +23,7 @@ int spi_deinit(SPI_HandleTypeDef * hspi)
 	int rc = HAL_SPI_DeInit(hspi);
 	__SPI1_CLK_DISABLE();
 	if(rc)
-		trace_printf("ERROR: Can't init SPI: %d\n", rc);
+		my_debug("ERROR: Can't init SPI: %d\n", rc);
 	return rc;
 }
 

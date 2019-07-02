@@ -18,7 +18,6 @@
 
 #define RESERVE_KOEF 1.5
 
-#define printf trace_printf
 
 Matrixf matrix_create(int height, int width)
 {
@@ -57,7 +56,7 @@ float *matrix_at(Matrixf *matrix, int row, int column)
 {
 	if(!matrix_isInRange(matrix, row, column))
 	{
-		printf("Matrix out of range!\n");
+		my_debug("Matrix out of range!\n");
 		return NULL;
 	}
 	return &matrix->arr[row * matrix->width + column];
@@ -72,15 +71,15 @@ void matrix_foreach(Matrixf *matrix, void (*fun)(Matrixf*, int, int))
 
 static void _matrix_print(Matrixf *x, int a, int b)
 {
-	printf("%f ", *matrix_at(x, a, b));
+	my_debug("%f ", *matrix_at(x, a, b));
 	if (b == x->width - 1)
-		printf("\n");
+		my_debug("\n");
 
 }
 void matrix_print(Matrixf *matrix)
 {
 	matrix_foreach(matrix, _matrix_print);
-	printf("\n");
+	my_debug("\n");
 }
 
 
@@ -89,7 +88,7 @@ int matrix_add(Matrixf *left, Matrixf *right)
 {
 	if(left->height != right->height || left->width != right->width)
 	{
-		printf("Matrix sizes do not appropriate\n");
+		my_debug("Matrix sizes do not appropriate\n");
 		return BAD_SIZES;
 	}
 	for(int i = 0; i < left->height; i++)
@@ -106,7 +105,7 @@ int matrix_sub(Matrixf *left, Matrixf *right)
 {
 	if(left->height != right->height || left->width != right->width)
 	{
-		printf("Matrix sizes do not appropriate\n");
+		my_debug("Matrix sizes do not appropriate\n");
 		return BAD_SIZES;
 	}
 	for(int i = 0; i < left->height; i++)
@@ -144,7 +143,7 @@ int matrix_multiplicate(Matrixf *left, Matrixf *right, Matrixf* result)
 	if (left->width != right->height || right->width != result->width
 			|| left->height != result->height)
 	{
-		printf("Matrix sizes do not appropriate\n");
+		my_debug("Matrix sizes do not appropriate\n");
 		return BAD_SIZES;
 	}
 	for (int i = 0; i < left->height; i++)
@@ -164,7 +163,7 @@ int matrix_swapRows(Matrixf *matrix, int i1, int i2)
 {
 	if (i1 >= matrix->height || i2 >= matrix->height)
 	{
-		printf("Matrix index is out of range\n");
+		my_debug("Matrix index is out of range\n");
 		return BAD_INDEX;
 	}
 	for(int i = 0; i < matrix->width; i++)
@@ -179,7 +178,7 @@ int matrix_mulRowNum(Matrixf *matrix, int index, float b)
 {
 	if (index >= matrix->height)
 	{
-		printf("Matrix index is out of range\n");
+		my_debug("Matrix index is out of range\n");
 		return BAD_INDEX;
 	}
 	for (int i = 0; i < matrix->width; i++)
@@ -193,7 +192,7 @@ int matrix_addRow(Matrixf *matrix, int source, int destination, float koef)
 {
 	if (!matrix_isInRange(matrix, source, 0) || !matrix_isInRange(matrix, destination, 0))
 	{
-		printf("Matrix index is out of range\n");
+		my_debug("Matrix index is out of range\n");
 		return BAD_INDEX;
 	}
 	for (int i = 0; i < matrix->width; i++)
@@ -221,7 +220,7 @@ int matrix_inverse(Matrixf *matrix)
 {
 	if (matrix->height != matrix->width)
 	{
-		printf("Matrix is not square\n");
+		my_debug("Matrix is not square\n");
 		return BAD_SIZES;
 	}
 
@@ -246,7 +245,7 @@ int matrix_inverse(Matrixf *matrix)
 		}
 		if(i1 == -1)
 		{
-			printf("Determinant is 0\n");
+			my_debug("Determinant is 0\n");
 			return DET_IS_ZERO;
 		}
 		matrix_swapRows(&result, x, i1);
@@ -257,7 +256,7 @@ int matrix_inverse(Matrixf *matrix)
 		for (int i = x + 1; i < matrix->height; i++)
 		{
 			float t = k * *matrix_at(matrix, i, x);
-			//printf("%f",t);
+			//my_debug("%f",t);
 			matrix_addRow(matrix, x, i, t);
 			matrix_addRow(&result, x, i, t);
 			//matrix_print(result);
@@ -299,7 +298,7 @@ int matrix_copy(Matrixf *source, Matrixf *destination, int isForced)
 	}
 	else if(destination->height != source->height || destination->width != source->width)
 	{
-		printf("Matrix sizes are not copied\n");
+		my_debug("Matrix sizes are not copied\n");
 		return BAD_SIZES;
 	}
 	for (int i = 0; i < destination->height; i++)
@@ -333,7 +332,7 @@ int matrix_normalize(Matrixf *matrix)
 	float norm = matrix_norm(matrix);
 	if(norm == 0)
 	{
-		printf("Can't normalize zero matrix\n");
+		my_debug("Can't normalize zero matrix\n");
 		return NORM_IS_ZERO;
 	}
 	for (int i = 0; i < matrix->height; i++)

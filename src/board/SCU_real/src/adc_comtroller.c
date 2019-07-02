@@ -7,7 +7,7 @@
 
 #include <stm32f4xx_hal.h>
 #include <stdlib.h>
-#include <diag/Trace.h>
+#include "my_debug.h"
 
 int adc_pin_chk_init(GPIO_TypeDef* GPIOX, uint32_t pin)
 {
@@ -48,7 +48,7 @@ int adc_init(ADC_HandleTypeDef *hadc)
 	//__HAL_ADC_ENABLE(hadc);
 	if(rc)
 	{
-		trace_printf("ERROR: can't init adc: %d\n", rc);
+		my_debug("ERROR: can't init adc: %d\n", rc);
 	}
 	return rc;
 }
@@ -57,7 +57,7 @@ int adc_deinit(ADC_HandleTypeDef *hadc)
 	int rc = HAL_ADC_DeInit(hadc);
 	if(rc)
 	{
-		trace_printf("ERROR: can't deinit adc: %d\n", rc);
+		my_debug("ERROR: can't deinit adc: %d\n", rc);
 	}
 	return rc;
 }

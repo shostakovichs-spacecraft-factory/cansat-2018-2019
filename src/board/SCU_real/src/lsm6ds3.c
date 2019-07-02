@@ -19,9 +19,9 @@
 // SPI BUS settings
 // ===========================================
 
-#define warning trace_printf
-#define snerr trace_printf
-#define sninfo trace_printf
+#define warning my_debug
+#define snerr my_debug
+#define sninfo my_debug
 
 #define LSM6DS3_SPI_MODE 1
 #define LSM6DS3_SPI_BITS (8)
@@ -428,7 +428,7 @@ static int lsm6ds3_do_read_regn_spi(const  struct lsm6ds3_dev_s * priv, uint8_t 
     int rc = 0;
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
     if(rc = HAL_SPI_Transmit(bus, &regaddr, 1, LSM6DS3_TIMEOUT))
-    	trace_printf("ERROR: %d\n", rc);
+    	my_debug("ERROR: %d\n", rc);
 
     //MY_HAL_SPI_TransmitReceive(bus, &regaddr, data, 1, datasize, LSM6DS3_TIMEOUT);
     // passing data
@@ -449,7 +449,7 @@ static int lsm6ds3_do_read_regn_spi(const  struct lsm6ds3_dev_s * priv, uint8_t 
         SPI_RECVBLOCK(bus, data, datasize);
     }*/
     if(rc = HAL_SPI_Receive(bus, data, datasize, LSM6DS3_TIMEOUT))
-    	trace_printf("ERROR: %d\n", rc);
+    	my_debug("ERROR: %d\n", rc);
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
 
 
@@ -475,9 +475,9 @@ static int lsm6ds3_do_write_regn_spi( struct lsm6ds3_dev_s * priv, uint8_t regad
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
     HAL_SPI_Transmit(bus, t, datasize + 1, LSM6DS3_TIMEOUT);
 //    if(rc = HAL_SPI_Transmit(bus, &regaddr, 1, LSM6DS3_TIMEOUT))
-//    	trace_printf("ERROR: %d\n", rc);
+//    	my_debug("ERROR: %d\n", rc);
 //    if(rc = HAL_SPI_Transmit(bus, data, datasize, LSM6DS3_TIMEOUT))
-//    	trace_printf("ERROR: %d\n", rc);
+//    	my_debug("ERROR: %d\n", rc);
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
 
     //SPI_SEND(bus, regaddr);
