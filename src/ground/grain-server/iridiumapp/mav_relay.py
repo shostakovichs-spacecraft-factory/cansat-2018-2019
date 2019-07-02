@@ -111,7 +111,9 @@ def main(listen_addr, relay_addr, log_dir: str):
 
 
 def main_exec():
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+    FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
+
+    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format=FORMAT)
 
     parser = argparse.ArgumentParser("devutil SBD receiver", add_help=True)
 
