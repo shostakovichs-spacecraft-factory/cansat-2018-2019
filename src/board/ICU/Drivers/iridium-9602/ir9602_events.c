@@ -93,6 +93,25 @@ static bool _probe_sbdi(const char * buffer, const ir9602_probe_args_t * arg, ir
 	return true;
 }
 
+
+static bool _probe_sbdtc(const char * buffer, const ir9602_probe_args_t * arg, ir9602_evt_t * evt)
+{
+	uint16_t size;
+
+	const int rc = sscanf(
+			buffer,
+			"size = %"SCNu16"",
+			&size
+	);
+
+	if (1 != rc)
+		return false;
+
+	evt->arg.sbdtc.size = size;
+	return true;
+
+}
+
 //! Структура определяющая то или иное событие
 typedef struct
 {
@@ -110,6 +129,7 @@ static ir9602_evt_def_t _evt_defs[] = {
 		{ _probe_simple,	{ .simple ={ .fmt="READY"} } },
 		{ _probe_errcode,	{} },
 		{ _probe_sbdi,		{} },
+		{ _probe_sbdtc,		{} },
 };
 
 

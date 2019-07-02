@@ -89,7 +89,7 @@ int main()
 		if(cyclenum % PCU_HEARTBEATSENDPERIOD_CYCL == 0)
 		{
 			mavlink_msg_heartbeat_encode(0, ZIKUSH_PCU, &msg, &heartbeat);
-			canlink_send(&msg);
+			//canlink_send(&msg);
 		}
 
 		if(cyclenum % PCU_CURRSENDPERIOD_CYCL == 0)
@@ -97,7 +97,7 @@ int main()
 			powerstate.time_boot_ms = global_ms;
 
 			mavlink_msg_zikush_power_state_encode(0, ZIKUSH_PCU, &msg, &powerstate);
-			canlink_send(&msg);
+			//canlink_send(&msg);
 		}
 
 		if(cyclenum % PCU_POWERSENDPERIOD_CYCL == 0)
@@ -105,7 +105,7 @@ int main()
 			powerconsumed.time_boot_ms = global_ms;
 
 			mavlink_msg_zikush_power_consumed_encode(0, ZIKUSH_PCU, &msg, &powerconsumed);
-			canlink_send(&msg);
+			//canlink_send(&msg);
 		}
 
 

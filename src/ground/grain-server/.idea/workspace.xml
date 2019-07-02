@@ -2,9 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a29cf80a-6178-4680-ae34-78975dde51bc" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../../board/CCU/src/spectrum.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/CCU/src/spectrum.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../board/ICU/Src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/Src/main.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../board/SCU/.settings/language.settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/SCU/.settings/language.settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../board/ICU/Src/tasks/can.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/Src/tasks/can.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../common/drivers/sx1268/sx1268.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../common/drivers/sx1268/sx1268.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../bombidary-radio/src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/../bombidary-radio/src/main.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -44,8 +46,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/connectorapp/__main__.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="98" column="22" lean-forward="true" selection-start-line="98" selection-start-column="22" selection-end-line="98" selection-end-column="22" />
+            <state relative-caret-position="244">
+              <caret line="98" column="22" selection-start-line="98" selection-start-column="22" selection-end-line="98" selection-end-column="22" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -56,7 +58,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../../../../venv-cansat-2018-2019/lib/python3.7/site-packages/pymavlink/dialects/v20/zikush.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="276">
+            <state relative-caret-position="47936">
               <caret line="3430" column="11" selection-start-line="3430" selection-start-column="11" selection-end-line="3430" selection-end-column="11" />
             </state>
           </provider>
@@ -126,7 +128,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-3" />
     <option name="width" value="1372" />
     <option name="height" value="771" />
@@ -316,7 +318,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-3" y="0" width="1926" height="1083" extended-state="7" />
+    <frame x="-3" y="0" width="1926" height="1083" extended-state="6" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.86467487" visible="true" weight="0.24907652" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -571,6 +573,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/webapp/static/js/mcc_gl.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="364">
+          <caret line="26" column="6" selection-start-line="26" selection-start-column="6" selection-end-line="26" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../../venv-cansat-2018-2019/lib/python3.7/site-packages/pymavlink/mavutil.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="169">
+          <caret line="216" column="19" selection-start-line="216" selection-start-column="8" selection-end-line="216" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/connectorapp/redis_store.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="56">
@@ -591,10 +607,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/webapp/static/js/mcc_gl.js">
+    <entry file="file://$PROJECT_DIR$/../../../../venv-cansat-2018-2019/lib/python3.7/site-packages/pymavlink/dialects/v20/zikush.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="364">
-          <caret line="26" column="6" selection-start-line="26" selection-start-column="6" selection-end-line="26" selection-end-column="6" />
+        <state relative-caret-position="47936">
+          <caret line="3430" column="11" selection-start-line="3430" selection-start-column="11" selection-end-line="3430" selection-end-column="11" />
         </state>
       </provider>
     </entry>
@@ -612,24 +628,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../../../../venv-cansat-2018-2019/lib/python3.7/site-packages/pymavlink/dialects/v20/zikush.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="276">
-          <caret line="3430" column="11" selection-start-line="3430" selection-start-column="11" selection-end-line="3430" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../../../../venv-cansat-2018-2019/lib/python3.7/site-packages/pymavlink/mavutil.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="169">
-          <caret line="216" column="19" selection-start-line="216" selection-start-column="8" selection-end-line="216" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/connectorapp/__main__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="98" column="22" lean-forward="true" selection-start-line="98" selection-start-column="22" selection-end-line="98" selection-end-column="22" />
+        <state relative-caret-position="244">
+          <caret line="98" column="22" selection-start-line="98" selection-start-column="22" selection-end-line="98" selection-end-column="22" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>

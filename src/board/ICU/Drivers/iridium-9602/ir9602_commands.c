@@ -88,6 +88,18 @@ static int _serialize_sbdd(char * buffer, int buffer_size, const ir9602_cmd_t * 
 }
 
 
+static int _serialize_sbdtc(char * buffer, int buffer_size, const ir9602_cmd_t * command)
+{
+	(void)command;
+	const char cmd[] = "AT+SBDTC\r\n";
+	const int cmd_len = sizeof(cmd)-1;
+	if (cmd_len > buffer_size)
+		return buffer_size;
+
+	memcpy(buffer, cmd, cmd_len);
+	return cmd_len;
+}
+
 
 // Стуктура с различными параметрами команды
 typedef struct
@@ -103,12 +115,13 @@ static const ir9602_cmd_def_t _cmd_defs[] = {
 		{ &_serialize_sbdrb  },
 		{ &_serialize_sbdi   },
 		{ &_serialize_sbdd   },
+		{ &_serialize_sbdtc  },
 };
 
 
 static const ir9602_cmd_def_t * _get_def(ir9602_cmd_code_t code)
 {
-	assert(code-1 < sizeof(_cmd_defs)/sizeof(*_cmd_defs));
+	assert(code >= 1 && code-1 < sizeof(_cmd_defs)/sizeof(*_cmd_defs));
 	return &_cmd_defs[code-1];
 }
 
@@ -116,8 +129,6 @@ static const ir9602_cmd_def_t * _get_def(ir9602_cmd_code_t code)
 int ir9602_serialize_command(char * buffer, int buffer_size, const ir9602_cmd_t * command)
 {
 	// проверка на валидность кода команды
-	assert(command->code > 0 && command->code < sizeof(_cmd_defs)/sizeof(*_cmd_defs));
-
 	const ir9602_cmd_def_t * const cmd_def = _get_def(command->code);
 	const ir9602_cmd_serializer_t serializer = cmd_def->serializer;
 
