@@ -4,7 +4,7 @@
 #include <mavlink/protocol.h> //FIXME not a proper way I think
 #include <mavlink/mavlink_types.h>
 
-#ifdef STM32F407xx
+#if defined(STM32F407xx) || defined(STM32F405xx)
 #include <stm32f4xx_hal.h>
 #include <stm32f4xx_hal_can.h>
 
