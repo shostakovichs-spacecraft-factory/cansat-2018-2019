@@ -27,6 +27,8 @@ void can_task (void *pvParameters)
 	CANMAVLINK_RX_FRAME_T receivedframe;
 	mavlink_message_t msg;
 
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 	MX_CAN_Init();
 	can_init();
 
@@ -136,7 +138,7 @@ static void MX_CAN_Init(void)
 	hcan.Init.TimeSeg1 = CAN_BS1_5TQ;
 	hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
 	hcan.Init.TimeTriggeredMode = DISABLE;
-	hcan.Init.AutoBusOff = ENABLE;
+	hcan.Init.AutoBusOff = DISABLE;
 	hcan.Init.AutoWakeUp = DISABLE;
 	hcan.Init.AutoRetransmission = DISABLE;
 	hcan.Init.ReceiveFifoLocked = DISABLE;

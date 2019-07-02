@@ -10,6 +10,8 @@
 
 void ICU_task (void *pvParameters)
 {
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 	while(1)
 	{
 		static mavlink_message_t msg;

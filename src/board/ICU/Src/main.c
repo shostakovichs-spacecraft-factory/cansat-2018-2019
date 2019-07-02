@@ -28,7 +28,7 @@ void can_task(void *pvParameters);
 static StaticTask_t can_task_tcb;
 static StackType_t can_stack[ICU_TASKS_CAN_STACKSIZE];
 static StaticQueue_t can_task_queue;
-static mavlink_message_t can_task_queue_buffer[ICU_TASKS_ICU_QUEUE_SIZE];
+static mavlink_message_t can_task_queue_buffer[ICU_TASKS_CAN_QUEUE_SIZE];
 TaskHandle_t can_task_handle = NULL;
 QueueHandle_t	can_queue_handle = NULL;
 
@@ -36,7 +36,7 @@ void sd_task(void *pvParameters);
 static StaticTask_t sd_task_tcb;
 static StackType_t sd_stack[ICU_TASKS_SD_STACKSIZE];
 static StaticQueue_t sd_task_queue;
-static mavlink_message_t sd_task_queue_buffer[ICU_TASKS_ICU_QUEUE_SIZE];
+static mavlink_message_t sd_task_queue_buffer[ICU_TASKS_SD_QUEUE_SIZE];
 TaskHandle_t sd_task_handle = NULL;
 QueueHandle_t	sd_queue_handle = NULL;
 
@@ -44,13 +44,13 @@ void radio_task(void *pvParameters);
 static StaticTask_t radio_task_tcb;
 static StackType_t radio_stack[ICU_TASKS_RADIO_STACKSIZE];
 static StaticQueue_t radio_task_queue;
-static mavlink_message_t radio_task_queue_buffer[ICU_TASKS_ICU_QUEUE_SIZE];
+static mavlink_message_t radio_task_queue_buffer[ICU_TASKS_RADIO_QUEUE_SIZE];
 TaskHandle_t radio_task_handle = NULL;
 QueueHandle_t	radio_queue_handle = NULL;
 
 void gps_task(void *pvParameters);
 static StaticTask_t gps_task_tcb;
-static StackType_t gps_stack[ICU_TASKS_RADIO_STACKSIZE];
+static StackType_t gps_stack[ICU_TASKS_GPS_STACKSIZE];
 TaskHandle_t gps_task_handle = NULL;
 
 void iridium_task(void *pvParameters);
@@ -91,7 +91,7 @@ int main(void)
 									   ICU_TASKS_RADIO_TASKPRIORITY, radio_stack, &radio_task_tcb);
 	radio_queue_handle = xQueueCreateStatic(ICU_TASKS_RADIO_QUEUE_SIZE, sizeof(mavlink_message_t), (uint8_t *)radio_task_queue_buffer, &radio_task_queue);
 
-	iridium_task_handle = xTaskCreateStatic(iridium_task, (const char *)"irid", ICU_TASKS_IRIDIUM_STACKSIZE, NULL, \
+	iridium_task_handle = xTaskCreateStatic(iridium_task, (const char *)"iridium", ICU_TASKS_IRIDIUM_STACKSIZE, NULL, \
 											ICU_TASKS_IRIDIUM_TASKPRIORITY, iridium_stack, &iridium_task_tcb);
 	iridium_queue_handle = xQueueCreateStatic(ICU_TASKS_IRIDIUM_QUEUE_SIZE, sizeof(mavlink_message_t), (uint8_t *)iridium_task_queue_buffer, &iridium_task_queue);
 

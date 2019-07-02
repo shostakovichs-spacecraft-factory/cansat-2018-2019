@@ -34,6 +34,8 @@ void radio_task (void *pvParameters)
 	static mavlink_message_t msg;
 	static uint32_t notifications = 0;
 
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 	MX_SPI2_Init();
 	MX_GPIO_Init();
 

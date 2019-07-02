@@ -32,6 +32,8 @@ void gps_task (void *pvParameters)
 	mavlink_hil_gps_t hil_gps;
 	mavlink_message_t msg;
 
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 	uart_init();
 
 	while(1)

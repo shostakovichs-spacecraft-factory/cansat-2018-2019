@@ -44,7 +44,7 @@ bool canlink_init(void)
 		.CAN_BS1 = CAN_BS1_5tq,
 		.CAN_BS2 = CAN_BS2_2tq,
 		.CAN_TTCM = DISABLE,
-		.CAN_ABOM = ENABLE,
+		.CAN_ABOM = DISABLE,
 		.CAN_AWUM = DISABLE,
 		.CAN_NART = ENABLE,
 		.CAN_RFLM = DISABLE,
