@@ -110,9 +110,6 @@ class MOServiceServer(TCPServer):
         :param send_ack:            Нужно ли отправть MOMessageConfirmation сообщение шлюзу иридиума?
         :param blog_stream:         Стрим для логгирования сырых сообщений еще до их разбора
         """
-        # Базовому классу дает свой собственный хендлер
-        super().__init__(server_address, _MOTcpRequestHandler, bind_and_activate)
-
         # А клиентский хендлер запоминаем для себя
         self.sbd_handler_cls = request_handler_cls
 
@@ -124,6 +121,9 @@ class MOServiceServer(TCPServer):
         # И сериализатор для MOConfirmation сообщений
         self.serializer = self._build_serializer()
 
+        # Базовому классу дает свой собственный хендлер
+        super().__init__(server_address, _MOTcpRequestHandler, bind_and_activate)
+
     # noinspection PyMethodMayBeStatic
     def _build_parser(self):
         return SBDMessageParser(MOMessage)
@@ -133,6 +133,7 @@ class MOServiceServer(TCPServer):
         return SBDMessageSerializer()
 
     def server_close(self):
-        super(self, MOServiceServer).server_close()
         if self.blog_stream:
             self.blog_stream.close()
+
+        super().server_close()
