@@ -19,6 +19,33 @@
 
 #include "mavlink/zikush/mavlink.h"
 
+static mavlink_message_t msg_heartbeat;
+void heartbeat_init(void)
+{
+    mavlink_heartbeat_t heartbeat =
+    {
+        .type = MAV_TYPE_ONBOARD_CONTROLLER,
+        .autopilot = MAV_AUTOPILOT_INVALID,
+        .base_mode = MAV_MODE_FLAG_TEST_ENABLED,
+        .system_status = MAV_STATE_ACTIVE
+    };
+    mavlink_msg_heartbeat_encode(0, ZIKUSH_SCU, &msg_heartbeat, &heartbeat);
+}
+
+void heartbeat_send(void)
+{
+    const uint32_t freq = 1;
+    static uint32_t t_prev = 0, t_now = 0;
+    if((t_now = HAL_GetTick()) - t_prev < 1000 / freq)
+    {
+        t_prev = t_now;
+        return;
+    }
+    can_mavlink_send(&msg_heartbeat);
+
+}
+
+
 int the_main(void)
 {
     mavlink_get_channel_status(ZIKUSH_SCU)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
@@ -89,6 +116,14 @@ int the_main(void)
         volatile float temp = 0;
         //ds18b20_Read(&ds18, &temp);
         HAL_Delay(500);
+
+        //ahrs_system_update();
+        sensors_bme280_update();
+        //sensors_external_update();
+        //heartbeat_send();
+
+
+        //camera_system_update(&hcam);
     }
 
     return 0;

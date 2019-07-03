@@ -43,6 +43,9 @@
 									<listOptionValue builtIn="false" value="../../../Drivers/CMSIS/Device/ST/STM32F1xx/Include"/>
 									<listOptionValue builtIn="false" value="../../../Drivers/CMSIS/Include"/>
 									<listOptionValue builtIn="false" value="../../../Drivers/bme280/inc"/>
+									<listOptionValue builtIn="false" value="/"/>
+									<listOptionValue builtIn="false" value="/madgwick"/>
+									<listOptionValue builtIn="false" value="/high_level"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1049914362" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__weak=&quot;__attribute__((weak))&quot;"/>

@@ -4,16 +4,18 @@
  *  Created on: 1 июл. 2019 г.
  *      Author: sereshotes
  */
-#include "task.h"
-#include "sensors.h"
+#include "../task.h"
+#include "../sensors.h"
 #include <math.h>
-#include <mavlink/zikush/mavlink.h>
+#include <../mavlink/zikush/mavlink.h>
 #include "ahrs_system.h"
 #include "ahrs.h"
 #include "mag_calib.h"
 #include "lsm6ds3.h"
 #include "lsm303c.h"
 #include "main.h"
+
+
 
 #define AHRS_CALC_FREQ 100
 #define AHRS_SEND_FREQ 10

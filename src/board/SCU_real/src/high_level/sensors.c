@@ -46,23 +46,42 @@ void sensors_init(void)
 	__SPI2_CLK_ENABLE();
 	__I2C3_CLK_ENABLE();
 
+
+/*
 	{	//I2C1 (separately, cause it's used both by BME280 and MPX2100)
 		GPIO_InitTypeDef pa_init;
 		pa_init.Alternate = GPIO_AF4_I2C3;
 		pa_init.Mode = GPIO_MODE_AF_OD;
 		pa_init.Pin = GPIO_PIN_8;
-		pa_init.Pull = GPIO_PULLUP;
+		pa_init.Pull = GPIO_NOPULL;
 		pa_init.Speed = GPIO_SPEED_FAST;
 
 		HAL_GPIO_Init(GPIOA, &pa_init);
 
 		pa_init.Pin = GPIO_PIN_9;
 		HAL_GPIO_Init(GPIOC, &pa_init);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
+
 		i2c_config_default(&hi2c);
 		hi2c.Instance = I2C3;
 		i2c_init(&hi2c);
-	}
+	}*//*
+	{
 
+		GPIO_InitTypeDef pa_init;
+		pa_init.Alternate = 0;
+		pa_init.Mode = GPIO_MODE_OUTPUT_PP;
+		pa_init.Pin = GPIO_PIN_13;
+		pa_init.Speed = GPIO_SPEED_FAST;
+		pa_init.Pull = GPIO_NOPULL;
+
+		HAL_GPIO_Init(GPIOB, &pa_init);
+		while(1)
+		{
+			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
+			HAL_Delay(50);
+		}
+	}*/
 	{
 		spi_config_default(&hspi2);
 		hspi2.Instance = SPI2;
@@ -73,7 +92,15 @@ void sensors_init(void)
 
 		spi_init(&hspi2);
 	}
-
+	{
+		while(1)
+		{
+			char str[] = "Hello\n";
+			HAL_SPI_Transmit(&hspi2, str, sizeof(str), 100);
+			HAL_Delay(50);
+		}
+	}
+/*
 	{
 		spi_config_default(&hspi3);
 		hspi3.Instance = SPI3;
@@ -84,12 +111,12 @@ void sensors_init(void)
 
 		spi_init(&hspi3);
 	}
-/*
+*/
 	{	//BME280
 		bme280_register_i2c(&hbme, &hi2c, BME280_I2C_ADDR_SDO_LOW << 1);
 		bme280_init(&hbme);
-	}*/
-
+	}
+/*
 	{	//DS18B20
 		delay_us_init();
 
@@ -123,7 +150,7 @@ void sensors_init(void)
 		lsm6ds3_push_conf(&hlsm6);
 	}
 
-	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;*/
 }
 
 //Read data from BME280 sensor and send scaled_pressure MAVLink message
