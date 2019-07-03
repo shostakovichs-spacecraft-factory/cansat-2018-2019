@@ -26,7 +26,11 @@ typedef struct {
 static _ir_divider_t _ir_divider_table[] = {
 		{ MAVLINK_MSG_ID_ZIKUSH_ICU_STATS, 1 },
 		{ MAVLINK_MSG_ID_HIL_GPS, 10 },
-		{ MAVLINK_MSG_ID_ZIKUSH_POWER_STATE, 10 },
+		{ MAVLINK_MSG_ID_ZIKUSH_POWER_STATE, 20 },
+
+		{ MAVLINK_MSG_ID_SCALED_PRESSURE, 20 },
+		{ MAVLINK_MSG_ID_ZIKUSH_HUMIDITY, 20 },
+		{ MAVLINK_MSG_ID_SCALED_PRESSURE2, 20 },
 
 		{ MAVLINK_MSG_ID_ZIKUSH_PICTURE_HEADER, 1 },
 		{ MAVLINK_MSG_ID_ZIKUSH_SPECTRUM_INTENSITY_HEADER, 1},
@@ -144,9 +148,6 @@ static bool _table_radio(mavlink_message_t * msg)
 static bool _table_Iridium(mavlink_message_t * msg)
 {
 	if (NULL == iridium_task_handle || NULL == iridium_queue_handle)
-		return false;
-
-	if(msg->sysid == 0)
 		return false;
 
 	_ir_divider_t * const entry = _ir_divider_find_entry(msg->msgid);

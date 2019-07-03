@@ -43,6 +43,11 @@
   */
 void usart_init(void);
 
+
+/**
+  * @brief  Pop one byte from ringbuffer of USART3
+  */
+uint8_t usart2_rx_ringbuffer_pop(void);
 /**
   * @brief  Pop one byte from ringbuffer of USART3
   */
@@ -51,18 +56,28 @@ uint8_t usart3_rx_ringbuffer_pop(void);
 /**
   * @brief  Push one byte to ringbuffer of USART3
   */
+uint8_t usart2_tx_ringbuffer_push(const uint8_t* ch, uint16_t len);
+/**
+  * @brief  Push one byte to ringbuffer of USART3
+  */
 uint8_t usart3_tx_ringbuffer_push(const uint8_t* ch, uint16_t len);
 
 /**
   * @brief  Push mavlink message to usart3 (for debug only)
   */
+void usart2_mavlink_transmit(const mavlink_message_t * msg);
 void usart3_mavlink_transmit(const mavlink_message_t * msg);
 
+/**
+  * @brief  Check character availability USART2
+  */
+int usart2_char_available(void);
 /**
   * @brief  Check character availability USART3
   */
 int usart3_char_available(void);
 
+void USART2_IRQHandler(void);
 void USART3_IRQHandler(void);
 
 #endif /* USART_H_ */

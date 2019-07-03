@@ -16,7 +16,6 @@
 #include <can.h>
 
 #include "zikush_config.h"
-#include "../../SCU_real/include/camera_system.h"
 
 /* coprocessor control register (fpu) */
 #ifndef SCB_CPACR
@@ -50,13 +49,13 @@ int main(int argc, char* argv[])
 #endif
 
 	spectrum_init_capture();
-	CAMERA hcam;
 	can_init();
 
 
 	while(true)
 	{
 		can_mavlink_transmit(&msg);
+		usart2_mavlink_transmit(&msg);
 
 		if(can_spectrum_request)
 		{
