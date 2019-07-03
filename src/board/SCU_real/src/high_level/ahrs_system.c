@@ -13,7 +13,7 @@
 #include "mag_calib.h"
 #include "lsm6ds3.h"
 #include "lsm303c.h"
-#include <stm32f4xx_hal.h>
+#include "main.h"
 
 #define AHRS_CALC_FREQ 100
 #define AHRS_SEND_FREQ 10
