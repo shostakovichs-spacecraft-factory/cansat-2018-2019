@@ -8,6 +8,6 @@
 #ifndef APPLICATION_USER_THE_MAIN_H_
 #define APPLICATION_USER_THE_MAIN_H_
 
-
+int the_main(void);
 
 #endif /* APPLICATION_USER_THE_MAIN_H_ */

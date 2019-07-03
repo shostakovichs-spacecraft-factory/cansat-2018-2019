@@ -9,7 +9,7 @@
 
 #include "bme280.h"
 #include "ads1x1x.h"
-
+#include "lsm6ds3.h"
 
 int the_main(void)
 {
@@ -24,12 +24,25 @@ int the_main(void)
     ADS1x1x_init(&ads);
 
 
+    struct lsm6ds3_dev_s lsm6d;
+    lsm6ds3_register_spi(&lsm6d, &hspi2, LSM_CS_GPIO_Port, LSM_CS_Pin);
+    lsm6ds3_conf_default(&lsm6d);
+
+    lsm6ds3_push_conf(&lsm6d);
+
     while(1)
     {
 
         ADS1x1x_start_conversion(&ads);
         volatile int16_t value = ADS1x1x_read(&ads);
+        (void)value;
 
+        struct lsm6ds3_raw_data_s inertial;
+        lsm6ds3_gxl_pull(&lsm6d, &inertial);
+        lsm6ds3_float_t xl[3];
+        lsm6ds3_float_t gyro[3];
+        lsm6ds3_scale_g(&lsm6d.conf.g, inertial.g, gyro, 3);
+        lsm6ds3_scale_xl(&lsm6d.conf.xl, inertial.xl, xl, 3);
         HAL_Delay(500);
     }
 
