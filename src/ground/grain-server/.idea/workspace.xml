@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a29cf80a-6178-4680-ae34-78975dde51bc" name="Default Changelist" comment="" />
+    <list default="true" id="a29cf80a-6178-4680-ae34-78975dde51bc" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../../board/CCU/src/usart.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/CCU/src/usart.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,7 +125,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-3" />
     <option name="width" value="1372" />
     <option name="height" value="771" />
@@ -312,8 +315,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-3" y="0" width="1926" height="1083" extended-state="7" />
-    <editor active="true" />
+    <frame x="-3" y="0" width="1926" height="1083" extended-state="6" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.86467487" visible="true" weight="0.24907652" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />

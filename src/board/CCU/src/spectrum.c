@@ -45,10 +45,8 @@
 #include "stm32f4xx_hal_dcmi.h"
 #include "stm32f4xx_hal_dma.h"
 #include "stm32f4xx_hal_tim.h"
-#include "stm32f4xx_hal_can.h"
 
 #include <mavlink/zikush/mavlink.h>
-#include <canmavlink_hal.h>
 #include <spectrum.h>
 #include <usart.h>
 #include <can.h>
@@ -56,8 +54,6 @@
 #include <zikush_config.h>
 
 #define MIN(a, b) ((a)<(b)?(a):(b))
-
-void can_mavlink_transmit(mavlink_message_t * msg);
 
 /* counters */
 static volatile uint32_t spectrum_frame_counter;
@@ -123,7 +119,7 @@ uint32_t spectrum_get_frame_counter(void){
 }
 
 /**
- * @brief Send spectrum image with MAVLINK over CAN
+ * @brief Send spectrum image with MAVLINK over USART2
  *
  * @param image_buffer_fast_1 Image buffer in fast RAM
  * @param image_buffer_fast_2 Image buffer in fast RAM
@@ -161,13 +157,13 @@ void spectrum_send_photo() {
 	 * 	QGriund control and Grain MCC
 	 */
 	mavlink_msg_data_transmission_handshake_encode(0, ZIKUSH_CCU, &msg, &handshake);
-	can_mavlink_transmit(&msg);
+	usart2_mavlink_transmit(&msg);
 #ifdef CCU_TESTMODE
 	usart3_mavlink_transmit(&msg);
 #endif
 
 	mavlink_msg_zikush_picture_header_encode(0, ZIKUSH_CCU, &msg, &picture_header);
-	can_mavlink_transmit(&msg);
+	usart2_mavlink_transmit(&msg);
 #ifdef CCU_TESTMODE
 	usart3_mavlink_transmit(&msg);
 #endif
@@ -182,19 +178,17 @@ void spectrum_send_photo() {
 
 		encdata.seqnr = frame;
 		mavlink_msg_encapsulated_data_encode(0, ZIKUSH_CCU, &msg, &encdata);
-		can_mavlink_transmit(&msg);
+		usart2_mavlink_transmit(&msg);
 #ifdef CCU_TESTMODE
 		usart3_mavlink_transmit(&msg);
 #endif
-
-		HAL_Delay(100);
 
 		frame++;
 	}
 }
 
 /**
- * @brief Send spectrum data with MAVLINK over CAN
+ * @brief Send spectrum data with MAVLINK over USART2
  *
  * @param image_buffer_fast_1 Image buffer in fast RAM
  * @param image_buffer_fast_2 Image buffer in fast RAM
@@ -218,7 +212,7 @@ void spectrum_send_data(uint16_t y_start, uint16_t y_end, uint16_t x_start, uint
 
 
 	mavlink_msg_zikush_spectrum_intensity_header_encode(0, ZIKUSH_CCU, &msg, &spectrum_header);
-	can_mavlink_transmit(&msg);
+	usart2_mavlink_transmit(&msg);
 #ifdef CCU_TESTMODE
 	usart3_mavlink_transmit(&msg);
 #endif
@@ -242,7 +236,7 @@ void spectrum_send_data(uint16_t y_start, uint16_t y_end, uint16_t x_start, uint
 				|| row == (y_end - 1))
 		{
 			mavlink_msg_zikush_spectrum_intensity_encapsulated_data_encode(0, ZIKUSH_CCU, &msg, &encdata);
-			can_mavlink_transmit(&msg);
+			usart2_mavlink_transmit(&msg);
 #ifdef CCU_TESTMODE
 			usart3_mavlink_transmit(&msg);
 #endif

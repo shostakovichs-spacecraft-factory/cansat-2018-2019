@@ -88,7 +88,7 @@
 #define CCU_DMA_IRQ_PRIO	0
 #define CCU_CAN_IRQ_PRIO	1
 
-#define CCU_TESTMODE	//Take picture every second and enable UART output
+#define CCU_TESTMODE	//Take picture every second and enable UART3 output
 
 
 // params directly from Flow config. Better explanation could be found in datasheet
