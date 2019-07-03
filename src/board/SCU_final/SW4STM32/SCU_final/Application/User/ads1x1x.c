@@ -37,9 +37,9 @@ void swap_endian(uint8_t* a, int size)
 void ADS1x1x_write_register(I2C_HandleTypeDef *hi2c, uint8_t i2c_address, uint8_t reg, uint16_t value)
 {
 	swap_endian((uint8_t*)&value, 2);
-	int rc = HAL_I2C_Mem_Write(hi2c, (uint16_t)i2c_address, (uint16_t)reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&value, 2, 100);
+	volatile int rc = HAL_I2C_Mem_Write(hi2c, (uint16_t)i2c_address, (uint16_t)reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&value, 2, 100);
 	if(rc)
-		my_debug("ERROR: Can't write ADS1x1x register: %d\n", rc);
+		return;
 }
 
 /**************************************************************************/
@@ -53,8 +53,6 @@ uint16_t ADS1x1x_read_register(I2C_HandleTypeDef *hi2c, uint8_t i2c_address, uin
 	uint16_t result = 0;
 	int rc = HAL_I2C_Mem_Read(hi2c, i2c_address, (uint16_t)reg, I2C_MEMADD_SIZE_16BIT, (uint8_t*)&result, 2, 100);
 	swap_endian((uint8_t*)&result, 2);
-	if(rc)
-		my_debug("ERROR: Can't read ADS1x1x register: %d\n", rc);
 	return result;
 }
 
