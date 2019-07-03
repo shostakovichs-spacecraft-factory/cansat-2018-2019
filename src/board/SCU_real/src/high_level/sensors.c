@@ -15,6 +15,7 @@
 #include "ads1x1x.h"
 #include "mpx2100ap.h"
 #include "ds18b20.h"
+#include "spi.h"
 #include <can.h>
 
 #include "thread.h"
@@ -130,7 +131,7 @@ void sensors_bme280_update(void)
 	mavlink_zikush_humidity_t humidity;
 	mavlink_message_t msg;
 
-	bme280_read(&hbme, &data, sizeof(struct bme280_float_data_s));
+	bme280_read(&hbme, (char*)&data, sizeof(struct bme280_float_data_s));
 
 	scaled_pressure.time_boot_ms = HAL_GetTick();
 	scaled_pressure.press_abs = data.pressure;
@@ -142,6 +143,8 @@ void sensors_bme280_update(void)
 	humidity.humidity = data.humidity;
 	mavlink_msg_zikush_humidity_encode(0, ZIKUSH_SCU, &msg, &humidity);
 	can_mavlink_send(&msg);
+
+	t_prev = t_now;
 }
 
 //Read data from DS18B20 and MPX2100AP sensors and send scaled_pressure2 MAVLink message

@@ -49,6 +49,7 @@ void heartbeat_send(void)
 		return;
 	}
 	can_mavlink_send(&msg_heartbeat);
+	t_prev = t_now;
 }
 
 int main()
