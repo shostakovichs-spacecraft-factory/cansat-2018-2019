@@ -7,7 +7,7 @@ class InformationElement:
         Этот класс олицетворяет такие элементы
     """
 
-    IEI: enum.IEI = None
+    IEI = None # type: enum.IEI
     """ Идентификатор информационного элемента. Реализуется в сабклассе """
 
     def unpack(self, ie_payload):
@@ -30,18 +30,18 @@ class InformationElement:
 class Message:
     """ SBD сообщение. Отправляется либо от нас, либо от иридиумовского шлюза """
 
-    IE_CLASSES: typing.List[typing.Type[InformationElement]] = []
+    IE_CLASSES = [] # type:  typing.List[typing.Type[InformationElement]]
     """ Список Information Element классов, которые могут попадаться в этом сообщении """
 
     def __init__(self):
         # Ключ словарика - идентификатор IE. Значение - само IE
-        self.ies: typing.Dict[int, InformationElement] = {}
+        self.ies = {} # type: typing.Dict[int, InformationElement]
 
     def insert_ie(self, ie: InformationElement):
         """ Добавиления IE к этому сообщению
             Если такой IE уже есть в сообщении - перезаписывает его """
         if ie.__class__ not in self.IE_CLASSES:
-            raise ValueError(f"Invalid IE class {ie.__class__} added to message")
+            raise ValueError("Invalid IE class %s added to message" % ie.__class__)
 
         self.ies[ie.IEI] = ie
 

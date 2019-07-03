@@ -227,5 +227,16 @@
             <description>Used to report various motion events</description>
             <field type="uint8_t" name="code">Value of enum ZIKUSH_MOTION_EVT</field>
         </message>
+
+        <message id="172" name="ZIKUSH_IRIDIUM_META">
+            <description>Used to report iridium meta with another messages</description>
+            <field type="uint16_t" name="mtmsn"></field>
+            <field type="uint16_t" name="momsn"></field>
+            <field type="uint8_t" name="session_status"></field>
+            <field type="uint8_t[15]" name="imei"></field>
+            <field type="uint32_t" name="time_of_session">POSIX TIMESTAMP</field>
+            <field type="float" name="lat"></field>
+            <field type="float" name="lon"></field>
+        </message>
     </messages>
 </mavlink>

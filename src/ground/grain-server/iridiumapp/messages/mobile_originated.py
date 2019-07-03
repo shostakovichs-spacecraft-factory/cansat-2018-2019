@@ -13,12 +13,12 @@ class MOIEHeader(InformationElement):
     BODY_STRUCT = struct.Struct(">L15sBHHL")
 
     def __init__(self):
-        self.cdr: int = None
-        self.imei: str = None
-        self.session_status: ConfirmationStatus = None
-        self.momsn: int = None
-        self.mtmsn: int = None
-        self.time_of_session: dt.datetime = None
+        self.cdr = None  # type: int
+        self.imei = None  # type: str
+        self.session_status = None  # type: ConfirmationStatus
+        self.momsn = None  # type: int
+        self.mtmsn = None  # type: int
+        self.time_of_session = None  # type: dt.datetime
 
     def _pack_body(self) -> bytes:
         raise NotImplementedError()
@@ -46,7 +46,7 @@ class MOIEPayload(InformationElement):
     IEI = IEI.MO_PAYLOAD
 
     def __init__(self):
-        self.raw_payload: bytes = None
+        self.raw_payload = None  # type: bytes
 
     def _pack_body(self) -> bytes:
         raise NotImplementedError()
@@ -61,9 +61,9 @@ class MOIELocationInformation(InformationElement):
     BODY_STRUCT = struct.Struct(">BBHBHL")
 
     def __init__(self):
-        self.lat: float = None
-        self.lon: float = None
-        self.CEP_radius: int = None
+        self.lat = None  # type: float
+        self.lon = None  # type: float
+        self.CEP_radius = None  # type: int
 
     def _pack_body(self) -> bytes:
         raise NotImplementedError()
@@ -73,7 +73,7 @@ class MOIELocationInformation(InformationElement):
 
         # Проверяем коды на валидность
         if codes & 0xfc != 0:
-            raise ValueError(f"Invalid Data in geoloc flags 0x{codes:02X}")
+            raise ValueError("Invalid Data in geoloc flags 0x%02X" % codes)
 
         # Пересчитываем долготу и широту в человеческие значения
         latmins, lonmins = latmins/1000, lonmins/1000

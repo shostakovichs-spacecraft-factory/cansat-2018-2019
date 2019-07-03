@@ -12,10 +12,10 @@ _log = logging.getLogger(__name__)
 
 class _MOTcpRequestHandler(BaseRequestHandler):
     """ Хендлер TCP сообщений от иридиумного гейтевея """
-    serializer: SBDMessageSerializer
+    serializer = None
 
     def __init__(self, request, client_address, server):
-        srv: MOServiceServer = server
+        srv = server
         self.parser = srv.parser
         self.serializer = srv.serializer
         self.send_ack = srv.send_ack
@@ -53,7 +53,7 @@ class _MOTcpRequestHandler(BaseRequestHandler):
 
     def read_all(self):
         """ Парсинг SBD сообщения из всех байт полученных в сокет """
-        sock: socket.socket = self.request
+        sock = self.request # type: socket.socket
 
         # Читаем все что передал нам гейтвей иридиума
         accum = bytes()
@@ -81,7 +81,7 @@ class _MOTcpRequestHandler(BaseRequestHandler):
         try:
             msg = MOMessageConfirmation(conf_status)
             msg_data = self.serializer.serialize(msg)
-            sock: socket.socket = self.request
+            sock = self.request  # type: socket.socket
             sock.send(msg_data)
         except OSError:
             _log.warning("Unable to send ACK message", exc_info=True)
@@ -110,9 +110,6 @@ class MOServiceServer(TCPServer):
         :param send_ack:            Нужно ли отправть MOMessageConfirmation сообщение шлюзу иридиума?
         :param blog_stream:         Стрим для логгирования сырых сообщений еще до их разбора
         """
-        # Базовому классу дает свой собственный хендлер
-        super().__init__(server_address, _MOTcpRequestHandler, bind_and_activate)
-
         # А клиентский хендлер запоминаем для себя
         self.sbd_handler_cls = request_handler_cls
 
@@ -124,6 +121,9 @@ class MOServiceServer(TCPServer):
         # И сериализатор для MOConfirmation сообщений
         self.serializer = self._build_serializer()
 
+        # Базовому классу дает свой собственный хендлер
+        super().__init__(server_address, _MOTcpRequestHandler, bind_and_activate)
+
     # noinspection PyMethodMayBeStatic
     def _build_parser(self):
         return SBDMessageParser(MOMessage)
@@ -133,6 +133,7 @@ class MOServiceServer(TCPServer):
         return SBDMessageSerializer()
 
     def server_close(self):
-        super(self, MOServiceServer).server_close()
         if self.blog_stream:
             self.blog_stream.close()
+
+        super().server_close()

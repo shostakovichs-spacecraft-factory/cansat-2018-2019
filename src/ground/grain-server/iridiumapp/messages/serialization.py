@@ -62,7 +62,7 @@ class MessageParser:
 
         if len(ie_payload) != size:
             raise ValueError(
-                f"invalid size for iei {iei}: {len(ie_payload)} while {size} were expected"
+                "invalid size for iei %s: %s while %s were expected" % (iei, len(ie_payload), size,)
             )
 
         return iei, ie_payload, leftovers
@@ -86,12 +86,15 @@ class MessageParser:
 
         if protocol_version != self.PROTOCOL_VERSION:
             raise ValueError(
-                f"Invalid protocol version: {protocol_version}. {self.PROTOCOL_VERSION} were expected"
+                "Invalid protocol version: %s, %s were expected"
+                % (protocol_version. self.PROTOCOL_VERSION,)
             )
 
         if size != len(msg_payload):
             raise ValueError(
-               f"Invalid message size {len(msg_payload)}. {size} were expected"
+               "Invalid message size %d. %d were expected"
+               %
+               (len(msg_payload), size,)
             )
 
         return msg_payload

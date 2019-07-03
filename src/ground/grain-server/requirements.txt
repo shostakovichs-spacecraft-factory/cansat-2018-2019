@@ -7,4 +7,6 @@ pyotp
 future
 lxml
 
+wheel # for mavlink building
+
 #pymavlink==2.2.8 #should be customly built

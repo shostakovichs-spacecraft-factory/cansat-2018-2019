@@ -18,7 +18,7 @@ def main(host, port, data):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
-        _log.info(f"connecting to {host}:{port}")
+        _log.info("connecting to %s:%s" % (host,port,))
         sock.connect((host, port,))
         _log.info("sending data")
         sock.sendall(data)

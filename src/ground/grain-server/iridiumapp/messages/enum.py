@@ -53,6 +53,9 @@ class ConfirmationStatus(IntEnum):
     SUCCESS = 1
     FAILURE = 0
 
+    def __bool__(self):
+        return self == ConfirmationStatus.SUCCESS
+
 
 class MTDispositionFlags(IntEnum):
     """ дополнительные флаги для mobile terminated сообщений """
