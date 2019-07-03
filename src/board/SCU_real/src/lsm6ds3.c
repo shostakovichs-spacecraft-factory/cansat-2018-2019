@@ -426,8 +426,9 @@ static int lsm6ds3_do_read_regn_spi(const  struct lsm6ds3_dev_s * priv, uint8_t 
     // passing register value
    // SPI_SEND(bus, regaddr);
     int rc = 0;
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
-    if(rc = HAL_SPI_Transmit(bus, &regaddr, 1, LSM6DS3_TIMEOUT))
+    HAL_GPIO_WritePin(priv->setup_conf.iface.spi.NSS_port, priv->setup_conf.iface.spi.NSS_pin,
+    		GPIO_PIN_RESET);
+    if(rc |= HAL_SPI_Transmit(bus, &regaddr, 1, LSM6DS3_TIMEOUT))
     	my_debug("ERROR: %d\n", rc);
 
     //MY_HAL_SPI_TransmitReceive(bus, &regaddr, data, 1, datasize, LSM6DS3_TIMEOUT);
@@ -448,14 +449,15 @@ static int lsm6ds3_do_read_regn_spi(const  struct lsm6ds3_dev_s * priv, uint8_t 
     {
         SPI_RECVBLOCK(bus, data, datasize);
     }*/
-    if(rc = HAL_SPI_Receive(bus, data, datasize, LSM6DS3_TIMEOUT))
+    if(rc |= HAL_SPI_Receive(bus, data, datasize, LSM6DS3_TIMEOUT))
     	my_debug("ERROR: %d\n", rc);
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(priv->setup_conf.iface.spi.NSS_port, priv->setup_conf.iface.spi.NSS_pin,
+    		GPIO_PIN_SET);
 
 
 
 
-    return datasize;
+    return rc;
 }
 
 
@@ -472,13 +474,15 @@ static int lsm6ds3_do_write_regn_spi( struct lsm6ds3_dev_s * priv, uint8_t regad
     	t[i] = data[i - 1];
     //lsm6ds3_prepare_spi_bus(priv);
     int rc = 0;
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(priv->setup_conf.iface.spi.NSS_port, priv->setup_conf.iface.spi.NSS_pin,
+    		GPIO_PIN_RESET);
     HAL_SPI_Transmit(bus, t, datasize + 1, LSM6DS3_TIMEOUT);
 //    if(rc = HAL_SPI_Transmit(bus, &regaddr, 1, LSM6DS3_TIMEOUT))
 //    	my_debug("ERROR: %d\n", rc);
 //    if(rc = HAL_SPI_Transmit(bus, data, datasize, LSM6DS3_TIMEOUT))
 //    	my_debug("ERROR: %d\n", rc);
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(priv->setup_conf.iface.spi.NSS_port, priv->setup_conf.iface.spi.NSS_pin,
+    		GPIO_PIN_SET);
 
     //SPI_SEND(bus, regaddr);
     //SPI_SNDBLOCK(bus, (uint8_t*)data, datasize); // const should be removed here, since
@@ -947,7 +951,8 @@ ssize_t lsm6ds3_fifo_pull_data( const struct lsm6ds3_dev_s * priv,
     return rc;
 }
 
-int lsm6ds3_register_spi(struct lsm6ds3_dev_s * config, SPI_HandleTypeDef* bus)
+int lsm6ds3_register_spi(struct lsm6ds3_dev_s * config, SPI_HandleTypeDef* bus,
+		GPIO_TypeDef *NSS_port, uint16_t NSS_pin)
 {
 
 	struct lsm6ds3_dev_s *priv = config;
@@ -958,9 +963,12 @@ int lsm6ds3_register_spi(struct lsm6ds3_dev_s * config, SPI_HandleTypeDef* bus)
     assert(bus != 0);
 
     priv->setup_conf.iface.spi.bus = bus;
+    priv->setup_conf.iface.spi.NSS_pin = NSS_pin;
+    priv->setup_conf.iface.spi.NSS_port = NSS_port;
     priv->_do_read_regn = lsm6ds3_do_read_regn_spi;
     priv->_do_write_regn = lsm6ds3_do_write_regn_spi;
     priv->readmode = LSM6DS3_READMODE_SCALED;
+
 
     // reset the sensor
     rc = lsm6ds3_sw_reset(priv);

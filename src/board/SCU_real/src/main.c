@@ -54,6 +54,7 @@ void heartbeat_send(void)
 
 int main()
 {
+
 	my_debug_init();
 	heartbeat_init();
 	can_init();
@@ -62,7 +63,7 @@ int main()
 	ahrs_system_init();
 
 	CAMERA hcam;
-	camera_system_init(&hcam);
+	//camera_system_init(&hcam);
 	while(1)
 	{
 		ahrs_system_update();

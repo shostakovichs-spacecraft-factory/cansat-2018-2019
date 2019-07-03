@@ -6,6 +6,7 @@
  */
 
 #include <stm32f4xx_hal.h>
+#include "task.h"
 
 #include "lsm6ds3.h"
 #include "lsm303c.h"
@@ -21,7 +22,7 @@
 #include "thread.h"
 
 I2C_HandleTypeDef hi2c;
-//SPI_HandleTypeDef hspi2;
+SPI_HandleTypeDef hspi2;
 SPI_HandleTypeDef hspi3;
 onewire_t how;
 
@@ -37,6 +38,14 @@ struct lsm6ds3_dev_s hlsm6;
 //Inits BME280, DS18B20, MPX2100AP (and also I2C1, OneWire and ADS1115 required for them)
 void sensors_init(void)
 {
+	__GPIOA_CLK_ENABLE();
+	__GPIOB_CLK_ENABLE();
+	__GPIOC_CLK_ENABLE();
+	__GPIOD_CLK_ENABLE();
+	__SPI3_CLK_ENABLE();
+	__SPI2_CLK_ENABLE();
+	__I2C3_CLK_ENABLE();
+
 	{	//I2C1 (separately, cause it's used both by BME280 and MPX2100)
 		GPIO_InitTypeDef pa_init;
 		pa_init.Alternate = GPIO_AF4_I2C3;
@@ -53,7 +62,7 @@ void sensors_init(void)
 		hi2c.Instance = I2C3;
 		i2c_init(&hi2c);
 	}
-/*
+
 	{
 		spi_config_default(&hspi2);
 		hspi2.Instance = SPI2;
@@ -63,7 +72,7 @@ void sensors_init(void)
 		spi_pin_nss_init(&hspi2, GPIOB, GPIO_PIN_12);
 
 		spi_init(&hspi2);
-	}*/
+	}
 
 	{
 		spi_config_default(&hspi3);
@@ -109,7 +118,7 @@ void sensors_init(void)
 
 	{	//lsm6ds3
 		lsm6ds3_conf_default(&hlsm6);
-		lsm6ds3_register_spi(&hlsm6, &hspi3);
+		lsm6ds3_register_spi(&hlsm6, &hspi3, GPIOD, GPIO_PIN_2);
 		HAL_Delay(50); //FIXME do we need it?
 		lsm6ds3_push_conf(&hlsm6);
 	}
@@ -150,11 +159,7 @@ void sensors_bme280_update(void)
 //Read data from DS18B20 and MPX2100AP sensors and send scaled_pressure2 MAVLink message
 void sensors_external_update(void)
 {
-	static uint32_t t_prev = 0, t_now;
-	if((t_now = HAL_GetTick()) - t_prev < 1000 / SENSORS_SEND_FREQ)
-	{
-		return;
-	}
+	task_begin(1000 / SENSORS_SEND_FREQ);
 
 	float temperature;
 	static mavlink_scaled_pressure2_t scaled_pressure;
@@ -182,7 +187,8 @@ void sensors_external_update(void)
 
 	mavlink_msg_scaled_pressure2_encode(0, ZIKUSH_SCU, &msg, &scaled_pressure);
 	can_mavlink_send(&msg);
-	t_prev = t_now;
+
+	task_end();
 }
 
 
