@@ -58,8 +58,34 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define LED_Pin GPIO_PIN_13
+#define LED_GPIO_Port GPIOC
+#define BME_CS_Pin GPIO_PIN_4
+#define BME_CS_GPIO_Port GPIOA
+#define BME_SCK_Pin GPIO_PIN_5
+#define BME_SCK_GPIO_Port GPIOA
+#define BME_MISO_Pin GPIO_PIN_6
+#define BME_MISO_GPIO_Port GPIOA
+#define BME_MOSI_Pin GPIO_PIN_7
+#define BME_MOSI_GPIO_Port GPIOA
+#define MAG_SCL_Pin GPIO_PIN_10
+#define MAG_SCL_GPIO_Port GPIOB
+#define MAG_SDA_Pin GPIO_PIN_11
+#define MAG_SDA_GPIO_Port GPIOB
+#define LSM_CS_Pin GPIO_PIN_12
+#define LSM_CS_GPIO_Port GPIOB
+#define LSM_SCK_Pin GPIO_PIN_13
+#define LSM_SCK_GPIO_Port GPIOB
+#define LSM_MISO_Pin GPIO_PIN_14
+#define LSM_MISO_GPIO_Port GPIOB
+#define LSM_MOSI_Pin GPIO_PIN_15
+#define LSM_MOSI_GPIO_Port GPIOB
+#define ADC_SCL_Pin GPIO_PIN_6
+#define ADC_SCL_GPIO_Port GPIOB
+#define ADC_SDA_Pin GPIO_PIN_7
+#define ADC_SDA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-
+extern SPI_HandleTypeDef hspi1;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
