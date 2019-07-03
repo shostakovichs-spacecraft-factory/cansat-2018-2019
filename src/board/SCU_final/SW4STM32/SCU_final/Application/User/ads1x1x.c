@@ -51,7 +51,7 @@ uint16_t ADS1x1x_read_register(I2C_HandleTypeDef *hi2c, uint8_t i2c_address, uin
 {
 
 	uint16_t result = 0;
-	int rc = HAL_I2C_Mem_Read(hi2c, i2c_address, (uint16_t)reg, I2C_MEMADD_SIZE_16BIT, (uint8_t*)&result, 2, 100);
+	volatile int rc = HAL_I2C_Mem_Read(hi2c, i2c_address, (uint16_t)reg, I2C_MEMADD_SIZE_16BIT, (uint8_t*)&result, 2, 100);
 	(void)rc;
 	swap_endian((uint8_t*)&result, 2);
 	return result;
@@ -73,7 +73,7 @@ int ADS1x1x_config_default(ADS1x1x_config_t *p_config)
     ADS1x1x_set_os(p_config,OS_SINGLE);
 	ADS1x1x_set_multiplexer(p_config, MUX_DIFF_0_1);
 	ADS1x1x_set_pga(p_config, PGA_256);
-	ADS1x1x_set_mode(p_config, MODE_SINGLE_SHOT);
+	ADS1x1x_set_mode(p_config, MODE_CONTINUOUS);
 	ADS1x1x_set_data_rate(p_config, DATA_RATE_ADS111x_8);
 	ADS1x1x_set_threshold_lo(p_config, 0);
 	ADS1x1x_set_threshold_hi(p_config, 1);

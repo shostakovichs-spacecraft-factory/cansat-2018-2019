@@ -10,7 +10,7 @@
 
 #include "mpx2100ap.h"
 
-float mpx2100ap_compensate_pressure_flt(uint16_t raw_data)
+float mpx2100ap_compensate_pressure_flt(int16_t raw_data)
 {
 	float offset = 1300;
 	float koef = 1;

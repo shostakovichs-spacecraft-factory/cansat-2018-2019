@@ -114,7 +114,7 @@ void TM_GPIO_SetPinAsInput(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin) {
         /* Pin is set */
         if (GPIO_Pin & (1 << i)) {
             /* Set 00 bits combination for input */
-            if (i > 7) {
+            if (i < 7) {
                 GPIOx->CRL &= ~((uint32_t)(0x03 << 4*i));
             }
             else {
@@ -132,7 +132,7 @@ void TM_GPIO_SetPinAsOutput(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin) {
         /* Pin is set */
         if (GPIO_Pin & (1 << i)) {
             /* Set 00 bits combination for input */
-            if (i > 7) {
+            if (i < 7) {
                 GPIOx->CRL = (GPIOx->CRL & ~((uint32_t)(0x03 << 4*i))) | ((uint32_t)0x01 << 4*i);
             }
             else {
@@ -144,11 +144,11 @@ void TM_GPIO_SetPinAsOutput(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin) {
 }
 void onewire_Init(onewire_t* OneWireStruct, GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin) {
 	/* Initialize delay if it was not already */
-	//TM_DELAY_Init();
+    delay_us_init();
 
 	/* Init GPIO pin */
 	//TM_GPIO_Init(GPIOx, GPIO_Pin, TM_GPIO_Mode_OUT, TM_GPIO_OType_PP, TM_GPIO_PuPd_UP, TM_GPIO_Speed_Medium);
-	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, RESET);
+	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, SET);
 
     GPIO_InitTypeDef gp;
 	gp.Mode = GPIO_MODE_OUTPUT_OD;

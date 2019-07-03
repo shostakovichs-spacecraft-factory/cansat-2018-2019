@@ -9,7 +9,7 @@
 #define MPX2100AP_H_
 
 #include <stdint.h>
-float mpx2100ap_compensate_pressure_flt(uint16_t raw_data);
+float mpx2100ap_compensate_pressure_flt(int16_t raw_data);
 
 
 
