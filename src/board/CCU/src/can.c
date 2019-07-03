@@ -75,7 +75,7 @@ void can_init(void)
 
 	HAL_CAN_ConfigFilter(&hcan, &filter);
 
-	HAL_NVIC_SetPriority(CAN1_RX0_IRQn, CCU_CAN_IRQ_PRIO);
+	HAL_NVIC_SetPriority(CAN1_RX0_IRQn, CCU_CAN_IRQ_PRIO, 0);
 	NVIC_EnableIRQ(CAN1_RX0_IRQn);
 	hcan.Instance->IER |= CAN_IER_FMPIE0;
 }

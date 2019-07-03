@@ -182,12 +182,12 @@ void spectrum_send_photo() {
 
 		encdata.seqnr = frame;
 		mavlink_msg_encapsulated_data_encode(0, ZIKUSH_CCU, &msg, &encdata);
-		//can_mavlink_transmit(&msg);//FIXME Is it ok?
+		can_mavlink_transmit(&msg);
 #ifdef CCU_TESTMODE
 		usart3_mavlink_transmit(&msg);
 #endif
 
-		//HAL_Delay(100);
+		HAL_Delay(100);
 
 		frame++;
 	}

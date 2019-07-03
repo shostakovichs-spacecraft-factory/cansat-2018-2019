@@ -87,7 +87,7 @@ int main(int argc, char ** argv)
 	char * filename = "./lastlog.bin";
 
 	if(argc > 2)
-		hostname = argv[2];
+		filename = argv[2];
 
 	int file = open(filename, O_WRONLY | O_CREAT | O_EXCL, S_IROTH);
 	if(file != 0 && errno == EEXIST)
@@ -118,11 +118,11 @@ int main(int argc, char ** argv)
 			printf("%s; received %d bytes; status %d\n", timeString, rxlen, status);
 
 			int res = sendto(sock, tmpbuff, rxlen, 0, addr->ai_addr, addr->ai_addrlen);
-			if(res != rxlen)
+			if(res != rxlen || verbose)
 				printf("Pushed to socket, res %d\n", res);
 
 			res = write(file, tmpbuff, rxlen);
-			if(res != rxlen)
+			if(res != rxlen || verbose)
 				printf("Writed to file, res %d\n", res);
 			else
 			{

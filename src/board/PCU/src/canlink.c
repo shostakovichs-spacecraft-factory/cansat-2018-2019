@@ -87,9 +87,10 @@ void canlink_send(mavlink_message_t * msg)
 		mailbox = CAN_Transmit(CAN1, frames + i);
 
 		uint8_t pending;
+		uint32_t timeout;
 		do {
-			pending = CAN_TransmitStatus(CAN1, mailbox);//TODO consider yielding here, but notice that for proper canmavlink functionality messages should come in an uninterrupted series
-		} while(pending == CAN_TxStatus_Pending);
+			pending = CAN_TransmitStatus(CAN1, mailbox);
+		} while(pending == CAN_TxStatus_Pending && --timeout != 0);
 	}
 
 	__enable_irq();
