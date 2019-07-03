@@ -65,12 +65,12 @@ int main()
 	while(1)
 	{
 		ahrs_system_update();
-		sensors_bme280_update();
+		//sensors_bme280_update();
 		sensors_external_update();
 		heartbeat_send();
 
 
-		camera_system_update(&hcam);
+		//camera_system_update(&hcam);
 		/*
 
 
