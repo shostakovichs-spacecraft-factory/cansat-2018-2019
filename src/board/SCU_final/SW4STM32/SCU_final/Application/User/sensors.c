@@ -12,10 +12,14 @@
 #include "ads1x1x.h"
 #include "mpx2100ap.h"
 #include "ds18b20.h"
-#include <can.h>
+#include "can.h"
 
 
 #define SENSORS_SEND_FREQ 2
+
+struct bme280_dev_s hbme;
+ds18b20_config_t hds;
+ADS1x1x_config_t hads;
 
 //Read data from BME280 sensor and send scaled_pressure MAVLink message
 void sensors_bme280_update(void)
@@ -48,27 +52,21 @@ void sensors_external_update(void)
 {
 	task_begin(1000 / SENSORS_SEND_FREQ);
 
-	float temperature;
+	static float temperature = 0;
 	static mavlink_scaled_pressure2_t scaled_pressure;
 	mavlink_message_t msg;
 
-	if( ds18b20_Read(&hds, &temperature) )
-	{
+    if (ds18b20_AllDone(&hds) && ds18b20_Read(&hds, &temperature))
+    {
+        ds18b20_StartAll(&hds);
 		scaled_pressure.temperature = temperature * 100;
-
-		ds18b20_Start(&hds);
 	}
 
-	static previousConversionTime = 0;
-	if(HAL_GetTick() - previousConversionTime >= 200)
-	{
-		uint16_t data = ADS1x1x_read(&hads);
+    uint16_t data = ADS1x1x_read(&hads);
 
-		scaled_pressure.press_abs = mpx2100ap_compensate_pressure_flt(data);
+    scaled_pressure.press_abs = mpx2100ap_compensate_pressure_flt(data);
 
-		ADS1x1x_start_conversion(&hads);
-		previousConversionTime = HAL_GetTick();
-	}
+
 
 	scaled_pressure.time_boot_ms = HAL_GetTick();
 

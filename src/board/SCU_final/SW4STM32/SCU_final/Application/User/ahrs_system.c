@@ -4,10 +4,10 @@
  *  Created on: 1 июл. 2019 г.
  *      Author: sereshotes
  */
-#include "../task.h"
-#include "../sensors.h"
+#include "task.h"
+#include "sensors.h"
 #include <math.h>
-#include <../mavlink/zikush/mavlink.h>
+#include "mavlink/zikush/mavlink.h"
 #include "ahrs_system.h"
 #include "ahrs.h"
 #include "mag_calib.h"
@@ -23,6 +23,10 @@
 
 ahrs_exec_status_t ahrs_exec_status;
 ahrs_send_status_t ahrs_send_status;
+
+struct lsm6ds3_dev_s hlsm6;
+struct lsm303c_handler_s hlsm3;
+
 
 void ahrs_system_init()
 {

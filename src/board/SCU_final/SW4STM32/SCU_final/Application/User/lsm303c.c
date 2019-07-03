@@ -169,7 +169,55 @@ uint8_t lsm303c_who_am_i(struct lsm303c_handler_s * handler)
 	handler->read_regn(handler, LSM303C_WHO_AM_I_ADDR, &res, 1);
 	return res;
 }
+// send mag settings to device
+int lsm303c_m_push_conf(const struct lsm303c_handler_s *handler,
+        const struct lsm303c_m_conf_s * m_conf)
+{
+    uint8_t creg[5];
+    handler->read_regn(handler, LSM303C_CTRL_REG1_M, creg, 5);
 
+    creg[0] = LSM303C_SET_BITS(creg[0], LSM303C_M_CTRL_REG1_ODR, m_conf->odr);
+    creg[0] = LSM303C_SET_BITS(creg[0], LSM303C_M_CTRL_REG1_PM, m_conf->pm);
+
+    creg[1] = LSM303C_SET_BITS(creg[1], LSM303C_M_CTRL_REG2_FS, m_conf->fs);
+
+    creg[2] = LSM303C_SET_BITS(creg[2], LSM303C_M_CTRL_REG3_MD, m_conf->md);
+
+    handler->write_regn(handler, LSM303C_CTRL_REG1_M, creg, 5);
+    return 0;
+
+}
+
+// read raw mag values
+int lsm303c_m_pull(const struct lsm303c_handler_s *handler,
+        struct lsm303c_raw_data_m_s * m_raw)
+{
+    int rc = handler->read_regn(handler, LSM303C_OUT_X_L_M, (uint8_t*)m_raw, 6);
+    return rc;
+}
+
+void lsm303c_scale_m(const struct lsm303c_handler_s *handler, int16_t *in, float *out, int count)
+{
+    float k = 1;
+    switch(handler->conf.m.fs)
+    {
+    case LSM303C_M_FS_16_GAUSS:
+        k = 16.0;
+        break;
+    }
+
+    for(int i = 0; i < count; i++)
+    {
+        out[i] = in[i] / k;
+    }
+}
+void lsm303c_m_conf_default(struct lsm303c_handler_s * handler)
+{
+    handler->conf.m.fs = LSM303C_M_FS_16_GAUSS;
+    handler->conf.m.md = LSM303C_M_MD_CONT_CONV;
+    handler->conf.m.odr = LSM303C_M_ODR_80_HZ;
+    handler->conf.m.pm = LSM303C_M_PM_ULTRA_HIGH_PERFORMANCE;
+}
 // registration of device on i2c bus
 int lsm303c_register_i2c(struct lsm303c_handler_s * handler, I2C_HandleTypeDef* hi2c)
 {
@@ -199,63 +247,11 @@ int lsm303c_register_i2c(struct lsm303c_handler_s * handler, I2C_HandleTypeDef* 
 
 
 
-// halt device measurements to allow applying new settings (or to put it to sleep)
-//int lsm303c_halt(struct lsm303c_dev_s *priv);
-// software device reset and wait until it completes
-//int lsm303c_m_sw_reset(const struct lsm303c_handler_s *priv);
-
-// load default configuration to as it as after reset
-void lsm303c_m_conf_default(struct lsm303c_handler_s * handler)
-{
-	handler->conf.m.fs = LSM303C_M_FS_16_GAUSS;
-	handler->conf.m.md = LSM303C_M_MD_CONT_CONV;
-	handler->conf.m.odr = LSM303C_M_ODR_80_HZ;
-	handler->conf.m.pm = LSM303C_M_PM_ULTRA_HIGH_PERFORMANCE;
-}
 
 
-// send mag settings to device
-int lsm303c_m_push_conf(const struct lsm303c_handler_s *handler,
-        const struct lsm303c_m_conf_s * m_conf)
-{
-	uint8_t creg[5];
-	handler->read_regn(handler, LSM303C_CTRL_REG1_M, creg, 5);
 
-	creg[0] = LSM303C_SET_BITS(creg[0], LSM303C_M_CTRL_REG1_ODR, m_conf->odr);
-	creg[0] = LSM303C_SET_BITS(creg[0], LSM303C_M_CTRL_REG1_PM, m_conf->pm);
 
-	creg[1] = LSM303C_SET_BITS(creg[1], LSM303C_M_CTRL_REG2_FS, m_conf->fs);
 
-	creg[2] = LSM303C_SET_BITS(creg[2], LSM303C_M_CTRL_REG3_MD, m_conf->md);
-
-	handler->write_regn(handler, LSM303C_CTRL_REG1_M, creg, 5);
-	return 0;
-
-}
-
-// read raw mag values
-int lsm303c_m_pull(const struct lsm303c_handler_s *handler,
-        struct lsm303c_raw_data_m_s * m_raw)
-{
-	int rc = handler->read_regn(handler, LSM303C_OUT_X_L_M, (uint8_t*)m_raw, 6);
-	return rc;
-}
-
-void lsm303c_scale_m(const struct lsm303c_handler_s *handler, int16_t *in, float *out, int count)
-{
-	float k = 1;
-	switch(handler->conf.m.fs)
-	{
-	case LSM303C_M_FS_16_GAUSS:
-		k = 16.0;
-		break;
-	}
-
-	for(int i = 0; i < count; i++)
-	{
-		out[i] = in[i] / k;
-	}
-}
 /*
 // push fifo config to device
 // its assumed that device (or at least fifo) is halted
