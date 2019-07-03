@@ -82,6 +82,7 @@ int the_main(void)
 
     ds18b20_StartAll(&hds);
 
+    ahrs_system_init();
 
     while(1)
     {
