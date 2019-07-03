@@ -5,14 +5,24 @@
  *      Author: snork
  */
 
+
 #include "main.h"
+
+#include <zikush_config.h>
 
 #include "bme280.h"
 #include "ads1x1x.h"
 #include "lsm6ds3.h"
+#include "can.h"
+
+#include "mavlink/zikush/mavlink.h"
 
 int the_main(void)
 {
+    mavlink_get_channel_status(ZIKUSH_SCU)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
+    can_init();
+
     struct bme280_dev_s bme;
     volatile int rc = bme280_register_spi(&bme, &hspi1, BME_CS_GPIO_Port, BME_CS_Pin, 1000);
     (void)rc;
@@ -32,7 +42,6 @@ int the_main(void)
 
     while(1)
     {
-
         ADS1x1x_start_conversion(&ads);
         volatile int16_t value = ADS1x1x_read(&ads);
         (void)value;
@@ -43,6 +52,13 @@ int the_main(void)
         lsm6ds3_float_t gyro[3];
         lsm6ds3_scale_g(&lsm6d.conf.g, inertial.g, gyro, 3);
         lsm6ds3_scale_xl(&lsm6d.conf.xl, inertial.xl, xl, 3);
+
+        mavlink_message_t msgbuf;
+        mavlink_heartbeat_t msg = {0};
+        mavlink_msg_heartbeat_encode_chan(0, ZIKUSH_SCU, ZIKUSH_SCU, &msgbuf, &msg);
+//        mavlink_zikush_icu_stats_t msg = {0};
+//        mavlink_msg_zikush_icu_stats_encode_chan(0, ZIKUSH_SCU, ZIKUSH_SCU, &msgbuf, &msg);
+        can_mavlink_send(&msgbuf);
         HAL_Delay(500);
     }
 

@@ -90,6 +90,7 @@ void Error_Handler(void);
 extern SPI_HandleTypeDef hspi1;
 extern I2C_HandleTypeDef hi2c1;
 extern SPI_HandleTypeDef hspi2;
+extern CAN_HandleTypeDef hcan;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

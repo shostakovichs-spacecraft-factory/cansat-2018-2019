@@ -52,6 +52,7 @@ uint16_t ADS1x1x_read_register(I2C_HandleTypeDef *hi2c, uint8_t i2c_address, uin
 
 	uint16_t result = 0;
 	int rc = HAL_I2C_Mem_Read(hi2c, i2c_address, (uint16_t)reg, I2C_MEMADD_SIZE_16BIT, (uint8_t*)&result, 2, 100);
+	(void)rc;
 	swap_endian((uint8_t*)&result, 2);
 	return result;
 }
