@@ -350,6 +350,9 @@ static int _bme280_do_write_spi( const struct bme280_dev_s * priv, uint8_t * ctr
     SPI_HandleTypeDef * const hspi = priv->setup_conf.iface.spi.hspi;
     const uint32_t timeout = priv->setup_conf.iface.spi.timeout;
 
+    for (size_t i = 0; i < ctrl_pairs_count; i++)
+        ctrl_pairs[i*2] &= 0x7F;
+
     HAL_GPIO_WritePin(gpio, gpio_pin, DISABLE);
     HAL_StatusTypeDef rc = HAL_SPI_Transmit(hspi, ctrl_pairs, ctrl_pairs_count*2, timeout);
 

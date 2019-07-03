@@ -14,7 +14,7 @@
 
 
 
-#if defined(CONFIG_SENSORS_BME280)
+
 
 
 double bme280_compensate_pressure_flt(const struct bme280_raw_data_s *uncomp_data,
@@ -307,5 +307,4 @@ int bme280_load_preset_conf(struct bme280_conf_s * conf, bme280_conf_preset_t co
 
 }
 
-#endif
 
