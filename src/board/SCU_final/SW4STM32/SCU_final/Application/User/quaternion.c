@@ -6,10 +6,10 @@
  */
 
 #include "quaternion.h"
+#include "my_debug.h"
 
 #include <math.h>
 
-#define my_debug trace_my_debug
 quaternion_t quat_mulByNum(quaternion_t * a, double k) {
 
 	quaternion_t result;

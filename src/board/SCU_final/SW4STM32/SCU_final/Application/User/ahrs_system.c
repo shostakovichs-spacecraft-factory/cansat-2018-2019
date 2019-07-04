@@ -4,10 +4,10 @@
  *  Created on: 1 июл. 2019 г.
  *      Author: sereshotes
  */
-#include "../task.h"
-#include "../sensors.h"
+#include "task.h"
+#include "sensors.h"
 #include <math.h>
-#include <../mavlink/zikush/mavlink.h>
+#include "mavlink/zikush/mavlink.h"
 #include "ahrs_system.h"
 #include "ahrs.h"
 #include "mag_calib.h"
@@ -18,14 +18,20 @@
 
 
 #define AHRS_CALC_FREQ 100
-#define AHRS_SEND_FREQ 10
+#define AHRS_SEND_FREQ 2
 
 
 ahrs_exec_status_t ahrs_exec_status;
 ahrs_send_status_t ahrs_send_status;
 
+struct lsm6ds3_dev_s hlsm6;
+struct lsm303c_handler_s hlsm3;
+
+
 void ahrs_system_init()
 {
+    mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 	mag_calib_init();
 
 	float ddx[3], ddg[3], ddm[3];
@@ -52,9 +58,9 @@ void ahrs_system_init()
 	vx.z = ddx[2];
 	vec_normalize(&vx);
 
-	vm.x = -ddm[2];
-	vm.y = -ddm[1];
-	vm.z = ddm[0];
+	vm.x = ddm[1];
+	vm.y = -ddm[0];
+	vm.z = -ddm[2];
 	vec_normalize(&vm);
 	ahrs_updateVecReal(AHRS_ACCEL, vx);
 	ahrs_updateVecReal(AHRS_MAG, vm);
@@ -102,9 +108,10 @@ void _ahrs_system_exec(float dt)
 		vx.z = ddx[2];
 		vec_normalize(&vx);
 
-		vm.x = -ddm[2];
-		vm.y = -ddm[1];
-		vm.z = ddm[0];
+
+	    vm.x = ddm[1];
+	    vm.y = -ddm[0];
+	    vm.z = -ddm[2];
 		vec_normalize(&vm);
 
 		vg.x = ddg[0];
@@ -212,7 +219,7 @@ void _ahrs_system_send()
 
 void ahrs_system_update()
 {
-	_ahrs_system_zero_acc_trigger();
+	//_ahrs_system_zero_acc_trigger();
 
 	task_begin(1000 / AHRS_CALC_FREQ);
 	_ahrs_system_exec(task_dt);

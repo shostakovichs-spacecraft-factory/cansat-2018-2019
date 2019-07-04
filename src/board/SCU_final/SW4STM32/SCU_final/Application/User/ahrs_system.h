@@ -24,6 +24,8 @@ typedef enum{
 extern ahrs_exec_status_t ahrs_exec_status;
 extern ahrs_send_status_t ahrs_send_status;
 
+extern struct lsm6ds3_dev_s hlsm6;
+extern struct lsm303c_handler_s hlsm3;
 
 void ahrs_system_update();
 void ahrs_system_init();
