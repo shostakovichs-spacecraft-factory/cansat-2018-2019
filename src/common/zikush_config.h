@@ -68,7 +68,7 @@
 #define ICU_CBBNE_BAUDRATE	9600
 #define ICU_CBBNE_BUFFLEN	1024 //in bytes
 #define ICU_CBBNE_BUFFCOUNT	4
-#define ICU_CBBNE_PERIOD_MS	100//in bytes
+#define ICU_CBBNE_PERIOD_MS	300//in ms
 
 /* Params for PCU */
 #define PCU_INA_ICU_ADDR	INA219_I2CADDR_A1_GND_A0_VSP

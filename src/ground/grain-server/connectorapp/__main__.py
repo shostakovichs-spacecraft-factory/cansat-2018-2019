@@ -98,7 +98,7 @@ def main(argv):
         _log.debug("got message %s", msg)
 
         if not isinstance(msg, MAVLink_bad_data):
-            print(msg)
+            print(msg._header.srcComponent, msg)
             print(badcounter)
         else: badcounter += 1
 

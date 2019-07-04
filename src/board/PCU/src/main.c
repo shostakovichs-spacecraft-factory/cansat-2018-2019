@@ -35,9 +35,9 @@ void delay_until(uint32_t ms)
 
 mavlink_heartbeat_t heartbeat =
 {
-	.type = MAV_TYPE_ONBOARD_CONTROLLER,
+	.type = MAV_TYPE_GIMBAL,
 	.autopilot = MAV_AUTOPILOT_INVALID,
-	.base_mode = MAV_MODE_FLAG_TEST_ENABLED,
+	.base_mode = MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
 	.system_status = MAV_STATE_ACTIVE
 };
 

@@ -34,9 +34,9 @@ int main(int argc, char* argv[])
 	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
 	mavlink_heartbeat_t heartbeat =
 	{
-		.type = MAV_TYPE_ONBOARD_CONTROLLER,
+		.type = MAV_TYPE_CAMERA,
 		.autopilot = MAV_AUTOPILOT_INVALID,
-		.base_mode = MAV_MODE_FLAG_TEST_ENABLED,
+		.base_mode = MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
 		.system_status = MAV_STATE_ACTIVE
 	};
 	mavlink_message_t msg;
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 		//TODO add cam requests processing
 
 
-		HAL_Delay(1000); //TODO Add transition into true sleep mode?
+		HAL_Delay(60000); //TODO Add transition into true sleep mode?
 
 #ifdef CCU_TESTMODE
 		can_spectrum_request = SPRQ_FULL;
