@@ -24,6 +24,8 @@ ADS1x1x_config_t hads;
 //Read data from BME280 sensor and send scaled_pressure MAVLink message
 void sensors_bme280_update(void)
 {
+    mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 	task_begin(1000 / SENSORS_SEND_FREQ);
 
 	struct bme280_float_data_s data;
@@ -50,6 +52,8 @@ void sensors_bme280_update(void)
 //Read data from DS18B20 and MPX2100AP sensors and send scaled_pressure2 MAVLink message
 void sensors_external_update(void)
 {
+    mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 	task_begin(1000 / SENSORS_SEND_FREQ);
 
 	static float temperature = 0;

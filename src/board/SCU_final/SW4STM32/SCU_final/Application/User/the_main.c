@@ -40,7 +40,7 @@ void heartbeat_send(void)
 {
     const uint32_t freq = 1;
     static uint32_t t_prev = 0, t_now = 0;
-    if((t_now = HAL_GetTick()) - t_prev < 1000 / freq)
+    if((t_now = HAL_GetTick()) - t_prev > 1000 / freq)
     {
         t_prev = t_now;
         return;
@@ -52,6 +52,8 @@ void heartbeat_send(void)
 
 int the_main(void)
 {
+    mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
     mavlink_get_channel_status(ZIKUSH_SCU)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
     can_init();
 

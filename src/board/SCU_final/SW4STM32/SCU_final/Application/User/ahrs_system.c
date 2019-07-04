@@ -30,6 +30,8 @@ struct lsm303c_handler_s hlsm3;
 
 void ahrs_system_init()
 {
+    mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
 	mag_calib_init();
 
 	float ddx[3], ddg[3], ddm[3];

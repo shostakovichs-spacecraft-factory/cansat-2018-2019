@@ -15,6 +15,8 @@
 
 void can_init(void)
 {
+    mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
     __HAL_RCC_CAN1_FORCE_RESET();
     HAL_Delay(100);
     __HAL_RCC_CAN1_RELEASE_RESET();
