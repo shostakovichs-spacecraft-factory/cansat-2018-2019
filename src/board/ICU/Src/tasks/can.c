@@ -19,7 +19,7 @@ static void can_init();
 
 static StaticQueue_t _rxqueue;
 static CANMAVLINK_RX_FRAME_T _rxbuff[ICU_CAN_RXBUFFSIZE];
-QueueHandle_t	_rxqueue_handle;
+static QueueHandle_t	_rxqueue_handle;
 
 
 void can_task (void *pvParameters)
