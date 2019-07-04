@@ -91,12 +91,16 @@ def main(argv):
                         picture_acceptor_nadir = PictureSaver(filename_template=nadirpicture_filename_template),
                         picture_acceptor_zenith = PictureSaver(filename_template=zenithpicture_filename_template)),
 
+    badcounter = 0
+
     while True:
         msg = mav.recv_match(blocking=True)
         _log.debug("got message %s", msg)
 
         if not isinstance(msg, MAVLink_bad_data):
             print(msg)
+            print(badcounter)
+        else: badcounter += 1
 
         if isinstance(msg, MAVLink_heartbeat_message):
             HeartbeatHandler(msg)

@@ -4,6 +4,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include <semphr.h>
 
 #include "main.h"
 
@@ -36,9 +37,11 @@ void sd_task(void *pvParameters);
 static StaticTask_t sd_task_tcb;
 static StackType_t sd_stack[ICU_TASKS_SD_STACKSIZE];
 static StaticQueue_t sd_task_queue;
+static StaticQueue_t sd_mutex;
 static mavlink_message_t sd_task_queue_buffer[ICU_TASKS_SD_QUEUE_SIZE];
 TaskHandle_t sd_task_handle = NULL;
 QueueHandle_t	sd_queue_handle = NULL;
+QueueHandle_t	sd_mutex_handle = NULL;
 
 void radio_task(void *pvParameters);
 static StaticTask_t radio_task_tcb;
@@ -52,6 +55,11 @@ void gps_task(void *pvParameters);
 static StaticTask_t gps_task_tcb;
 static StackType_t gps_stack[ICU_TASKS_GPS_STACKSIZE];
 TaskHandle_t gps_task_handle = NULL;
+
+void cbbne_task(void *pvParameters);
+static StaticTask_t cbbne_task_tcb;
+static StackType_t cbbne_stack[ICU_TASKS_CBBNE_STACKSIZE];
+TaskHandle_t cbbne_task_handle = NULL;
 
 void iridium_task(void *pvParameters);
 static StaticTask_t iridium_task_tcb;
@@ -86,6 +94,7 @@ int main(void)
 	sd_task_handle = xTaskCreateStatic(sd_task, (const char *)"sd", ICU_TASKS_SD_STACKSIZE, NULL, \
 										ICU_TASKS_SD_TASKPRIORITY, sd_stack, &sd_task_tcb);
 	sd_queue_handle = xQueueCreateStatic(ICU_TASKS_SD_QUEUE_SIZE, sizeof(mavlink_message_t), (uint8_t *)sd_task_queue_buffer, &sd_task_queue);
+	sd_mutex_handle = xSemaphoreCreateMutexStatic(&sd_mutex);
 
 	radio_task_handle = xTaskCreateStatic(radio_task, (const char *)"radio", ICU_TASKS_RADIO_STACKSIZE, NULL, \
 									   ICU_TASKS_RADIO_TASKPRIORITY, radio_stack, &radio_task_tcb);
@@ -97,6 +106,9 @@ int main(void)
 
 	gps_task_handle = xTaskCreateStatic(gps_task, (const char *)"gps", ICU_TASKS_GPS_STACKSIZE, NULL, \
 										   ICU_TASKS_GPS_TASKPRIORITY, gps_stack, &gps_task_tcb);
+
+	cbbne_task_handle = xTaskCreateStatic(cbbne_task, (const char *)"cbbne", ICU_TASKS_CBBNE_STACKSIZE, NULL, \
+											   ICU_TASKS_CBBNE_TASKPRIORITY, cbbne_stack, &cbbne_task_tcb);
 
 
 	vTaskStartScheduler();

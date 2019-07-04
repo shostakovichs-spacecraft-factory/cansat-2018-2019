@@ -4,6 +4,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "semphr.h"
 
 #include <main.h>
 
@@ -16,7 +17,6 @@ SD_HandleTypeDef hsd;
 static void MX_SDIO_SD_Init(void);
 static void sd_startlog(void);
 
-
 void sd_task (void *pvParameters)
 {
 	static int8_t _extfilenum = -1, _intfilenum = -1;
@@ -28,14 +28,19 @@ void sd_task (void *pvParameters)
 
 	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
 
+	xSemaphoreTake(sd_mutex_handle, portMAX_DELAY);
+
 	MX_SDIO_SD_Init();
 	MX_FATFS_Init();
 
 	sd_startlog();
 
+	xSemaphoreGive(sd_mutex_handle);
+
 	while(1)
 	{
 		xQueueReceive(sd_queue_handle, &msg, 0xFFFFFFFF);
+		xSemaphoreTake(sd_mutex_handle, portMAX_DELAY);
 
 		if(msg.sysid == 0) //internal
 			{ currentfile = &_intfile; currentfilenum = &_intfilenum;}
@@ -67,6 +72,8 @@ void sd_task (void *pvParameters)
 		//if(result != FR_OK || infactwritten != len)
 
 		result = f_sync(currentfile);
+
+		xSemaphoreGive(sd_mutex_handle);
 	}
 
 	vTaskDelete(NULL);

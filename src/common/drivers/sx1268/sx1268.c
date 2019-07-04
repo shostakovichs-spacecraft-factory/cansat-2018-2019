@@ -456,13 +456,13 @@ static void _sendpackparams(sx1268_t * self, uint8_t PayloadLength) //yeees, it'
 
 static inline void _waitbusy(sx1268_t * self, int timeout_ms)
 {
-	while(_readbusypin(self))
+	while(_readbusypin(self) && timeout_ms != 0)
 		timeout_ms--; //TODO proper timeout handling
 }
 
 static inline void _waittxbusy(sx1268_t * self, int timeout_ms)
 {
-	while(_readdio2pin(self))
+	while(_readdio2pin(self) && timeout_ms != 0)
 		timeout_ms--; //TODO proper timeout handling
 }
 

@@ -182,6 +182,7 @@ void spectrum_send_photo() {
 #ifdef CCU_TESTMODE
 		usart3_mavlink_transmit(&msg);
 #endif
+		HAL_Delay(70);
 
 		frame++;
 	}

@@ -42,6 +42,8 @@
 
 #include <mavlink/zikush/mavlink.h>
 
+#include <zikush_config.h>
+
 #define TXBUFFERSIZE   	(64*64) // 4 KByte
 #define RXBUFFERSIZE   	(64*64)
 
@@ -377,7 +379,7 @@ void usart_init(void)
 	huart2.Init.StopBits = USART_STOPBITS_1;
 	huart2.Init.Parity = USART_PARITY_NONE;
 	huart2.Init.Mode = USART_MODE_RX | USART_MODE_TX;
-	huart2.Init.BaudRate = 38400;
+	huart2.Init.BaudRate = CCU_CBBNE_BAUDRATE;
 	huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
 	huart2.Init.OverSampling = UART_OVERSAMPLING_16;
 

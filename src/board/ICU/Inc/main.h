@@ -21,6 +21,7 @@ extern TaskHandle_t can_task_handle;
 extern QueueHandle_t	can_queue_handle;
 extern TaskHandle_t sd_task_handle;
 extern QueueHandle_t	sd_queue_handle;
+extern QueueHandle_t	sd_mutex_handle;
 extern TaskHandle_t radio_task_handle;
 extern QueueHandle_t	radio_queue_handle;
 extern TaskHandle_t iridium_task_handle;

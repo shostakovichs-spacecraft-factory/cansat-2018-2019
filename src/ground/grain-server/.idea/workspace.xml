@@ -3,7 +3,13 @@
   <component name="ChangeListManager">
     <list default="true" id="a29cf80a-6178-4680-ae34-78975dde51bc" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/../../board/CCU/src/usart.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/CCU/src/usart.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../board/ICU/Src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/Src/main.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../board/ICU/Src/tasks/can.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../board/ICU/Src/tasks/can.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../common/zikush_config.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../common/zikush_config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/grain-server.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/grain-server.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/connectorapp/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/connectorapp/__main__.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -43,8 +49,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/connectorapp/__main__.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="538">
-              <caret line="119" column="60" selection-start-line="119" selection-start-column="60" selection-end-line="119" selection-end-column="60" />
+            <state relative-caret-position="490">
+              <caret line="101" column="29" selection-start-line="101" selection-start-column="29" selection-end-line="101" selection-end-column="29" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -136,7 +142,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -176,6 +181,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -323,13 +329,13 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32868218" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32838982" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" sideWeight="0.49973616" visible="true" weight="0.3983051" />
+      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49973616" weight="0.3983051" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="8" />
-      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.50026387" side_tool="true" weight="0.3983051" />
+      <window_info anchor="bottom" id="Terminal" order="7" />
+      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50026387" side_tool="true" weight="0.3983051" />
+      <window_info anchor="bottom" id="Version Control" order="9" weight="0.32944915" />
       <window_info anchor="bottom" id="Python Console" order="10" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -356,7 +362,6 @@
     </layout-to-restore>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/venv-cansat-2018-2019/lib/python3.5/tokenize.py" />
     <entry file="file:///usr/lib/python3.5/http/server.py" />
     <entry file="file://$USER_HOME$/venv-cansat-2018-2019/lib/python3.5/site-packages/flask/helpers.py" />
     <entry file="file://$PROJECT_DIR$/webapp/templates/spectrum.html">
@@ -625,10 +630,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$USER_HOME$/.PyCharmCE2019.1/system/python_stubs/1294164489/builtins.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="200">
+          <caret line="483" column="4" selection-start-line="483" selection-start-column="4" selection-end-line="483" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/connectorapp/__main__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="538">
-          <caret line="119" column="60" selection-start-line="119" selection-start-column="60" selection-end-line="119" selection-end-column="60" />
+        <state relative-caret-position="490">
+          <caret line="101" column="29" selection-start-line="101" selection-start-column="29" selection-end-line="101" selection-end-column="29" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
