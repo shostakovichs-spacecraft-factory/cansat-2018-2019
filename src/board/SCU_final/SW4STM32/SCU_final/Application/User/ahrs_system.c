@@ -18,7 +18,7 @@
 
 
 #define AHRS_CALC_FREQ 100
-#define AHRS_SEND_FREQ 10
+#define AHRS_SEND_FREQ 2
 
 
 ahrs_exec_status_t ahrs_exec_status;
@@ -58,9 +58,9 @@ void ahrs_system_init()
 	vx.z = ddx[2];
 	vec_normalize(&vx);
 
-	vm.x = -ddm[2];
-	vm.y = -ddm[1];
-	vm.z = ddm[0];
+	vm.x = ddm[1];
+	vm.y = -ddm[0];
+	vm.z = -ddm[2];
 	vec_normalize(&vm);
 	ahrs_updateVecReal(AHRS_ACCEL, vx);
 	ahrs_updateVecReal(AHRS_MAG, vm);
@@ -108,9 +108,10 @@ void _ahrs_system_exec(float dt)
 		vx.z = ddx[2];
 		vec_normalize(&vx);
 
-		vm.x = -ddm[2];
-		vm.y = -ddm[1];
-		vm.z = ddm[0];
+
+	    vm.x = ddm[1];
+	    vm.y = -ddm[0];
+	    vm.z = -ddm[2];
 		vec_normalize(&vm);
 
 		vg.x = ddg[0];
