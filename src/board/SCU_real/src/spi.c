@@ -50,7 +50,7 @@ int spi_pin_sck_init(SPI_HandleTypeDef *hspi, GPIO_TypeDef* GPIOX, uint32_t pin)
 	GPIO_InitTypeDef gp = {
 		.Pin = pin,
 		.Mode = GPIO_MODE_AF_PP,
-		.Pull = GPIO_PULLUP,
+		.Pull = GPIO_NOPULL,
 		.Speed = GPIO_SPEED_FAST
 	};
 	if(hspi->Instance == SPI1)
@@ -68,7 +68,7 @@ int spi_pin_miso_init(SPI_HandleTypeDef *hspi, GPIO_TypeDef* GPIOX, uint32_t pin
 	GPIO_InitTypeDef gp = {
 		.Pin = pin,
 		.Mode = GPIO_MODE_AF_PP,
-		.Pull = GPIO_PULLUP,
+		.Pull = GPIO_NOPULL,
 		.Speed = GPIO_SPEED_FAST
 	};
 	if(hspi->Instance == SPI1)
@@ -87,7 +87,7 @@ int spi_pin_mosi_init(SPI_HandleTypeDef *hspi, GPIO_TypeDef* GPIOX, uint32_t pin
 	GPIO_InitTypeDef gp = {
 		.Pin = pin,
 		.Mode = GPIO_MODE_AF_PP,
-		.Pull = GPIO_PULLUP,
+		.Pull = GPIO_NOPULL,
 		.Speed = GPIO_SPEED_FAST
 	};
 	if(hspi->Instance == SPI1)
@@ -107,7 +107,7 @@ int spi_pin_nss_init(SPI_HandleTypeDef *hspi, GPIO_TypeDef* GPIOX, uint32_t pin)
 	GPIO_InitTypeDef gp = {
 		.Pin = pin,
 		.Mode = GPIO_MODE_OUTPUT_PP,
-		.Pull = GPIO_PULLUP,
+		.Pull = GPIO_NOPULL,
 		.Speed = GPIO_SPEED_FAST
 	};
 

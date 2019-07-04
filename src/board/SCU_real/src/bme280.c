@@ -379,6 +379,83 @@ static int _bme280_do_read_i2c( const struct bme280_dev_s * priv, uint8_t regadd
     return ret;
 
 }
+static int _bme280_do_read_spi( const struct bme280_dev_s * priv, uint8_t regaddr, uint8_t * data, size_t datasize)
+{
+
+    int ret = 0;
+
+    SPI_HandleTypeDef * const bus = priv->setup_conf.iface.spi.hspi;
+
+	if (0 == datasize)
+		return 0;
+
+	regaddr |= 0x80; // for read by SPI, regaddr should be modified with most significant bit setted to 1
+
+	// passing register value
+   // SPI_SEND(bus, regaddr);
+	int rc = 0;
+	HAL_GPIO_WritePin(priv->setup_conf.iface.spi.NSS_port, priv->setup_conf.iface.spi.NSS_pin,
+			GPIO_PIN_RESET);
+	if(rc = HAL_SPI_Transmit(bus, &regaddr, 1, TIMEOUT))
+		my_debug("ERROR: can't read spi: %d\n", rc);
+
+	//MY_HAL_SPI_TransmitReceive(bus, &regaddr, data, 1, datasize, LSM6DS3_TIMEOUT);
+	// passing data
+
+	// we have two type of read transfers
+	// first - is to read simple reg data
+	// and second - to read relatively large blocs of sensor data and even fifo buffers
+	// its possible to use DMA for block transfers
+	// and there is no need to use it for single byte transfer
+	/*
+	if (datasize <= 1)
+	{
+		//data[0] = SPI_SEND(bus, 0xFF);
+
+	}
+	else
+	{
+		SPI_RECVBLOCK(bus, data, datasize);
+	}*/
+	if(rc = HAL_SPI_Receive(bus, data, datasize, TIMEOUT))
+		my_debug("ERROR: can't read spi: %d\n", rc);
+	HAL_GPIO_WritePin(priv->setup_conf.iface.spi.NSS_port, priv->setup_conf.iface.spi.NSS_pin,
+			GPIO_PIN_SET);
+
+
+
+
+	return rc;
+
+}
+
+static int _bme280_do_write_reg8_spi( struct bme280_dev_s * priv, uint8_t * ctrl_pairs, size_t ctrl_pairs_count)
+{
+    SPI_HandleTypeDef * bus = priv->setup_conf.iface.spi.hspi;
+
+    if (0 == ctrl_pairs_count)
+        return 0;
+    //lsm6ds3_prepare_spi_bus(priv);
+    int rc = 0;
+    for(int i = 0; i < ctrl_pairs_count; i++)
+    {
+		HAL_GPIO_WritePin(priv->setup_conf.iface.spi.NSS_port, priv->setup_conf.iface.spi.NSS_pin,
+				GPIO_PIN_RESET);
+		rc = HAL_SPI_Transmit(bus, ctrl_pairs + 2 * i, 2, TIMEOUT);
+	//    if(rc = HAL_SPI_Transmit(bus, &regaddr, 1, LSM6DS3_TIMEOUT))
+	//    	my_debug("ERROR: %d\n", rc);
+	//    if(rc = HAL_SPI_Transmit(bus, data, datasize, LSM6DS3_TIMEOUT))
+	//    	my_debug("ERROR: %d\n", rc);
+		HAL_GPIO_WritePin(priv->setup_conf.iface.spi.NSS_port, priv->setup_conf.iface.spi.NSS_pin,
+				GPIO_PIN_SET);
+    }
+    //SPI_SEND(bus, regaddr);
+    //SPI_SNDBLOCK(bus, (uint8_t*)data, datasize); // const should be removed here, since
+                                                 // it`s not conforms the spi bus interface
+
+
+    return rc;
+}
 
 static int _bme280_do_write_i2c( const struct bme280_dev_s * priv, uint8_t * ctrl_pairs, size_t ctrl_pairs_count)
 {
@@ -661,7 +738,45 @@ int bme280_pull_raw_data( const struct bme280_dev_s * priv, struct bme280_raw_da
 }
 
 
+int bme280_register_spi(struct bme280_dev_s *bme280, SPI_HandleTypeDef *hspi,
+		GPIO_TypeDef *NSS_port, uint16_t NSS_pin)
+{
+	int rc = 0;
+	bme280->setup_conf.iface.spi.hspi = hspi;
+	bme280->setup_conf.iface.spi.NSS_pin = NSS_pin;
+	bme280->setup_conf.iface.spi.NSS_port = NSS_port;
 
+	bme280->_do_read = _bme280_do_read_spi;
+	bme280->_do_write = _bme280_do_write_reg8_spi;
+
+
+
+    /* reset the device */
+    rc = bme280_soft_reset(bme280);
+    if (rc < 0)
+    {
+        return rc;
+    }
+
+    /* Check Device ID */
+    rc = bme280_checkid(bme280);
+    if (rc < 0)
+    {
+        return rc;
+    }
+
+    /* Read the coefficient value */
+    rc = bme280_pull_calvals(bme280);
+    if (rc < 0)
+    {
+    	my_debug("ERROR: Can`t load calibration values from device: %d\n", rc);
+        return rc;
+    }
+    my_debug("INFO: loaded calibration values\n");
+
+    my_debug("INFO: BME280 driver loaded successfully!\n");
+    return rc;
+}
 
 int bme280_register_i2c(struct bme280_dev_s *bme280, I2C_HandleTypeDef *i2c_handler, uint16_t devaddr)
 {

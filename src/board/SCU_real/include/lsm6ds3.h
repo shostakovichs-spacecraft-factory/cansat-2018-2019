@@ -353,6 +353,9 @@ struct lsm6ds3_setup_conf_s
         	SPI_HandleTypeDef * bus; // spi bus
             uint32_t bus_freq;          // spi bus frequency
             int dev_id;                 // spi device id for cs callbacks
+
+            uint16_t NSS_pin;
+            GPIO_TypeDef *NSS_port;
         } spi;
 
         // i2c bus params
@@ -388,7 +391,8 @@ struct lsm6ds3_dev_s
 };
 
 // registration of device on spi bus
-int lsm6ds3_register_spi(struct lsm6ds3_dev_s * config, SPI_HandleTypeDef* bus);
+int lsm6ds3_register_spi(struct lsm6ds3_dev_s * config, SPI_HandleTypeDef* bus,
+		GPIO_TypeDef *NSS_port, uint16_t NSS_pin);
 // configure spi bus to work with this particular device
 void lsm6ds3_prepare_spi_bus(const struct lsm6ds3_dev_s * priv);
 

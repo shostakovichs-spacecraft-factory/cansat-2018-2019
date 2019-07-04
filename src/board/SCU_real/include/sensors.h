@@ -13,7 +13,8 @@
 #include <can.h>
 
 extern I2C_HandleTypeDef hi2c;
-extern SPI_HandleTypeDef hspi;
+extern SPI_HandleTypeDef hspi2;
+extern SPI_HandleTypeDef hspi3;
 extern onewire_t how;
 
 extern struct bme280_dev_s hbme;

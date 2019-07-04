@@ -279,7 +279,9 @@ struct bme280_setup_conf_s {
     {
         struct
         {
-            // TODO
+            SPI_HandleTypeDef *hspi;
+            uint16_t NSS_pin;
+            GPIO_TypeDef *NSS_port;
         } spi;
 
         struct

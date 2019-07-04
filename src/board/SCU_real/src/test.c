@@ -36,7 +36,7 @@ int lsm6ds3_test()
 
 	struct lsm6ds3_dev_s hlsm6;
 	lsm6ds3_conf_default(&hlsm6);
-	lsm6ds3_register_spi(&hlsm6, &hspi);
+	lsm6ds3_register_spi(&hlsm6, &hspi, GPIOA, GPIO_PIN_4);
 	HAL_Delay(50);
 	lsm6ds3_push_conf(&hlsm6);
 	//hspi.Instance->CR2 |= SPI_CR2_SSOE;
@@ -89,7 +89,7 @@ void madgwick_test()
 
 	struct lsm6ds3_dev_s hlsm6;
 	lsm6ds3_conf_default(&hlsm6);
-	lsm6ds3_register_spi(&hlsm6, &hspi);
+	lsm6ds3_register_spi(&hlsm6, &hspi, GPIOA, GPIO_PIN_4);
 	HAL_Delay(50);
 	lsm6ds3_push_conf(&hlsm6);
 

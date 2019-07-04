@@ -6,6 +6,7 @@
  */
 
 #include <stm32f4xx_hal.h>
+#include "task.h"
 
 #include "lsm6ds3.h"
 #include "lsm303c.h"
@@ -15,12 +16,13 @@
 #include "ads1x1x.h"
 #include "mpx2100ap.h"
 #include "ds18b20.h"
+#include "spi.h"
 #include <can.h>
 
 #include "thread.h"
 
 I2C_HandleTypeDef hi2c;
-//SPI_HandleTypeDef hspi2;
+SPI_HandleTypeDef hspi2;
 SPI_HandleTypeDef hspi3;
 onewire_t how;
 
@@ -36,23 +38,50 @@ struct lsm6ds3_dev_s hlsm6;
 //Inits BME280, DS18B20, MPX2100AP (and also I2C1, OneWire and ADS1115 required for them)
 void sensors_init(void)
 {
+	__GPIOA_CLK_ENABLE();
+	__GPIOB_CLK_ENABLE();
+	__GPIOC_CLK_ENABLE();
+	__GPIOD_CLK_ENABLE();
+	__SPI3_CLK_ENABLE();
+	__SPI2_CLK_ENABLE();
+	__I2C3_CLK_ENABLE();
+
+
+/*
 	{	//I2C1 (separately, cause it's used both by BME280 and MPX2100)
 		GPIO_InitTypeDef pa_init;
 		pa_init.Alternate = GPIO_AF4_I2C3;
 		pa_init.Mode = GPIO_MODE_AF_OD;
 		pa_init.Pin = GPIO_PIN_8;
-		pa_init.Pull = GPIO_PULLUP;
+		pa_init.Pull = GPIO_NOPULL;
 		pa_init.Speed = GPIO_SPEED_FAST;
 
 		HAL_GPIO_Init(GPIOA, &pa_init);
 
 		pa_init.Pin = GPIO_PIN_9;
 		HAL_GPIO_Init(GPIOC, &pa_init);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
+
 		i2c_config_default(&hi2c);
 		hi2c.Instance = I2C3;
 		i2c_init(&hi2c);
-	}
-/*
+	}*//*
+	{
+
+		GPIO_InitTypeDef pa_init;
+		pa_init.Alternate = 0;
+		pa_init.Mode = GPIO_MODE_OUTPUT_PP;
+		pa_init.Pin = GPIO_PIN_13;
+		pa_init.Speed = GPIO_SPEED_FAST;
+		pa_init.Pull = GPIO_NOPULL;
+
+		HAL_GPIO_Init(GPIOB, &pa_init);
+		while(1)
+		{
+			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
+			HAL_Delay(50);
+		}
+	}*/
 	{
 		spi_config_default(&hspi2);
 		hspi2.Instance = SPI2;
@@ -62,8 +91,16 @@ void sensors_init(void)
 		spi_pin_nss_init(&hspi2, GPIOB, GPIO_PIN_12);
 
 		spi_init(&hspi2);
-	}*/
-
+	}
+	{
+		while(1)
+		{
+			char str[] = "Hello\n";
+			HAL_SPI_Transmit(&hspi2, str, sizeof(str), 100);
+			HAL_Delay(50);
+		}
+	}
+/*
 	{
 		spi_config_default(&hspi3);
 		hspi3.Instance = SPI3;
@@ -74,12 +111,12 @@ void sensors_init(void)
 
 		spi_init(&hspi3);
 	}
-/*
+*/
 	{	//BME280
 		bme280_register_i2c(&hbme, &hi2c, BME280_I2C_ADDR_SDO_LOW << 1);
 		bme280_init(&hbme);
-	}*/
-
+	}
+/*
 	{	//DS18B20
 		delay_us_init();
 
@@ -108,12 +145,12 @@ void sensors_init(void)
 
 	{	//lsm6ds3
 		lsm6ds3_conf_default(&hlsm6);
-		lsm6ds3_register_spi(&hlsm6, &hspi3);
+		lsm6ds3_register_spi(&hlsm6, &hspi3, GPIOD, GPIO_PIN_2);
 		HAL_Delay(50); //FIXME do we need it?
 		lsm6ds3_push_conf(&hlsm6);
 	}
 
-	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;*/
 }
 
 //Read data from BME280 sensor and send scaled_pressure MAVLink message
@@ -130,7 +167,7 @@ void sensors_bme280_update(void)
 	mavlink_zikush_humidity_t humidity;
 	mavlink_message_t msg;
 
-	bme280_read(&hbme, &data, sizeof(struct bme280_float_data_s));
+	bme280_read(&hbme, (char*)&data, sizeof(struct bme280_float_data_s));
 
 	scaled_pressure.time_boot_ms = HAL_GetTick();
 	scaled_pressure.press_abs = data.pressure;
@@ -142,16 +179,14 @@ void sensors_bme280_update(void)
 	humidity.humidity = data.humidity;
 	mavlink_msg_zikush_humidity_encode(0, ZIKUSH_SCU, &msg, &humidity);
 	can_mavlink_send(&msg);
+
+	t_prev = t_now;
 }
 
 //Read data from DS18B20 and MPX2100AP sensors and send scaled_pressure2 MAVLink message
 void sensors_external_update(void)
 {
-	static uint32_t t_prev = 0, t_now;
-	if((t_now = HAL_GetTick()) - t_prev < 1000 / SENSORS_SEND_FREQ)
-	{
-		return;
-	}
+	task_begin(1000 / SENSORS_SEND_FREQ);
 
 	float temperature;
 	static mavlink_scaled_pressure2_t scaled_pressure;
@@ -179,7 +214,8 @@ void sensors_external_update(void)
 
 	mavlink_msg_scaled_pressure2_encode(0, ZIKUSH_SCU, &msg, &scaled_pressure);
 	can_mavlink_send(&msg);
-	t_prev = t_now;
+
+	task_end();
 }
 
 

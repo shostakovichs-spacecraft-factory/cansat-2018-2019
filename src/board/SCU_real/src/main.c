@@ -49,25 +49,28 @@ void heartbeat_send(void)
 		return;
 	}
 	can_mavlink_send(&msg_heartbeat);
+	t_prev = t_now;
 }
 
 int main()
 {
-	my_debug_init();
-	heartbeat_init();
-	can_init();
-	mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+
+
 	sensors_init();
-	ahrs_system_init();
+	//my_debug_init();
+	//heartbeat_init();
+	//can_init();
+	//mavlink_get_channel_status(MAVLINK_COMM_0)->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+	//ahrs_system_init();
 
 	CAMERA hcam;
-	camera_system_init(&hcam);
+	//camera_system_init(&hcam);
 	while(1)
 	{
-		ahrs_system_update();
-		//sensors_bme280_update();
-		sensors_external_update();
-		heartbeat_send();
+		//ahrs_system_update();
+		sensors_bme280_update();
+		//sensors_external_update();
+		//heartbeat_send();
 
 
 		//camera_system_update(&hcam);

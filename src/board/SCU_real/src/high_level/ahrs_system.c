@@ -4,7 +4,7 @@
  *  Created on: 1 июл. 2019 г.
  *      Author: sereshotes
  */
-
+#include "task.h"
 #include "sensors.h"
 #include <math.h>
 #include <mavlink/zikush/mavlink.h>
@@ -13,7 +13,7 @@
 #include "mag_calib.h"
 #include "lsm6ds3.h"
 #include "lsm303c.h"
-#include <stm32f4xx_hal.h>
+#include "main.h"
 
 #define AHRS_CALC_FREQ 100
 #define AHRS_SEND_FREQ 10
@@ -56,6 +56,9 @@ void ahrs_system_init()
 	vec_normalize(&vm);
 	ahrs_updateVecReal(AHRS_ACCEL, vx);
 	ahrs_updateVecReal(AHRS_MAG, vm);
+
+	ahrs_exec_status = AHRSEST_ORI_TRAJ;
+	ahrs_send_status = AHRSSST_ORI_ONLY;
 }
 static double _pos[3];
 static double _speed[3];
@@ -207,20 +210,15 @@ void _ahrs_system_send()
 
 void ahrs_system_update()
 {
-	static uint32_t t_prev = 0;
-	static uint32_t t_now = 0;
-
 	_ahrs_system_zero_acc_trigger();
 
-	if((t_now = HAL_GetTick()) - t_prev >= 1000 / AHRS_CALC_FREQ)
-	{
-		_ahrs_system_exec((t_now - t_prev)/1000.0);
-	}
-	if((t_now = HAL_GetTick()) - t_prev >= 1000 / AHRS_SEND_FREQ && ahrs_send_status)
-	{
-		_ahrs_system_send();
-	}
-	t_prev = t_now;
+	task_begin(1000 / AHRS_CALC_FREQ);
+	_ahrs_system_exec(task_dt);
+	task_end();
+
+	task_begin(1000 / AHRS_SEND_FREQ);
+	_ahrs_system_send();
+	task_end();
 
 
 }
