@@ -62,7 +62,7 @@ void sensors_external_update(void)
 		scaled_pressure.temperature = temperature * 100;
 	}
 
-    uint16_t data = ADS1x1x_read(&hads);
+    int16_t data = ADS1x1x_read(&hads);
 
     scaled_pressure.press_abs = mpx2100ap_compensate_pressure_flt(data);
 

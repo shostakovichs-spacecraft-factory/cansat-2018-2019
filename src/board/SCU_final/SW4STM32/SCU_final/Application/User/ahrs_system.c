@@ -216,7 +216,7 @@ void _ahrs_system_send()
 
 void ahrs_system_update()
 {
-	_ahrs_system_zero_acc_trigger();
+	//_ahrs_system_zero_acc_trigger();
 
 	task_begin(1000 / AHRS_CALC_FREQ);
 	_ahrs_system_exec(task_dt);
